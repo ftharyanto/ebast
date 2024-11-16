@@ -86,7 +86,7 @@ def operator_view(request):
     context = {}
 
     # add the dictionary during initialization
-    context["operators"] = OperatorModel.objects.all()
+    context["operators"] = OperatorModel.objects.all().order_by('name')
 
     add_operator_form = OperatorForm(request.POST or None)
     if add_operator_form.is_valid():
