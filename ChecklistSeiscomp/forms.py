@@ -4,7 +4,7 @@ from .models import ChecklistSeiscompModel, OperatorModel, StationListModel
 # creating a form
 class InputForm(forms.ModelForm):
     operator = forms.ModelChoiceField(
-        queryset=OperatorModel.objects.all(), initial=0)
+        queryset=OperatorModel.objects.all().order_by('name'), initial=0)
 
     # create meta class
     class Meta:

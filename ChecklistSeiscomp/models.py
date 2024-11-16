@@ -11,9 +11,10 @@ KELOMPOK = (
 )
 
 WAKTU = (
+    ('00:00 WIB', '00:00 WIB'),
+    ('06:00 WIB', '06:00 WIB'),
     ('12:00 WIB', '12:00 WIB'),
     ('18:00 WIB', '18:00 WIB'),
-    ('00:00 WIB', '00:00 WIB')
 )
 
 class StationListModel(models.Model):
@@ -31,9 +32,9 @@ class ChecklistSeiscompModel(models.Model):
     jam = models.CharField(max_length=20, choices=WAKTU, default='12:00 WIB')
     kelompok = models.IntegerField(choices=KELOMPOK, default=1)
     operator = models.TextField(null=True,)
-    gaps = models.TextField(max_length=500, null=True, blank=True)
-    spikes = models.TextField(max_length=500, null=True, blank=True)
-    blanks = models.TextField(max_length=500, null=True, blank=True)
+    gaps = models.TextField(max_length=3000, null=True, blank=True)
+    spikes = models.TextField(max_length=3000, null=True, blank=True)
+    blanks = models.TextField(max_length=3000, null=True, blank=True)
     slmon = models.PositiveIntegerField(null=True, blank=True, default=0)
     count_gaps = models.IntegerField(default=0, blank=True)
     count_spikes = models.IntegerField(default=0, blank=True)
