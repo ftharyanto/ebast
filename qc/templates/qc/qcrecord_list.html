@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}QC Records{% endblock %}
+
+{% block content %}
+<h1 class="mt-5">QC Records</h1>
+<a href="{% url 'qc:qcrecord_create' %}" class="btn btn-primary mb-3">Create New Record</a>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Operator</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in qcrecords %}
+                <tr>
+                    <td>{{ record.qc_id }}</td>
+                    <td>{{ record.operator.name }}</td>
+                    <td>
+                        <a href="{% url 'qc:qcrecord_update' record.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'qc:qcrecord_delete' record.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
