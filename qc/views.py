@@ -3,10 +3,11 @@ from django.urls import reverse_lazy
 from .models import QcRecord
 from .forms import QcRecordForm
 from django.shortcuts import render
-import requests
+import requests, openpyxl, datetime, os
 import pandas as pd
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from .models import Operator
+from io import BytesIO
 
 class QcRecordListView(ListView):
     model = QcRecord
@@ -86,28 +87,83 @@ def fetch_data(request, start_datetime='2024-12-11 13:00:00', end_datetime='2024
     else:
         return JsonResponse({'error': 'Failed to fetch data'}, status=500)
 
-import openpyxl
-
-def update_excel_file(tanggal, hari, jam, kelompok, operator, NIP):
-    # Load the workbook and select the active worksheet
-    workbook = openpyxl.load_workbook('QC Seiscomp.xlsx')
-    sheet = workbook.active
-
-    # Fill cell G2 with the specified value
-    sheet['G2'] = ': ' + tanggal
-    sheet['G3'] = ': ' + hari
-    sheet['G4'] = f': {jam} - selesai'
-    sheet['G5'] = f': {kelompok}'
-    sheet['M18'] = tanggal
-    sheet['M24'] = operator
-    NIP = sheet['M25'] = 'NIP. ' + NIP
-
-    # Save the workbook
-    workbook.save('QC Seiscomp.xlsx')
-
 def get_nip(request, operator_id):
     try:
         operator = Operator.objects.get(id=operator_id)
         return JsonResponse({'nip': operator.NIP})
     except Operator.DoesNotExist:
         return JsonResponse({'error': 'Operator not found'}, status=404)
+
+def export_to_excel(request):
+    records = QcRecord.objects.all()
+    file_path = os.path.join(os.path.dirname(__file__), 'static/qc/QC Seiscomp.xlsx')
+    workbook = openpyxl.load_workbook(file_path)
+    sheet = workbook.active
+    sheet.title = 'QC Records'
+
+    for idx, record in enumerate(records, start=2):
+        tanggal = format_date_indonesian(record.qc_id[:-2])
+        hari = get_hari_indonesia(record.qc_id[:-2])
+        sheet['G2'] = ': ' + tanggal
+        sheet['G3'] = ': ' + hari
+        sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
+        sheet['G5'] = f': {record.kelompok}'
+        sheet['M18'] = tanggal
+        sheet['M24'] = record.operator.name
+        NIP = sheet['M25'] = 'NIP. ' + record.NIP
+
+    # # Add data
+    # for idx, record in enumerate(records, start=2):  # Assuming the data starts from the second row
+    #     sheet[f'A{idx}'] = record.qc_id
+    #     sheet[f'B{idx}'] = record.operator.name
+    #     sheet[f'C{idx}'] = 
+    #     sheet[f'D{idx}'] = 
+    #     sheet[f'E{idx}'] = record.qc_prev
+    #     sheet[f'F{idx}'] = record.qc
+    #     sheet[f'G{idx}'] = record.NIP
+
+    # Save the workbook to a BytesIO object
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=qc_records.xlsx'    
+    workbook.save(response)
+    return response
+
+import datetime
+
+def format_date_indonesian(date_string):
+    """Formats a date string in YYYY-MM-DD format into Indonesian date format.
+
+    Args:
+    date_string: The date string in YYYY-MM-DD format.
+
+    Returns:
+    The formatted date string in Indonesian format (DD MMMM YYYY).
+    """
+
+    date_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d")
+    formatted_date = date_obj.strftime("%d %B %Y")
+    return formatted_date
+
+def get_hari_indonesia(date_string):
+    """
+    Converts a date string (YYYY-MM-DD) to its corresponding Indonesian day name.
+
+    Args:
+        date_string: The date string in YYYY-MM-DD format.
+
+    Returns:
+        The Indonesian day name.
+    """
+
+    date_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d")
+    hari_indonesia = date_obj.strftime("%A")
+    hari_indonesia_map = {
+        "Monday": "Senin",
+        "Tuesday": "Selasa",
+        "Wednesday": "Rabu",
+        "Thursday": "Kamis",
+        "Friday": "Jumat",
+        "Saturday": "Sabtu",
+        "Sunday": "Minggu"
+    }
+    return hari_indonesia_map[hari_indonesia]
