@@ -7,7 +7,8 @@ import requests, openpyxl, datetime, os
 import pandas as pd
 from django.http import JsonResponse, HttpResponse
 from .models import Operator
-from io import BytesIO
+from io import StringIO
+from openpyxl.utils.dataframe import dataframe_to_rows
 
 class QcRecordListView(ListView):
     model = QcRecord
@@ -19,11 +20,6 @@ class QcRecordCreateView(CreateView):
     form_class = QcRecordForm
     template_name = 'qc/qcrecord_form.html'
     success_url = reverse_lazy('qc:qcrecord_list')
-
-    def form_valid(self, form):
-        form.save()
-        # update_excel_file(form.cleaned_data['tanggal'], form.cleaned_data['hari'], form.cleaned_data['jam'], form.cleaned_data['kelompok'], form.cleaned_data['operator'], form.cleaned_data['NIP'])
-        return super().form_valid(form)
 
 class QcRecordUpdateView(UpdateView):
     model = QcRecord
@@ -68,7 +64,7 @@ def clean_index3(data, start_datetime='2024-12-11 13:00:00', end_datetime='2024-
 
     # sort the columns to be 'Date', 'OT (UTC)', 'Lat', 'Long', 'Mag', 'D(Km)', 'Phase', 'RMS', 'Az.Gap', 'Region', but first turn the respective column names into the desired ones
     df_selected = df_selected.rename(columns={'Lon': 'Long', 'Depth': 'D(Km)', 'cntP': 'Phase', 'AZgap': 'Az. Gap', 'Remarks': 'Region'})
-    df_selected = df_selected[['Date', 'OT (UTC)', 'Lat', 'Long', 'Mag', 'D(Km)', 'Phase', 'RMS', 'Az. Gap', 'Region']]
+    df_selected = df_selected[['Date', 'OT (UTC)', 'Lat', 'Long', 'Mag', 'TypeMag', 'D(Km)', 'Phase', 'RMS', 'Az. Gap', 'Region']]
     df_selected = df_selected.reset_index(drop=True)
 
     # Check for duplicate columns
@@ -112,15 +108,31 @@ def export_to_excel(request):
         sheet['M24'] = record.operator.name
         NIP = sheet['M25'] = 'NIP. ' + record.NIP
 
-    # # Add data
-    # for idx, record in enumerate(records, start=2):  # Assuming the data starts from the second row
-    #     sheet[f'A{idx}'] = record.qc_id
-    #     sheet[f'B{idx}'] = record.operator.name
-    #     sheet[f'C{idx}'] = 
-    #     sheet[f'D{idx}'] = 
-    #     sheet[f'E{idx}'] = record.qc_prev
-    #     sheet[f'F{idx}'] = record.qc
-    #     sheet[f'G{idx}'] = record.NIP
+        # import the qc_prev and qc values from the record using pandas and fill the C8 to M8 row with the qc_prev and qc values alternatingly, add rows as needed
+        qc_prev = pd.read_csv(StringIO(record.qc_prev))
+        
+        # add prev columns with 'prev' values to the last column
+        qc_prev['prev'] = 'prev'
+
+        # add rows to the sheet
+        rows_to_add = len(qc_prev)
+        sheet.insert_rows(8, amount=rows_to_add*2)
+        qc_prev = dataframe_to_rows(qc_prev, index=False, header=False)
+
+        qc = pd.read_csv(StringIO(record.qc))
+
+        # add qc columns with 'QC' values to the last column
+        qc['QC'] = 'QC'
+        qc = dataframe_to_rows(qc, index=False, header=False)
+        
+        for r_idx, row in enumerate(qc_prev, 1):
+            for c_idx, value in enumerate(row, 1):
+                sheet.cell(row=r_idx*2+6, column=2, value=r_idx)
+                sheet.cell(row=r_idx*2+6, column=c_idx+2, value=value)
+                
+        for r_idx, row in enumerate(qc, 1):
+            for c_idx, value in enumerate(row, 1):
+                sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value)
 
     # Save the workbook to a BytesIO object
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
