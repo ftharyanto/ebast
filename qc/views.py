@@ -6,6 +6,7 @@ from django.shortcuts import render
 import requests
 import pandas as pd
 from django.http import JsonResponse
+from .models import Operator
 
 class QcRecordListView(ListView):
     model = QcRecord
@@ -103,3 +104,10 @@ def update_excel_file(tanggal, hari, jam, kelompok, operator, NIP):
 
     # Save the workbook
     workbook.save('QC Seiscomp.xlsx')
+
+def get_nip(request, operator_id):
+    try:
+        operator = Operator.objects.get(id=operator_id)
+        return JsonResponse({'nip': operator.NIP})
+    except Operator.DoesNotExist:
+        return JsonResponse({'error': 'Operator not found'}, status=404)

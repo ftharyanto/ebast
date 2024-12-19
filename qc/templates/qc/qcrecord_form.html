@@ -264,5 +264,27 @@
             }
         });
 
+        // Set NIP's value based on the selected operator
+        document.addEventListener('DOMContentLoaded', function () {
+            const operatorSelect = document.getElementById('{{ form.operator.id_for_label }}');
+            const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
+
+            function updateNip() {
+                const selectedOperator = operatorSelect.value;
+                fetch(`/qc/api/get_nip/${selectedOperator}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.nip) {
+                            nipInput.value = data.nip;
+                        } else {
+                            console.error('Error fetching NIP:', data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching NIP:', error));
+            }
+
+            operatorSelect.addEventListener('change', updateNip);
+            updateNip();
+        });
     </script>
 {% endblock %}
