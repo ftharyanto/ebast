@@ -169,7 +169,7 @@ def export_to_excel(request, record_id):
 
     # Save the workbook to a BytesIO object
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=qc_records.xlsx'    
+    response['Content-Disposition'] = f'attachment; filename=QC_{record.qc_id}.xlsx'
     workbook.save(response)
     return response
 
