@@ -107,9 +107,7 @@ def export_to_excel(request, record_id):
     sheet['G3'] = ': ' + hari
     sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
     sheet['G5'] = f': {record.kelompok}'
-    sheet['M18'] = tanggal
-    sheet['M24'] = record.operator.name
-    NIP = sheet['M25'] = 'NIP. ' + record.NIP
+
 
     # import the qc_prev and qc values from the record using pandas and fill the C8 to M8 row with the qc_prev and qc values alternatingly, add rows as needed
     qc_prev = pd.read_csv(StringIO(record.qc_prev))
@@ -128,28 +126,46 @@ def export_to_excel(request, record_id):
     qc['QC'] = 'QC'
     qc = dataframe_to_rows(qc, index=False, header=False)
     
+    # Iterate over the rows of the qc_prev DataFrame
     for r_idx, row in enumerate(qc_prev, 1):
+        # Iterate over the columns of the current row
         for c_idx, value in enumerate(row, 1):
+            # Set the value and alignment for the first column (row number)
             sheet.cell(row=r_idx*2+6, column=2, value=r_idx).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            # Set the value and alignment for the current cell
             sheet.cell(row=r_idx*2+6, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            # change the background color of the cell to light grey
+            # Change the background color of the cell to light grey
             sheet.cell(row=r_idx*2+6, column=c_idx+2).fill = openpyxl.styles.PatternFill(start_color='FFD3D3D3', end_color='FFD3D3D3', fill_type='solid')
-            sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
-
-
+        # Merge cells for the row number column
+        sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
             
+    # Iterate over the rows of the qc DataFrame
     for r_idx, row in enumerate(qc, 1):
+        # Iterate over the columns of the current row
         for c_idx, value in enumerate(row, 1):
+            # Set the value and alignment for the current cell
             sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
     
     # set the M8 column to align left horizontally
     for r_idx in range(rows_to_add*2):
         sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
 
-    # add borders to the cell in the range B7:N17
+    # add borders to the cell in the data
     for r_idx in range(rows_to_add*2):
         for c_idx in range(13):
             sheet.cell(row=r_idx+8, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
+
+    # set the height of the rows in the data to 15
+    for r_idx in range(rows_to_add*2):
+        sheet.row_dimensions[r_idx+8].height = 15
+
+    # Dynamically set the value of 'M' column based on the number of rows added
+    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=tanggal)
+    sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
+    sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
+    sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(underline='single', size=18, bold=True)
+    sheet.row_dimensions[8 + rows_to_add * 2 + 8].height = 23.5
+    sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
 
     # Save the workbook to a BytesIO object
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -170,7 +186,12 @@ def format_date_indonesian(date_string):
     """
 
     date_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d")
-    formatted_date = date_obj.strftime("%d %B %Y")
+    bulan_indonesia = {
+        1: "Januari", 2: "Februari", 3: "Maret", 4: "April",
+        5: "Mei", 6: "Juni", 7: "Juli", 8: "Agustus",
+        9: "September", 10: "Oktober", 11: "November", 12: "Desember"
+    }
+    formatted_date = f"{date_obj.day} {bulan_indonesia[date_obj.month]} {date_obj.year}"
     return formatted_date
 
 def get_hari_indonesia(date_string):
