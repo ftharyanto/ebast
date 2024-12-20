@@ -90,54 +90,57 @@ def get_nip(request, operator_id):
     except Operator.DoesNotExist:
         return JsonResponse({'error': 'Operator not found'}, status=404)
 
-def export_to_excel(request):
-    records = QcRecord.objects.all()
+def export_to_excel(request, record_id):
+    try:
+        record = QcRecord.objects.get(id=record_id)
+    except QcRecord.DoesNotExist:
+        return HttpResponse(status=404)
+
     file_path = os.path.join(os.path.dirname(__file__), 'static/qc/QC Seiscomp.xlsx')
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
     sheet.title = 'QC Records'
 
-    for idx, record in enumerate(records, start=2):
-        tanggal = format_date_indonesian(record.qc_id[:-2])
-        hari = get_hari_indonesia(record.qc_id[:-2])
-        sheet['G2'] = ': ' + tanggal
-        sheet['G3'] = ': ' + hari
-        sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
-        sheet['G5'] = f': {record.kelompok}'
-        sheet['M18'] = tanggal
-        sheet['M24'] = record.operator.name
-        NIP = sheet['M25'] = 'NIP. ' + record.NIP
+    tanggal = format_date_indonesian(record.qc_id[:-2])
+    hari = get_hari_indonesia(record.qc_id[:-2])
+    sheet['G2'] = ': ' + tanggal
+    sheet['G3'] = ': ' + hari
+    sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
+    sheet['G5'] = f': {record.kelompok}'
+    sheet['M18'] = tanggal
+    sheet['M24'] = record.operator.name
+    NIP = sheet['M25'] = 'NIP. ' + record.NIP
 
-        # import the qc_prev and qc values from the record using pandas and fill the C8 to M8 row with the qc_prev and qc values alternatingly, add rows as needed
-        qc_prev = pd.read_csv(StringIO(record.qc_prev))
-        
-        # add prev columns with 'prev' values to the last column
-        qc_prev['prev'] = 'prev'
+    # import the qc_prev and qc values from the record using pandas and fill the C8 to M8 row with the qc_prev and qc values alternatingly, add rows as needed
+    qc_prev = pd.read_csv(StringIO(record.qc_prev))
+    
+    # add prev columns with 'prev' values to the last column
+    qc_prev['prev'] = 'prev'
 
-        # add rows to the sheet
-        rows_to_add = len(qc_prev)
-        sheet.insert_rows(8, amount=rows_to_add*2)
-        qc_prev = dataframe_to_rows(qc_prev, index=False, header=False)
+    # add rows to the sheet
+    rows_to_add = len(qc_prev)
+    sheet.insert_rows(8, amount=rows_to_add*2)
+    qc_prev = dataframe_to_rows(qc_prev, index=False, header=False)
 
-        qc = pd.read_csv(StringIO(record.qc))
+    qc = pd.read_csv(StringIO(record.qc))
 
-        # add qc columns with 'QC' values to the last column
-        qc['QC'] = 'QC'
-        qc = dataframe_to_rows(qc, index=False, header=False)
-        
-        for r_idx, row in enumerate(qc_prev, 1):
-            for c_idx, value in enumerate(row, 1):
-                sheet.cell(row=r_idx*2+6, column=2, value=r_idx).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-                sheet.cell(row=r_idx*2+6, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-                # change the background color of the cell to light grey
-                sheet.cell(row=r_idx*2+6, column=c_idx+2).fill = openpyxl.styles.PatternFill(start_color='FFD3D3D3', end_color='FFD3D3D3', fill_type='solid')
-                sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
+    # add qc columns with 'QC' values to the last column
+    qc['QC'] = 'QC'
+    qc = dataframe_to_rows(qc, index=False, header=False)
+    
+    for r_idx, row in enumerate(qc_prev, 1):
+        for c_idx, value in enumerate(row, 1):
+            sheet.cell(row=r_idx*2+6, column=2, value=r_idx).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            sheet.cell(row=r_idx*2+6, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            # change the background color of the cell to light grey
+            sheet.cell(row=r_idx*2+6, column=c_idx+2).fill = openpyxl.styles.PatternFill(start_color='FFD3D3D3', end_color='FFD3D3D3', fill_type='solid')
+            sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
 
 
-                
-        for r_idx, row in enumerate(qc, 1):
-            for c_idx, value in enumerate(row, 1):
-                sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            
+    for r_idx, row in enumerate(qc, 1):
+        for c_idx, value in enumerate(row, 1):
+            sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
     
     # set the M8 column to align left horizontally
     for r_idx in range(rows_to_add*2):

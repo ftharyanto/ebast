@@ -22,8 +22,7 @@
                 <td>
                     <a href="{% url 'qc:qcrecord_update' record.pk %}" class="btn btn-sm btn-warning">Edit</a>
                     <a href="{% url 'qc:qcrecord_delete' record.pk %}" class="btn btn-sm btn-danger">Delete</a>
-                    <a href="{% url 'qc:export_to_excel' %}" class="btn btn-sm btn-primary">Export to Excel</a>
-
+                    <a href="{% url 'qc:export_to_excel' record.pk %}" class="btn btn-sm btn-primary">Export to Excel</a>
                 </td>
             </tr>
             {% endfor %}

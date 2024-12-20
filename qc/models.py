@@ -26,6 +26,8 @@ class QcRecord(models.Model):
     qc = models.TextField(default='0')
     operator = models.ForeignKey(Operator, on_delete=models.CASCADE)
     NIP = models.CharField(max_length=18, default='0')
+    event_indonesia = models.IntegerField(default=0)
+    event_luar = models.IntegerField(default=0)
 
     def __str__(self):
         return self.qc_id
