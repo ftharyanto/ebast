@@ -127,12 +127,26 @@ def export_to_excel(request):
         
         for r_idx, row in enumerate(qc_prev, 1):
             for c_idx, value in enumerate(row, 1):
-                sheet.cell(row=r_idx*2+6, column=2, value=r_idx)
-                sheet.cell(row=r_idx*2+6, column=c_idx+2, value=value)
+                sheet.cell(row=r_idx*2+6, column=2, value=r_idx).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+                sheet.cell(row=r_idx*2+6, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+                # change the background color of the cell to light grey
+                sheet.cell(row=r_idx*2+6, column=c_idx+2).fill = openpyxl.styles.PatternFill(start_color='FFD3D3D3', end_color='FFD3D3D3', fill_type='solid')
+                sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
+
+
                 
         for r_idx, row in enumerate(qc, 1):
             for c_idx, value in enumerate(row, 1):
-                sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value)
+                sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+    
+    # set the M8 column to align left horizontally
+    for r_idx in range(rows_to_add*2):
+        sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
+
+    # add borders to the cell in the range B7:N17
+    for r_idx in range(rows_to_add*2):
+        for c_idx in range(13):
+            sheet.cell(row=r_idx+8, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
 
     # Save the workbook to a BytesIO object
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
