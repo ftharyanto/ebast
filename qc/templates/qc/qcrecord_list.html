@@ -15,7 +15,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for record in qcrecords %}
+            {% for record in qcrecords|dictsortreversed:"qc_id" %}
             <tr>
                 <td>{{ record.qc_id }}</td>
                 <td>{{ record.operator.name }}</td>
