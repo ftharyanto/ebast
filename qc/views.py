@@ -273,6 +273,9 @@ def export_to_pdf(request, record_id):
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
         response['Content-Disposition'] = f'inline; filename={record.qc_id}.pdf'
 
+    if os.path.exists(temp_pdf):
+        os.remove(temp_pdf)
+
     return response
 
 
