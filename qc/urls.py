@@ -14,4 +14,5 @@ urlpatterns = [
     path('fetch-data/<str:start_datetime>/<str:end_datetime>/', fetch_data, name='fetch_data'),
     path('api/get_nip/<int:operator_id>/', views.get_nip, name='get_nip'),
     path('export-to-excel/<int:record_id>/', export_to_excel, name='export_to_excel'),
+    path('export-to-pdf/<int:record_id>/', views.export_to_pdf, name='export_to_pdf'),
 ]
