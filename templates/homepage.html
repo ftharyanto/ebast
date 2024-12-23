@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Homepage</title>
+</head>
+<body>
+    {% extends "base.html" %}
+
+    {% block title %}Homepage{% endblock %}
+
+    {% block content %}
+    <h1>Welcome to the Homepage</h1>
+    <ul></ul>
+        <li><a href="{% url 'qc:qcrecord_list' %}">QC App</a></li>
+    </ul>
+    {% endblock %}
+</body>
+</html>
