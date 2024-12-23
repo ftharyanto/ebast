@@ -163,7 +163,7 @@ def export_to_excel(request, record_id):
     sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=tanggal)
     sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
     sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
-    sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(underline='single', size=18, bold=True)
+    sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(name='Calibri', underline='single', size=18, bold=True)
     sheet.row_dimensions[8 + rows_to_add * 2 + 8].height = 23.5
     sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
 
@@ -247,7 +247,7 @@ def export_to_pdf(request, record_id):
     sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=tanggal)
     sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
     sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
-    sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(underline='single', size=18, bold=True)
+    sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(name='Calibri', underline='single', size=18, bold=True)
     sheet.row_dimensions[8 + rows_to_add * 2 + 8].height = 23.5
     sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
 
@@ -271,7 +271,7 @@ def export_to_pdf(request, record_id):
     # Read the generated PDF file and return it in the response
     with open(temp_pdf, 'rb') as pdf_file:
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename={record.qc_id}.pdf'
+        response['Content-Disposition'] = f'inline; filename={record.qc_id}.pdf'
 
     return response
 
