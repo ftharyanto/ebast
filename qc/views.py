@@ -9,6 +9,8 @@ from django.http import JsonResponse, HttpResponse
 from .models import Operator
 from io import StringIO
 from openpyxl.utils.dataframe import dataframe_to_rows
+from django.views import View
+from django.shortcuts import redirect
 
 class QcRecordListView(ListView):
     model = QcRecord
@@ -27,10 +29,14 @@ class QcRecordUpdateView(UpdateView):
     template_name = 'qc/qcrecord_form.html'
     success_url = reverse_lazy('qc:qcrecord_list')
 
-class QcRecordDeleteView(DeleteView):
-    model = QcRecord
-    template_name = 'qc/qcrecord_confirm_delete.html'
-    success_url = reverse_lazy('qc:qcrecord_list')
+class QcRecordDeleteDirectView(View):
+    def post(self, request, pk, *args, **kwargs):
+        try:
+            record = QcRecord.objects.get(pk=pk)
+            record.delete()
+            return redirect('qc:qcrecord_list')
+        except QcRecord.DoesNotExist:
+            return HttpResponse(status=404)
 
 
 # Functions
