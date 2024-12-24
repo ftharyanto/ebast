@@ -11,6 +11,11 @@
     <nav class="navbar navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">Home</a>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                </li>
+            </ul>
         </div>
     </nav>
     {% if 'qc' in request.resolver_match.namespace %}

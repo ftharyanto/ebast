@@ -6,7 +6,7 @@ from django.shortcuts import render
 import requests, openpyxl, datetime, os
 import pandas as pd
 from django.http import JsonResponse, HttpResponse
-from .models import Operator
+from core.models import Operator
 from io import StringIO
 from openpyxl.utils.dataframe import dataframe_to_rows
 from django.views import View
