@@ -1,10 +1,63 @@
-from django.views.generic import TemplateView
-from qc.models import Operator
+from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
+from .models import Operator
+from django.urls import reverse_lazy
+from .forms import OperatorForm
+from django.views import View
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+import csv
 
 class HomeView(TemplateView):
     template_name = 'core/homepage.html'
 
-class OperatorView(TemplateView):
+class OperatorListView(ListView):
     model = Operator
-    template_name = 'core/operator.html'
+    template_name = 'core/operator_list.html'
     context_object_name = 'operator'
+
+class OperatorCreateView(CreateView):
+    model = Operator
+    form_class = OperatorForm
+    template_name = 'core/operator_form.html'
+    success_url = reverse_lazy('core:operator_list')
+
+class OperatorUpdateView(UpdateView):
+    model = Operator
+    form_class = OperatorForm
+    template_name = 'core/operator_form.html'
+    success_url = reverse_lazy('core:operator_list')
+
+class OperatorDeleteDirectView(View):
+    def post(self, request, pk, *args, **kwargs):
+        try:
+            record = Operator.objects.get(pk=pk)
+            record.delete()
+            return redirect('core:operator_list')
+        except Operator.DoesNotExist:
+            return HttpResponse(status=404)
+
+class OperatorBulkCreateView(View):
+    template_name = 'core/operator_bulk_create.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        csv_file = request.FILES.get('file')
+        csv_data = request.POST.get('csv_data')
+
+        if csv_file:
+            if not csv_file.name.endswith('.csv'):
+                return HttpResponse('File is not CSV type', status=400)
+            file_data = csv_file.read().decode('utf-8')
+        elif csv_data:
+            file_data = csv_data
+        else:
+            return HttpResponse('No CSV file or data provided', status=400)
+
+        reader = csv.reader(file_data.splitlines())
+        for row in reader:
+            if len(row) >= 2:
+                Operator.objects.create(name=row[0], NIP=row[1])
+
+        return redirect('core:operator_list')

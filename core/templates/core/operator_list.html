@@ -1,9 +1,16 @@
 {% extends 'core/base.html' %}
-{% block title %}QC Records{% endblock %}
+{% block title %}Operator List{% endblock %}
 
 {% block content %}
-<h1 class="mt-5">Operator</h1>
-<a href="{% url 'qc:qcrecord_create' %}" class="btn btn-primary mb-3">Create New Record</a>
+<h1 class="mt-5">Operator List</h1>
+<a href="{% url 'core:operator_create' %}" class="btn btn-primary mb-3">
+    <i class="fas fa-plus"></i> Add Operator
+</a>
+<a href="{% url 'core:operator_bulk_create' %}" class="btn btn-primary mb-3">
+    <i class="fas fa-file-csv"></i> Add Operators (CSV)
+</a>
+</a>
+
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>
@@ -19,21 +26,15 @@
                 <td>{{ record.name }}</td>
                 <td>{{ record.NIP }}</td>
                 <td>
-                    <a href="{% url 'qc:qcrecord_update' record.pk %}" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Edit">
+                    <a href="{% url 'core:operator_update' record.pk %}" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Edit">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <form action="{% url 'qc:qcrecord_delete_direct' record.pk %}" method="post" style="display:inline;">
+                    <form action="{% url 'core:operator_delete_direct' record.pk %}" method="post" style="display:inline;">
                         {% csrf_token %}
                         <button type="button" class="btn btn-sm btn-danger delete-button" data-toggle="tooltip" title="Delete">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </form>
-                    <a href="{% url 'qc:export_to_excel' record.pk %}" class="btn btn-sm btn-success" data-toggle="tooltip" title="Export to Excel">
-                        <i class="fas fa-file-excel"></i>
-                    </a>
-                    <a href="{% url 'qc:export_to_pdf' record.pk %}" class="btn btn-sm btn-light text-danger" data-toggle="tooltip" title="Export to PDF">
-                        <i class="fas fa-file-pdf"></i>
-                    </a>
                 </td>
             </tr>
             {% endfor %}
