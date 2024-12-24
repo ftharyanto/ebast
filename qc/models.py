@@ -1,15 +1,6 @@
 from django.db import models
 from django.utils import timezone
-
-class Operator(models.Model):
-    name = models.CharField(max_length=100)
-    NIP = models.CharField(max_length=18)
-
-    def __str__(self):
-        return self.name
-    
-    class Meta:
-        db_table = 'Operators'
+from core.models import Operator
 
 class QcRecord(models.Model):
     qc_id = models.CharField(max_length=100, default='0')
