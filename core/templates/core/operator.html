@@ -2,22 +2,22 @@
 {% block title %}QC Records{% endblock %}
 
 {% block content %}
-<h1 class="mt-5">QC Records</h1>
+<h1 class="mt-5">Operator</h1>
 <a href="{% url 'qc:qcrecord_create' %}" class="btn btn-primary mb-3">Create New Record</a>
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Operator</th>
+                <th>Name</th>
+                <th>NIP</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            {% for record in qcrecords|dictsortreversed:"qc_id" %}
+            {% for record in operator %}
             <tr>
-                <td>{{ record.qc_id }}</td>
-                <td>{{ record.operator.name }}</td>
+                <td>{{ record.name }}</td>
+                <td>{{ record.NIP }}</td>
                 <td>
                     <a href="{% url 'qc:qcrecord_update' record.pk %}" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Edit">
                         <i class="fas fa-edit"></i>
