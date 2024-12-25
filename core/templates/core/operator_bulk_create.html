@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% block content %}
 <div class="container">
-    <h1 class="mt-5">Bulk Create Operators</h1>
+    <h1 class="mt-5">Bulk Add Operators</h1>
     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
         <div class="form-group">
@@ -22,7 +22,8 @@
             <label>CSV Format Guide:</label>
             <p>CSV file atau data harus dalam format sebagai berikut, gunakan tanda petik untuk nama <strong>"Nama Operator", NIP</strong></p>
             <p>Contoh:</p>
-            <pre>"Franco, S. Tr, MDM", 1234567890</pre>
+            <pre>"J. R. R. Tolkien, S. Tr, MDM", 1234567890</pre>
+            <pre>"Dr. William Minerva", 1234567890</pre>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
         <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'core:operator_list' %}'">Cancel</button>

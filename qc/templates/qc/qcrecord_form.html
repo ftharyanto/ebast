@@ -79,20 +79,59 @@
                         Data</button>
                 </div>
             </div>
-            {{ form.qc_prev.label_tag }}
-            {{ form.qc_prev|add_class:"form-control" }}
-            <div class="form-group row">
-                <div class="col-md-6">
-                    {{ form.event_indonesia.label_tag }}
-                    {{ form.event_indonesia|add_class:"form-control" }}
+            <!-- Accordion for fetched data and qc_prev form -->
+            <div class="accordion" id="fetchedDataAccordion">
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#fetchedDataSection" aria-expanded="true" aria-controls="fetchedDataSection">
+                                Fetched Data
+                            </button>
+                        </h2>
+                    </div>
+
+                    <div id="fetchedDataSection" class="collapse" aria-labelledby="headingOne" data-parent="#fetchedDataAccordion">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover" id="fetched-data-table">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>OT (UTC)</th>
+                                            <th>Lat</th>
+                                            <th>Long</th>
+                                            <th>Mag</th>
+                                            <th>TypeMag</th>
+                                            <th>D(Km)</th>
+                                            <th>Phase</th>
+                                            <th>RMS</th>
+                                            <th>Az. Gap</th>
+                                            <th>Region</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            {{ form.qc_prev.label_tag }}
+                            {{ form.qc_prev|add_class:"form-control" }}
+                            <div class="form-group row">
+                                <div class="col-md-6">
+                                    {{ form.event_indonesia.label_tag }}
+                                    {{ form.event_indonesia|add_class:"form-control" }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.event_luar.label_tag }}
+                                    {{ form.event_luar|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid previous QC.
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    {{ form.event_luar.label_tag }}
-                    {{ form.event_luar|add_class:"form-control" }}
-                </div>
-            </div>
-            <div class="invalid-feedback">
-                Please provide a valid previous QC.
             </div>
         </div>
 
@@ -111,49 +150,90 @@
                     <button type="button" id="fetch_qc" class="btn btn-primary align-bottom">Fetch Data</button>
                 </div>
             </div>
-            {{ form.qc.label_tag }}
-            {{ form.qc|add_class:"form-control" }}
+            <!-- Accordion for fetched data and qc form -->
+            <div class="accordion" id="qcDataAccordion">
+                <div class="card">
+                    <div class="card-header" id="headingTwo">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#qcDataSection" aria-expanded="true" aria-controls="qcDataSection">
+                                Fetched QC Data
+                            </button>
+                        </h2>
+                    </div>
+
+                    <div id="qcDataSection" class="collapse" aria-labelledby="headingTwo" data-parent="#qcDataAccordion">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover" id="qc-data-table">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>OT (UTC)</th>
+                                            <th>Lat</th>
+                                            <th>Long</th>
+                                            <th>Mag</th>
+                                            <th>TypeMag</th>
+                                            <th>D(Km)</th>
+                                            <th>Phase</th>
+                                            <th>RMS</th>
+                                            <th>Az. Gap</th>
+                                            <th>Region</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            {{ form.qc.label_tag }}
+                            {{ form.qc|add_class:"form-control" }}
+                            <div class="invalid-feedback">
+                                Please provide a valid QC.
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-6">
+                                    {{ form.operator.label_tag }}
+                                    {{ form.operator|add_class:"form-control" }}
+                                    <div class="invalid-feedback">
+                                        Please select a valid operator.
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.NIP.label_tag }}
+                                    {{ form.NIP|add_class:"form-control" }}
+                                    <div class="invalid-feedback">
+                                        Please provide a valid NIP.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
             <div class="invalid-feedback">
-                Please provide a valid QC.
+                Please provide a valid date.
             </div>
-            <div class="form-group row">
-                <div class="col-md-6">
-                    {{ form.operator.label_tag }}
-                    {{ form.operator|add_class:"form-control" }}
-                    <div class="invalid-feedback">
-                        Please select a valid operator.
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    {{ form.NIP.label_tag }}
-                    {{ form.NIP|add_class:"form-control" }}
-                    <div class="invalid-feedback">
-                        Please provide a valid NIP.
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="invalid-feedback">
-                    Please provide a valid date.
-                </div>
-            </div>
-            {% if form.errors %}
-            <div class="alert alert-danger">
-                Please correct the errors below.
-                <ul>
-                    {% for field in form %}
-                    {% if field.errors %}
-                    {% for error in field.errors %}
-                    <li>{{ field.label }}: {{ error }}</li>
-                    {% endfor %}
-                    {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-            <button type="submit" class="btn btn-primary">Save</button>
-            <button type="button" class="btn btn-secondary"
-                onclick="window.location.href='{% url 'qc:qcrecord_list' %}'">Cancel</button>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Please correct the errors below.
+            <ul>
+                {% for field in form %}
+                {% if field.errors %}
+                {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary"
+            onclick="window.location.href='{% url 'qc:qcrecord_list' %}'">Cancel</button>
     </form>
 </div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -208,10 +288,23 @@
             .replace('end_datetime', encodeURIComponent(endDatetime));
 
         fetch(url)
-            .then(response => response.json()) // Assuming data is plain text
+            .then(response => response.json())
             .then(data => {
                 const qcPrevInput = document.querySelector('[name="{{ form.qc_prev.name }}"]');
                 qcPrevInput.value = data.csv;
+
+                // Populate the table with fetched data
+                const tableBody = document.getElementById('fetched-data-table').querySelector('tbody');
+                tableBody.innerHTML = '';
+                data.table_data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    Object.values(row).forEach(cell => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
             })
             .catch(error => console.error('Error fetching data:', error));
     });
@@ -229,6 +322,19 @@
             .then(data => {
                 const qcInput = document.querySelector('[name="{{ form.qc.name }}"]');
                 qcInput.value = data.csv;
+
+                // Populate the table with fetched data
+                const tableBody = document.getElementById('qc-data-table').querySelector('tbody');
+                tableBody.innerHTML = '';
+                data.table_data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    Object.values(row).forEach(cell => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
             })
             .catch(error => console.error('Error fetching data:', error));
     });
