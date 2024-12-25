@@ -10,6 +10,23 @@
     <i class="fas fa-file-csv"></i> Add Operators (CSV)
 </a>
 
+<div class="d-flex justify-content-between mb-3">
+    <div>
+        <label for="recordsPerPageTop">Records per page:</label>
+        <select id="recordsPerPageTop" class="form-control d-inline-block w-auto">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+    <div>
+        <button id="prevPageTop" class="btn btn-secondary">Previous</button>
+        <span id="pageInfoTop"></span>
+        <button id="nextPageTop" class="btn btn-secondary">Next</button>
+    </div>
+</div>
+
 <div class="table-responsive">
     <table class="table table-striped" id="operatorTable">
         <thead>
@@ -24,7 +41,7 @@
                 <th></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="operatorTableBody">
             {% for record in operator %}
             <tr>
                 <td>{{ record.name }}</td>
@@ -44,6 +61,23 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<div class="d-flex justify-content-between">
+    <div>
+        <label for="recordsPerPage">Records per page:</label>
+        <select id="recordsPerPage" class="form-control d-inline-block w-auto">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+    <div>
+        <button id="prevPage" class="btn btn-secondary">Previous</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage" class="btn btn-secondary">Next</button>
+    </div>
 </div>
 
 <script>
@@ -122,6 +156,69 @@ function setArrow(n, dir) {
 // Set initial sort arrow
 document.addEventListener("DOMContentLoaded", function() {
     setArrow(0, "asc");
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    var currentPage = 1;
+    var recordsPerPage = parseInt(document.getElementById("recordsPerPage").value);
+    var table = document.getElementById("operatorTable");
+    var tbody = document.getElementById("operatorTableBody");
+    var rows = Array.from(tbody.getElementsByTagName("tr"));
+    var totalPages = Math.ceil(rows.length / recordsPerPage);
+
+    function displayPage(page) {
+        var start = (page - 1) * recordsPerPage;
+        var end = start + recordsPerPage;
+        rows.forEach((row, index) => {
+            row.style.display = (index >= start && index < end) ? "" : "none";
+        });
+        document.getElementById("pageInfo").textContent = `Page ${page} of ${totalPages}`;
+        document.getElementById("pageInfoTop").textContent = `Page ${page} of ${totalPages}`;
+        document.getElementById("prevPage").disabled = page === 1;
+        document.getElementById("prevPageTop").disabled = page === 1;
+        document.getElementById("nextPage").disabled = page === totalPages;
+        document.getElementById("nextPageTop").disabled = page === totalPages;
+    }
+
+    function updateRecordsPerPage() {
+        recordsPerPage = parseInt(this.value);
+        totalPages = Math.ceil(rows.length / recordsPerPage);
+        currentPage = 1;
+        displayPage(currentPage);
+    }
+
+    document.getElementById("recordsPerPage").addEventListener("change", updateRecordsPerPage);
+    document.getElementById("recordsPerPageTop").addEventListener("change", updateRecordsPerPage);
+
+    document.getElementById("prevPage").addEventListener("click", function() {
+        if (currentPage > 1) {
+            currentPage--;
+            displayPage(currentPage);
+        }
+    });
+
+    document.getElementById("nextPage").addEventListener("click", function() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayPage(currentPage);
+        }
+    });
+
+    document.getElementById("prevPageTop").addEventListener("click", function() {
+        if (currentPage > 1) {
+            currentPage--;
+            displayPage(currentPage);
+        }
+    });
+
+    document.getElementById("nextPageTop").addEventListener("click", function() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayPage(currentPage);
+        }
+    });
+
+    displayPage(currentPage);
 });
 </script>
 {% endblock %}
