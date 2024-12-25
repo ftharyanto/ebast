@@ -14,8 +14,8 @@
     <table class="table table-striped" id="operatorTable">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>NIP</th>
+                <th onclick="sortTable(0)" style="cursor: pointer;">Name <span id="nameSortArrow">↑</span></th>
+                <th onclick="sortTable(1)" style="cursor: pointer;">NIP <span id="nipSortArrow"></span></th>
                 <th>Actions</th>
             </tr>
             <tr>
@@ -65,5 +65,63 @@ function filterTable(n) {
         }       
     }
 }
+
+function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("operatorTable");
+    switching = true;
+    dir = "asc"; 
+    resetArrows();
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 2; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount ++;      
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+    setArrow(n, dir);
+}
+
+function resetArrows() {
+    document.getElementById("nameSortArrow").innerHTML = "";
+    document.getElementById("nipSortArrow").innerHTML = "";
+}
+
+function setArrow(n, dir) {
+    var arrow = dir == "asc" ? "↑" : "↓";
+    if (n == 0) {
+        document.getElementById("nameSortArrow").innerHTML = arrow;
+    } else if (n == 1) {
+        document.getElementById("nipSortArrow").innerHTML = arrow;
+    }
+}
+
+// Set initial sort arrow
+document.addEventListener("DOMContentLoaded", function() {
+    setArrow(0, "asc");
+});
 </script>
 {% endblock %}
