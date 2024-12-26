@@ -23,4 +23,5 @@ urlpatterns = [
     path('core/', include('core.urls')),
     path('admin/', admin.site.urls),
     path('qc/', include('qc.urls')),
+    path('cl_seiscomp/', include('cl_seiscomp.urls')),
 ]

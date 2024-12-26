@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Homepage</title>
 </head>
+
 <body>
     {% extends "core/base.html" %}
 
@@ -11,8 +13,10 @@
     {% block content %}
     <h1>Welcome to the Homepage</h1>
     <ul></ul>
-        <li><a href="{% url 'qc:qcrecord_list' %}">QC App</a></li>
+    <li><a href="{% url 'qc:qcrecord_list' %}">QC App</a></li>
+    <li><a href="{% url 'cl_seiscomp:cs_list' %}">Ceklis Seiscomp</a></li>
     </ul>
     {% endblock %}
 </body>
+
 </html>

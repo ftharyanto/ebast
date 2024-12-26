@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+{% block title %}Bulk Create Stations{% endblock %}
+
+{% block content %}
+<h1 class="mt-5">Bulk Create Stations</h1>
+<form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="csv_file">Upload CSV file</label>
+        <input type="file" class="form-control-file" id="csv_file" name="csv_file">
+        <div class="invalid-feedback">
+            Please upload a CSV file.
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="csv_data">Or paste CSV data</label>
+        <textarea class="form-control" id="csv_data" name="csv_data" rows="5"></textarea>
+        <div class="invalid-feedback">
+            Please provide valid CSV data.
+        </div>
+    </div>
+    <div class="form-group">
+        <label>CSV Format Guide:</label>
+        <p>CSV file or data should be in the following format:</p>
+        <pre>network,code,province,location,digitizer_type,UPT</pre>
+        <p>Example:</p>
+        <pre>NET1,ST01,Province1,Location1,Type1,UPT1</pre>
+        <pre>NET2,ST02,Province2,Location2,Type2,UPT2</pre>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a href="{% url 'cl_seiscomp:station_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    var fileInput = document.getElementById('csv_file');
+                    var textArea = document.getElementById('csv_data');
+                    if (!fileInput.value && !textArea.value.trim()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        fileInput.setCustomValidity('Please upload a CSV file or provide CSV data.');
+                        textArea.setCustomValidity('Please upload a CSV file or provide CSV data.');
+                    } else {
+                        fileInput.setCustomValidity('');
+                        textArea.setCustomValidity('');
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock %}
