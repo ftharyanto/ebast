@@ -19,6 +19,7 @@ class QcRecord(models.Model):
     NIP = models.CharField(max_length=18, default='0')
     event_indonesia = models.IntegerField(default=0)
     event_luar = models.IntegerField(default=0)
+    kel_sebelum = models.CharField(max_length=1, choices=KELOMPOK_CHOICES, default='1')
 
     def __str__(self):
         return self.qc_id

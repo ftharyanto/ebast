@@ -120,7 +120,7 @@ def export_to_excel(request, record_id):
     qc_prev = pd.read_csv(StringIO(record.qc_prev))
     
     # add prev columns with 'prev' values to the last column
-    qc_prev['prev'] = 'prev'
+    qc_prev['prev'] = f'Kel. {record.kel_sebelum}'
 
     # add rows to the sheet
     rows_to_add = len(qc_prev)
@@ -204,7 +204,7 @@ def export_to_pdf(request, record_id):
     qc_prev = pd.read_csv(StringIO(record.qc_prev))
     
     # add prev columns with 'prev' values to the last column
-    qc_prev['prev'] = 'prev'
+    qc_prev['prev'] = f'Kel. {record.kel_sebelum}'
 
     # add rows to the sheet
     rows_to_add = len(qc_prev)

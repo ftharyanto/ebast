@@ -59,6 +59,13 @@
                         Please fill a valid jam pelaksanaan.
                     </div>
                 </div>
+                <div class="form-group col-md-4">
+                    <label for="{{ form.kel_sebelum.id_for_label }}">Kelompok Sebelumnya</label>
+                    {{ form.kel_sebelum|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please fill a valid kelompok sebelumnya.
+                    </div>
+                </div>
             </div>
         </div>
 
