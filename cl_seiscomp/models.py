@@ -69,12 +69,13 @@ class CsRecordModel(models.Model):
             self.count_blanks = len(self.blanks)
 
         super().save(*args, **kwargs)
-        img = Image.open(self.slmon_image.path) # Open slmon_image using self
+        if self.slmon_image:
+            img = Image.open(self.slmon_image.path) # Open slmon_image using self
 
-        if img.height > 1006 or img.width > 600:
-            new_img = (1006, 600)
-            img.thumbnail(new_img)
-            img.save(self.slmon_image.path)
+            if img.height > 1006 or img.width > 600:
+                new_img = (1006, 600)
+                img.thumbnail(new_img)
+                img.save(self.slmon_image.path)
             
 class StationListModel(models.Model):
     network = models.CharField(max_length=5)

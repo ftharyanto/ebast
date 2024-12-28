@@ -105,7 +105,8 @@ class CsDeleteView(DeleteView):
     success_url = reverse_lazy('cl_seiscomp:cs_list')
 
 def cs_export_excel(request, record_id):
-    from qc.views import format_date_indonesian, get_hari_indonesia
+    from qc.views import format_date_indonesian
+    from datetime import timedelta
     import ast
 
     try:
@@ -118,17 +119,35 @@ def cs_export_excel(request, record_id):
     sheet = workbook['checklist_seiscomp']
     sheet.title = 'Checklist Seiscomp'
     
-    # tanggal = format_date_indonesian(record.cs_id[2:-2])
-    # hari = get_hari_indonesia(record.cs_id[2:-2])
+    tanggal = datetime.datetime.strptime(record.cs_id[3:-2], "%Y-%m-%d")
+    print(record.shift)
+    if record.shift.upper() == 'MALAM':
+        tanggal = date_range_to_string([tanggal, tanggal + timedelta(days=1)])
+        sheet['R3'] = tanggal
+    else:
+        sheet['R3'] = tanggal
+        
     sheet['A3'] = f'KELOMPOK: {record.kelompok}'
     sheet['A2'] = f'SHIFT {record.shift.upper()}'
     sheet['H266'] = f'{record.operator}'
     jam_pelaksanaan = f'JAM {record.jam_pelaksanaan}'
     sheet['D5'], sheet['P5'], sheet['H253'] = jam_pelaksanaan, jam_pelaksanaan, jam_pelaksanaan
 
-    gaps = ast.literal_eval(record.gaps)
-    spikes = ast.literal_eval(record.spikes)
-    blanks = ast.literal_eval(record.blanks)
+
+    if record.gaps:
+        gaps = ast.literal_eval(record.gaps)
+    else:
+        gaps = []
+
+    if record.spikes:
+        spikes = ast.literal_eval(record.spikes)
+    else:
+        spikes = []
+
+    if record.blanks:
+        blanks = ast.literal_eval(record.blanks)
+    else:
+        blanks = []
 
     # for cells B7:B269
     for row in range(7, 269+1):  # Iterate through rows 7 to 269
@@ -156,30 +175,58 @@ def cs_export_excel(request, record_id):
     from openpyxl.drawing.image import Image
 
     sheet = workbook['slmon']
-    img = Image(record.slmon_image.path)
-    
-    if len(sheet._images) == 0:
-        # Initalise the `ref` data, do sheet.add_image(...)   
-        img.anchor='B3'
-        sheet.add_image(img)
-        # set the size of the image in inches
-        sheet._images[0].width = 8.6 * 96  # 96 DPI is the default resolution
-        sheet._images[0].height = 4.14 * 96  # 96 DPI is the default resolution
-        
-    elif len(sheet._images) == 1:
-        # Replace the first image do **only** the following:
-        sheet._images[0] = img
-        # Update the default anchor `A1` to your needs
-        sheet._images[0].anchor='B3'
-        # set the size of the image in inches
-        sheet._images[0].width = 8.6 * 96  # 96 DPI is the default resolution
-        sheet._images[0].height = 4.14 * 96  # 96 DPI is the default resolution
+    tanggal = format_date_indonesian(record.cs_id[3:-2])
+    sheet['A2'] = f'{tanggal}, pukul {record.jam_pelaksanaan}'
+    sheet['M24'] = f'Jakarta, {tanggal}'
+    sheet['C28'] = f'{record.operator}'
+
+    if record.slmon_image:
+        img = Image(record.slmon_image.path)
+        if len(sheet._images) == 0:
+            # Initalise the `ref` data, do sheet.add_image(...)   
+            img.anchor='B3'
+            sheet.add_image(img)
+            # set the size of the image in inches
+            sheet._images[0].width = 8.6 * 96  # 96 DPI is the default resolution
+            sheet._images[0].height = 4.14 * 96  # 96 DPI is the default resolution
+            
+        elif len(sheet._images) == 1:
+            # Replace the first image do **only** the following:
+            sheet._images[0] = img
+            # Update the default anchor `A1` to your needs
+            sheet._images[0].anchor='B3'
+            # set the size of the image in inches
+            sheet._images[0].width = 8.6 * 96  # 96 DPI is the default resolution
+            sheet._images[0].height = 4.14 * 96  # 96 DPI is the default resolution
+        else:
+            raise(ValueError, "Found more than 1 Image!")
     else:
-        raise(ValueError, "Found more than 1 Image!")
+        sheet['B3'] = 'No image'
 
     # Save the workbook to a BytesIO object
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename=CS-{record.cs_id}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename={record.cs_id}.xlsx'
     workbook.save(response)
 
     return response
+
+def date_range_to_string(date_range):
+    import locale
+    locale.setlocale(locale.LC_TIME, "id_ID.utf8")
+    
+    weekdays = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
+    date_strings = date_range
+    start_date = date_strings[0].strftime('%d')
+    end_date = date_strings[-1].strftime('%d')
+    start_month = date_strings[0].strftime('%B')
+    end_month = date_strings[-1].strftime('%B')
+    start_year = date_strings[0].strftime('%Y')
+    end_year = date_strings[-1].strftime('%Y')
+    start_weekday = weekdays[date_strings[0].weekday()]
+    end_weekday = weekdays[date_strings[-1].weekday()]
+    if (start_year != end_year) and (start_month != end_month):
+        return f"{start_weekday} - {end_weekday}, {start_date} {start_month} {start_year} - {end_date} {end_month} {end_year}"
+    elif (start_year == end_year) and (start_month != end_month):
+        return f"{start_weekday} - {end_weekday}, {start_date} {start_month} - {end_date} {end_month} {start_year}"
+    else:
+        return f"{start_weekday} - {end_weekday}, {start_date} - {end_date} {start_month} {start_year}"
