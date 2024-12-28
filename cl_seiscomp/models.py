@@ -37,6 +37,7 @@ class CsRecordModel(models.Model):
     count_gaps = models.PositiveIntegerField(null=True, blank=True, default=0)
     count_spikes = models.PositiveIntegerField(null=True, blank=True, default=0)
     count_blanks = models.PositiveIntegerField(null=True, blank=True, default=0)
+    slmon_image = models.ImageField(upload_to='cl_seiscomp/slmon_images/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
         sensor_list = StationListModel.objects.values_list('code', flat=True)

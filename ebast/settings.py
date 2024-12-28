@@ -125,3 +125,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Base url to serve media files
+MEDIA_URL = 'cl_seiscomp/slmon_images/'
+
+MEDIA_ROOT = BASE_DIR / 'cl_seiscomp/slmon_images/'

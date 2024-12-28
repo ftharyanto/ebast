@@ -85,11 +85,19 @@ class CsCreateView(CreateView):
     fields = '__all__'
     success_url = reverse_lazy('cl_seiscomp:cs_list')
 
+    def form_valid(self, form):
+        form.instance.slmon_image = self.request.FILES.get('slmon_image')
+        return super().form_valid(form)
+
 class CsUpdateView(UpdateView):
     model = CsRecordModel
     template_name = 'cl_seiscomp/cs_form.html'
     fields = '__all__'
     success_url = reverse_lazy('cl_seiscomp:cs_list')
+
+    def form_valid(self, form):
+        form.instance.slmon_image = self.request.FILES.get('slmon_image')
+        return super().form_valid(form)
 
 class CsDeleteView(DeleteView):
     model = CsRecordModel

@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from core.views import HomeView, OperatorListView
 
 urlpatterns = [
@@ -25,3 +27,6 @@ urlpatterns = [
     path('qc/', include('qc.urls')),
     path('cl_seiscomp/', include('cl_seiscomp.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

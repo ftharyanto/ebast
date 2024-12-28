@@ -3,10 +3,35 @@
 
 {% block content %}
 <h1 class="mt-5">Ceklis Seiscomp Form</h1>
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
+    <div class="form-group">
+        <label for="slmon_image">Upload SLMon Image:</label>
+        <input type="file" name="slmon_image" id="slmon_image" class="form-control">
+        <img id="pasted_image" style="display:none; max-width: 100%; margin-top: 10px;">
+    </div>
     <button type="submit" class="btn btn-primary">Save</button>
     <a href="{% url 'cl_seiscomp:cs_list' %}" class="btn btn-secondary">Cancel</a>
 </form>
+
+<script>
+document.addEventListener('paste', function (event) {
+    const items = event.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+            const file = items[i].getAsFile();
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const imgElement = document.getElementById('pasted_image');
+                imgElement.src = event.target.result;
+                imgElement.style.display = 'block';
+                document.getElementById('slmon_image').files = new DataTransfer().files;
+                document.getElementById('slmon_image').files[0] = file;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+});
+</script>
 {% endblock %}
