@@ -3,4 +3,29 @@
 
 {% block content %}
 <h1 class="mt-5">Ceklis Seiscomp</h1>
+<a href="{% url 'cl_seiscomp:cs_create' %}" class="btn btn-primary">Add New Record</a>
+<table class="table mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Jam Pelaksanaan</th>
+            <th>Kelompok</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in csrecords %}
+        <tr>
+            <td>{{ record.cs_id }}</td>
+            <td>{{ record.jam_pelaksanaan }}</td>
+            <td>{{ record.kelompok }}</td>
+            <td>
+                <a href="{% url 'cl_seiscomp:cs_update' record.pk %}" class="btn btn-warning">Edit</a>
+                <a href="{% url 'cl_seiscomp:cs_delete' record.pk %}" class="btn btn-danger">Delete</a>
+                <a href="{% url 'cl_seiscomp:cs_export_excel' record.pk %}" class="btn btn-success">Export to Excel</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

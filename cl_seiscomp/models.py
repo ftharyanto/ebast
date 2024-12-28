@@ -1,67 +1,69 @@
 from django.db import models
-from django.utils import timezone
 from core.models import Operator
 
-# class CsRecordModel(models.Model):
-#     # fields of the model
-#     cs_id = models.CharField(max_length=15, default='0')
-#     tanggal = models.DateField()
-#     jam = models.CharField(max_length=20, choices=WAKTU, default='12:00 WIB')
-#     kelompok = models.IntegerField(choices=KELOMPOK, default=1)
-#     operator = models.TextField(null=True,)
-#     gaps = models.TextField(max_length=3000, null=True, blank=True)
-#     spikes = models.TextField(max_length=3000, null=True, blank=True)
-#     blanks = models.TextField(max_length=3000, null=True, blank=True)
-#     slmon = models.PositiveIntegerField(null=True, blank=True, default=0)
-#     count_gaps = models.IntegerField(default=0, blank=True)
-#     count_spikes = models.IntegerField(default=0, blank=True)
-#     count_blanks = models.IntegerField(default=0, blank=True)
+KELOMPOK = (
+    (1, 1),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5),
+)
 
-#     def save(self, *args, **kwargs):
-#         seismograph_list = StationListModel.objects.values_list('kode', flat=True)
+WAKTU = (
+    ('00:00 WIB', '00:00 WIB'),
+    ('06:00 WIB', '06:00 WIB'),
+    ('12:00 WIB', '12:00 WIB'),
+    ('18:00 WIB', '18:00 WIB'),
+)
 
-#         def remove_accelerograph(data):
-#             for item in data:
-#                 if item not in seismograph_list:
-#                     data.remove(item)
-#             return data
+SHIFT = (
+    ('Pagi', 'Pagi'),
+    ('Siang', 'Siang'),
+    ('Malam', 'Malam'),
+    ('Dini Hari', 'Dini Hari'),
+)
+
+class CsRecordModel(models.Model):
+    # fields of the model
+    cs_id = models.CharField(max_length=15, default='0')
+    shift = models.CharField(max_length=15, choices=SHIFT, default='P')
+    jam_pelaksanaan = models.CharField(max_length=20, choices=WAKTU, default='12:00 WIB')
+    kelompok = models.IntegerField(choices=KELOMPOK, default=1)
+    operator = models.ForeignKey(Operator, on_delete=models.CASCADE)
+    gaps = models.TextField(max_length=10000, null=True, blank=True)
+    spikes = models.TextField(max_length=10000, null=True, blank=True)
+    blanks = models.TextField(max_length=10000, null=True, blank=True)
+    slmon = models.PositiveIntegerField(null=True, blank=True, default=0)
+    count_gaps = models.PositiveIntegerField(null=True, blank=True, default=0)
+    count_spikes = models.PositiveIntegerField(null=True, blank=True, default=0)
+    count_blanks = models.PositiveIntegerField(null=True, blank=True, default=0)
+
+    def save(self, *args, **kwargs):
+        sensor_list = StationListModel.objects.values_list('code', flat=True)
+
+        def clean_sensor(data):
+            for item in data:
+                if item not in sensor_list:
+                    data.remove(item)
+            return data
         
-#         # Modify the group field here
-#         if self.gaps:
-#             self.gaps = self.gaps.upper()
-#             self.gaps = remove_accelerograph(self.gaps.split('\r\n'))
-#             self.count_gaps = len(self.gaps)
+        # Modify the group field here
+        if self.gaps:
+            self.gaps = self.gaps.upper()
+            self.gaps = clean_sensor(self.gaps.split('\r\n'))
+            self.count_gaps = len(self.gaps)
 
-#         if self.spikes:
-#             self.spikes = self.spikes.upper()
-#             self.spikes = remove_accelerograph(self.spikes.split('\r\n'))
-#             self.count_spikes = len(self.spikes)
+        if self.spikes:
+            self.spikes = self.spikes.upper()
+            self.spikes = clean_sensor(self.spikes.split('\r\n'))
+            self.count_spikes = len(self.spikes)
 
-#         if self.blanks:
-#             self.blanks = self.blanks.upper()
-#             self.blanks = remove_accelerograph(self.blanks.split('\r\n'))
-#             self.count_blanks = len(self.blanks)
+        if self.blanks:
+            self.blanks = self.blanks.upper()
+            self.blanks = clean_sensor(self.blanks.split('\r\n'))
+            self.count_blanks = len(self.blanks)
 
-#         super().save(*args, **kwargs)
-class CsRecord(models.Model):
-    # KELOMPOK_CHOICES = [
-    #     ('1', '1'),
-    #     ('2', '2'),
-    #     ('3', '3'),
-    #     ('4', '4'),
-    #     ('5', '5'),
-    # ]
-    # kelompok = models.CharField(max_length=1, choices=KELOMPOK_CHOICES, default='1')
-    # jam_pelaksanaan = models.TimeField(default=(timezone.now() + timezone.timedelta(hours=7)).replace(second=0, microsecond=0))
-    # qc_prev = models.TextField(default='0')
-    # qc = models.TextField(default='0')
-    # operator = models.ForeignKey(Operator, on_delete=models.CASCADE)
-    # NIP = models.CharField(max_length=18, default='0')
-    # event_indonesia = models.IntegerField(default=0)
-    # event_luar = models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.cs_id
+        super().save(*args, **kwargs)
 
 class StationListModel(models.Model):
     network = models.CharField(max_length=5)
