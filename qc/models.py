@@ -3,7 +3,7 @@ from django.utils import timezone
 from core.models import Operator
 
 class QcRecord(models.Model):
-    qc_id = models.CharField(max_length=100, default='0')
+    qc_id = models.CharField(max_length=15, default='0')
     KELOMPOK_CHOICES = [
         ('1', '1'),
         ('2', '2'),

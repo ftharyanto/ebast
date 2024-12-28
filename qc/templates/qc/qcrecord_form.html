@@ -274,7 +274,7 @@
         const dateInput = document.getElementById('date_input');
         const waktuDinasSelect = document.getElementById('waktu_dinas');
         const qcIdInput = document.getElementById('{{ form.qc_id.id_for_label }}');
-        qcIdInput.value = dateInput.value + "-" + waktuDinasSelect.value;
+        qcIdInput.value = "QC-" + dateInput.value + "-" + waktuDinasSelect.value;
 
         function updateQcId() {
             const dateValue = dateInput.value;
