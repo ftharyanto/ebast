@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.urls import path
 from .views import CsListView, StationListView, StationCreateView, StationUpdateView, StationDeleteView, StationBulkCreateView, CsCreateView, CsUpdateView, CsDeleteView, cs_export_excel
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 app_name = 'cl_seiscomp'
 
@@ -18,3 +20,7 @@ urlpatterns = [
     path('cs/delete/<int:pk>/', CsDeleteView.as_view(), name='cs_delete'),
     path('cs-export-excel/<int:record_id>/', cs_export_excel, name='cs_export_excel'),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.CS_MEDIA_URL, document_root=settings.CS_MEDIA_ROOT)

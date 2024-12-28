@@ -1,5 +1,6 @@
 from django.db import models
 from core.models import Operator
+from PIL import Image  # Add this import
 
 KELOMPOK = (
     (1, 1),
@@ -39,6 +40,9 @@ class CsRecordModel(models.Model):
     count_blanks = models.PositiveIntegerField(null=True, blank=True, default=0)
     slmon_image = models.ImageField(upload_to='cl_seiscomp/slmon_images/', null=True, blank=True)
 
+    def __str__(self):
+        return self.cs_id
+
     def save(self, *args, **kwargs):
         sensor_list = StationListModel.objects.values_list('code', flat=True)
 
@@ -65,7 +69,13 @@ class CsRecordModel(models.Model):
             self.count_blanks = len(self.blanks)
 
         super().save(*args, **kwargs)
+        img = Image.open(self.slmon_image.path) # Open slmon_image using self
 
+        if img.height > 1006 or img.width > 600:
+            new_img = (1006, 600)
+            img.thumbnail(new_img)
+            img.save(self.slmon_image.path)
+            
 class StationListModel(models.Model):
     network = models.CharField(max_length=5)
     code = models.CharField(max_length=10)

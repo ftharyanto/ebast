@@ -115,7 +115,7 @@ def cs_export_excel(request, record_id):
 
     file_path = os.path.join(os.path.dirname(__file__), 'static/cl_seiscomp/cl_Seiscomp.xlsx')
     workbook = openpyxl.load_workbook(file_path)
-    sheet = workbook.active
+    sheet = workbook['checklist_seiscomp']
     sheet.title = 'Checklist Seiscomp'
     
     # tanggal = format_date_indonesian(record.cs_id[2:-2])
@@ -151,6 +151,31 @@ def cs_export_excel(request, record_id):
             sheet.cell(row=row, column=17).value = 1
         if cell_value in blanks:
             sheet.cell(row=row, column=18).value = 1
+
+    # sheet of slmon
+    from openpyxl.drawing.image import Image
+
+    sheet = workbook['slmon']
+    img = Image(record.slmon_image.path)
+    
+    if len(sheet._images) == 0:
+        # Initalise the `ref` data, do sheet.add_image(...)   
+        img.anchor='B3'
+        sheet.add_image(img)
+        # set the size of the image in inches
+        sheet._images[0].width = 8.6 * 96  # 96 DPI is the default resolution
+        sheet._images[0].height = 4.14 * 96  # 96 DPI is the default resolution
+        
+    elif len(sheet._images) == 1:
+        # Replace the first image do **only** the following:
+        sheet._images[0] = img
+        # Update the default anchor `A1` to your needs
+        sheet._images[0].anchor='B3'
+        # set the size of the image in inches
+        sheet._images[0].width = 8.6 * 96  # 96 DPI is the default resolution
+        sheet._images[0].height = 4.14 * 96  # 96 DPI is the default resolution
+    else:
+        raise(ValueError, "Found more than 1 Image!")
 
     # Save the workbook to a BytesIO object
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
