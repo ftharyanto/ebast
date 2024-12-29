@@ -23,6 +23,7 @@
                 <a href="{% url 'cl_seiscomp:cs_update' record.pk %}" class="btn btn-warning">Edit</a>
                 <a href="{% url 'cl_seiscomp:cs_delete' record.pk %}" class="btn btn-danger">Delete</a>
                 <a href="{% url 'cl_seiscomp:cs_export_excel' record.pk %}" class="btn btn-success">Export to Excel</a>
+                <a href="{% url 'cl_seiscomp:cs_export_pdf' record.pk %}" class="btn btn-success">Export to PDF</a>
             </td>
         </tr>
         {% endfor %}

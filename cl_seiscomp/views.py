@@ -105,7 +105,7 @@ class CsDeleteView(DeleteView):
     success_url = reverse_lazy('cl_seiscomp:cs_list')
 
 def cs_export_excel(request, record_id):
-    from qc.views import format_date_indonesian
+    from qc.views import format_date_indonesian, get_hari_indonesia
     from datetime import timedelta
     import ast
 
@@ -125,7 +125,8 @@ def cs_export_excel(request, record_id):
         tanggal = date_range_to_string([tanggal, tanggal + timedelta(days=1)])
         sheet['R3'] = tanggal
     else:
-        sheet['R3'] = tanggal
+        tanggal = record.cs_id[3:-2]
+        sheet['R3'] = f'{get_hari_indonesia(tanggal)}, {format_date_indonesian(tanggal)}'
         
     sheet['A3'] = f'KELOMPOK: {record.kelompok}'
     sheet['A2'] = f'SHIFT {record.shift.upper()}'
@@ -207,6 +208,133 @@ def cs_export_excel(request, record_id):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = f'attachment; filename={record.cs_id}.xlsx'
     workbook.save(response)
+
+    return response
+
+def cs_export_pdf(request, record_id):
+    from qc.views import format_date_indonesian, get_hari_indonesia
+    from datetime import timedelta
+    import ast
+
+    try:
+        record = CsRecordModel.objects.get(id=record_id)
+    except CsRecordModel.DoesNotExist:
+        return HttpResponse(status=404)
+
+    file_path = os.path.join(os.path.dirname(__file__), 'static/cl_seiscomp/cl_Seiscomp.xlsx')
+    workbook = openpyxl.load_workbook(file_path)
+    sheet = workbook['checklist_seiscomp']
+    sheet.title = 'Checklist Seiscomp'
+    
+    tanggal = datetime.datetime.strptime(record.cs_id[3:-2], "%Y-%m-%d")
+    print(record.shift)
+    if record.shift.upper() == 'MALAM':
+        tanggal = date_range_to_string([tanggal, tanggal + timedelta(days=1)])
+        sheet['R3'] = tanggal
+    else:
+        tanggal = record.cs_id[3:-2]
+        sheet['R3'] = f'{get_hari_indonesia(tanggal)}, {format_date_indonesian(tanggal)}'
+        
+    sheet['A3'] = f'KELOMPOK: {record.kelompok}'
+    sheet['A2'] = f'SHIFT {record.shift.upper()}'
+    sheet['H266'] = f'{record.operator}'
+    jam_pelaksanaan = f'JAM {record.jam_pelaksanaan}'
+    sheet['D5'], sheet['P5'], sheet['H253'] = jam_pelaksanaan, jam_pelaksanaan, jam_pelaksanaan
+
+
+    if record.gaps:
+        gaps = ast.literal_eval(record.gaps)
+    else:
+        gaps = []
+
+    if record.spikes:
+        spikes = ast.literal_eval(record.spikes)
+    else:
+        spikes = []
+
+    if record.blanks:
+        blanks = ast.literal_eval(record.blanks)
+    else:
+        blanks = []
+
+    # for cells B7:B269
+    for row in range(7, 269+1):  # Iterate through rows 7 to 269
+        cell_value = sheet.cell(row=row, column=2).value  # Get the cell value in column B
+
+        if cell_value in gaps:
+            sheet.cell(row=row, column=4).value = 1
+        if cell_value in spikes:
+            sheet.cell(row=row, column=5).value = 1
+        if cell_value in blanks:
+            sheet.cell(row=row, column=6).value = 1
+
+    # for cells I7:I250
+    for row in range(7, 250+1):  # Iterate through rows 7 to 269
+        cell_value = sheet.cell(row=row, column=9).value  # Get the cell value in column B
+
+        if cell_value in gaps:
+            sheet.cell(row=row, column=16).value = 1
+        if cell_value in spikes:
+            sheet.cell(row=row, column=17).value = 1
+        if cell_value in blanks:
+            sheet.cell(row=row, column=18).value = 1
+
+    # sheet of slmon
+    from openpyxl.drawing.image import Image
+
+    sheet = workbook['slmon']
+    tanggal = format_date_indonesian(record.cs_id[3:-2])
+    sheet['A2'] = f'{tanggal}, pukul {record.jam_pelaksanaan}'
+    sheet['M24'] = f'Jakarta, {tanggal}'
+    sheet['C28'] = f'{record.operator}'
+
+    if record.slmon_image:
+        img = Image(record.slmon_image.path)
+        if len(sheet._images) == 0:
+            # Initalise the `ref` data, do sheet.add_image(...)   
+            img.anchor='B3'
+            sheet.add_image(img)
+            # set the size of the image in inches
+            sheet._images[0].width = 8.6 * 96  # 96 DPI is the default resolution
+            sheet._images[0].height = 4.14 * 96  # 96 DPI is the default resolution
+            
+        elif len(sheet._images) == 1:
+            # Replace the first image do **only** the following:
+            sheet._images[0] = img
+            # Update the default anchor `A1` to your needs
+            sheet._images[0].anchor='B3'
+            # set the size of the image in inches
+            sheet._images[0].width = 8.6 * 96  # 96 DPI is the default resolution
+            sheet._images[0].height = 4.14 * 96  # 96 DPI is the default resolution
+        else:
+            raise(ValueError, "Found more than 1 Image!")
+    else:
+        sheet['B3'] = 'No image'
+
+    # temporarily save the workbook to a file
+    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/cl_seiscomp/{record.cs_id}.xlsx')
+    workbook.save(temp_xlsx)
+    temp_pdf_dir = os.path.join(os.path.dirname(__file__), 'static/cl_seiscomp')
+    temp_pdf = os.path.join(temp_pdf_dir, f'{record.cs_id}.pdf')
+
+    import subprocess
+    try:
+        command = ['soffice', '--headless', '--convert-to', 'pdf:impress_pdf_Export', temp_xlsx, '--outdir', temp_pdf_dir]
+        subprocess.run(command, check=True)
+        print(temp_xlsx)
+    except subprocess.CalledProcessError as e:
+        print(f"Error converting {temp_xlsx} to PDF: {e}")
+    finally:
+        if os.path.exists(temp_xlsx):
+            os.remove(temp_xlsx)
+
+    # Read the generated PDF file and return it in the response
+    with open(temp_pdf, 'rb') as pdf_file:
+        response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename={record.cs_id}.pdf'
+
+    if os.path.exists(temp_pdf):
+        os.remove(temp_pdf)
 
     return response
 

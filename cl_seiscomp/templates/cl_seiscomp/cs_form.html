@@ -2,36 +2,194 @@
 {% block title %}Ceklis Seiscomp Form{% endblock %}
 
 {% block content %}
-<h1 class="mt-5">Ceklis Seiscomp Form</h1>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div class="form-group">
-        <label for="slmon_image">Upload SLMon Image:</label>
-        <input type="file" name="slmon_image" id="slmon_image" class="form-control">
-        <img id="pasted_image" style="display:none; max-width: 100%; margin-top: 10px;">
-    </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a href="{% url 'cl_seiscomp:cs_list' %}" class="btn btn-secondary">Cancel</a>
-</form>
+<div class="container">
+    <h1 class="mt-5">Ceklis Seiscomp Form</h1>
+    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {% load form_tags %}
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Please correct the errors below.
+            <ul>
+                {% for field in form %}
+                {% if field.errors %}
+                {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
 
-<script>
-document.addEventListener('paste', function (event) {
-    const items = event.clipboardData.items;
-    for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf('image') !== -1) {
-            const file = items[i].getAsFile();
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                const imgElement = document.getElementById('pasted_image');
-                imgElement.src = event.target.result;
-                imgElement.style.display = 'block';
-                document.getElementById('slmon_image').files = new DataTransfer().files;
-                document.getElementById('slmon_image').files[0] = file;
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-});
-</script>
-{% endblock %}
+        <div class="form-group row">
+            <div class="form-group col-md-4">
+                {{ form.kelompok.label_tag }}
+                {{ form.kelompok|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid kelompok.
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="date_input">Date</label>
+                <input type="date" id="date_input" name="date_input" class="form-control">
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.shift.label_tag }}
+                {{ form.shift|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid Shift.
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.jam_pelaksanaan.label_tag }}
+                {{ form.jam_pelaksanaan|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid jam pelaksanaan.
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.cs_id.label_tag }}
+                {{ form.cs_id|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid CS ID.
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.operator.label_tag }}
+                {{ form.operator|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid operator.
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="form-group col-md-4">
+                {{ form.gaps.label_tag }}
+                {{ form.gaps|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid gaps.
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.spikes.label_tag }}
+                {{ form.spikes|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid spikes.
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.blanks.label_tag }}
+                {{ form.blanks|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid blanks.
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="form-group col-md-4">
+                {{ form.slmon.label_tag }}
+                {{ form.slmon|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid slmon.
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="slmon_image">Upload SLMon Image:</label>
+            <input type="file" name="slmon_image" id="slmon_image" class="form-control">
+            <div id="drop_zone" class="border border-primary p-3 mt-2" style="text-align: center;">
+                Drag and drop an image here or press Ctrl+V to paste
+            </div>
+            {% if form.instance.slmon_image %}
+            <div class="mt-2">
+                <a href="{{ form.instance.slmon_image.url }}" target="_blank">View current image</a>
+            </div>
+            <img id="pasted_image" src="{{ form.instance.slmon_image.url }}" style="max-width: 100%; margin-top: 10px;">
+            {% else %}
+            <img id="pasted_image" style="display:none; max-width: 100%; margin-top: 10px;">
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'cl_seiscomp:cs_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+
+    <script>
+        // set the date_input default value to today
+        document.getElementById('date_input').valueAsDate = new Date();
+
+        // Paste functionality
+        document.addEventListener('paste', function (event) {
+            const items = event.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        const imgElement = document.getElementById('pasted_image');
+                        imgElement.src = event.target.result;
+                        imgElement.style.display = 'block';
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        document.getElementById('slmon_image').files = dataTransfer.files;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+        // Drag and drop functionality
+        const dropZone = document.getElementById('drop_zone');
+        dropZone.addEventListener('dragover', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            dropZone.classList.add('bg-light');
+        });
+
+        dropZone.addEventListener('dragleave', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            dropZone.classList.remove('bg-light');
+        });
+
+        dropZone.addEventListener('drop', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            dropZone.classList.remove('bg-light');
+            const file = event.dataTransfer.files[0];
+            if (file && file.type.indexOf('image') !== -1) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const imgElement = document.getElementById('pasted_image');
+                    imgElement.src = event.target.result;
+                    imgElement.style.display = 'block';
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    document.getElementById('slmon_image').files = dataTransfer.files;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // change cs_id value based on date_input and waktu_dinas
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateInput = document.getElementById('date_input');
+            const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
+            const qcIdInput = document.getElementById('{{ form.cs_id.id_for_label }}');
+            qcIdInput.value = "CS-" + dateInput.value + "-" + waktuDinasSelect.value[0];
+
+            function updateQcId() {
+                const dateValue = dateInput.value;
+                const waktuDinasValue = waktuDinasSelect.value;
+                qcIdInput.value = "CS-" + dateValue + "-" + waktuDinasValue[0];
+            }
+
+            dateInput.addEventListener('change', updateQcId);
+            waktuDinasSelect.addEventListener('change', updateQcId);
+        });
+    </script>
+    {% endblock %}

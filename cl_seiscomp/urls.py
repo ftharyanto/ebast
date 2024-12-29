@@ -1,7 +1,7 @@
 from django.views import View
 from django.http import HttpResponse
 from django.urls import path
-from .views import CsListView, StationListView, StationCreateView, StationUpdateView, StationDeleteView, StationBulkCreateView, CsCreateView, CsUpdateView, CsDeleteView, cs_export_excel
+from .views import CsListView, StationListView, StationCreateView, StationUpdateView, StationDeleteView, StationBulkCreateView, CsCreateView, CsUpdateView, CsDeleteView, cs_export_excel, cs_export_pdf
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -19,6 +19,7 @@ urlpatterns = [
     path('cs/update/<int:pk>/', CsUpdateView.as_view(), name='cs_update'),
     path('cs/delete/<int:pk>/', CsDeleteView.as_view(), name='cs_delete'),
     path('cs-export-excel/<int:record_id>/', cs_export_excel, name='cs_export_excel'),
+    path('cs-export-pdf/<int:record_id>/', cs_export_pdf, name='cs_export_pdf'),
 ]
 
 
