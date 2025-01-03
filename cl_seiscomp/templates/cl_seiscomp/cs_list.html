@@ -3,7 +3,9 @@
 
 {% block content %}
 <h1 class="mt-5">Ceklis Seiscomp</h1>
-<a href="{% url 'cl_seiscomp:cs_create' %}" class="btn btn-primary">Add New Record</a>
+<a href="{% url 'cl_seiscomp:cs_create' %}" class="btn btn-primary">
+    <i class="fas fa-plus"></i> Add New Record
+</a>
 <table class="table mt-3">
     <thead>
         <tr>
@@ -20,10 +22,18 @@
             <td>{{ record.jam_pelaksanaan }}</td>
             <td>{{ record.kelompok }}</td>
             <td>
-                <a href="{% url 'cl_seiscomp:cs_update' record.pk %}" class="btn btn-warning">Edit</a>
-                <a href="{% url 'cl_seiscomp:cs_delete' record.pk %}" class="btn btn-danger">Delete</a>
-                <a href="{% url 'cl_seiscomp:cs_export_excel' record.pk %}" class="btn btn-success">Export to Excel</a>
-                <a href="{% url 'cl_seiscomp:cs_export_pdf' record.pk %}" class="btn btn-success">Export to PDF</a>
+                <a href="{% url 'cl_seiscomp:cs_update' record.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'cl_seiscomp:cs_delete' record.pk %}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i>
+                </a>
+                <a href="{% url 'cl_seiscomp:cs_export_excel' record.pk %}" class="btn btn-light text-success">
+                    <i class="fas fa-file-excel"></i>
+                </a>
+                <a href="{% url 'cl_seiscomp:cs_export_pdf' record.pk %}" class="btn btn-light text-danger">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
             </td>
         </tr>
         {% endfor %}

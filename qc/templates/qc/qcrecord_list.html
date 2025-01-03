@@ -48,10 +48,10 @@
                     <form action="{% url 'qc:qcrecord_delete_direct' record.pk %}" method="post" style="display:inline;">
                         {% csrf_token %}
                         <button type="button" class="btn btn-sm btn-danger delete-button" data-toggle="tooltip" title="Delete">
-                            <i class="fas fa-trash-alt"></i>
+                            <i class="fas fa-trash"></i>
                         </button>
                     </form>
-                    <a href="{% url 'qc:export_to_excel' record.pk %}" class="btn btn-sm btn-success" data-toggle="tooltip" title="Export to Excel">
+                    <a href="{% url 'qc:export_to_excel' record.pk %}" class="btn btn-sm btn-light text-success" data-toggle="tooltip" title="Export to Excel">
                         <i class="fas fa-file-excel"></i>
                     </a>
                     <a href="{% url 'qc:export_to_pdf' record.pk %}" class="btn btn-sm btn-light text-danger" data-toggle="tooltip" title="Export to PDF">
