@@ -108,8 +108,8 @@ def export_to_excel(request, record_id):
     sheet = workbook.active
     sheet.title = 'QC Records'
 
-    tanggal = format_date_indonesian(record.qc_id[2:-2])
-    hari = get_hari_indonesia(record.qc_id[2:-2])
+    tanggal = format_date_indonesian(record.qc_id[3:-2])
+    hari = get_hari_indonesia(record.qc_id[3:-2])
     sheet['G2'] = ': ' + tanggal
     sheet['G3'] = ': ' + hari
     sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
@@ -192,8 +192,8 @@ def export_to_pdf(request, record_id):
     sheet = workbook.active
     sheet.title = 'QC Records'
 
-    tanggal = format_date_indonesian(record.qc_id[:-2])
-    hari = get_hari_indonesia(record.qc_id[:-2])
+    tanggal = format_date_indonesian(record.qc_id[3:-2])
+    hari = get_hari_indonesia(record.qc_id[3:-2])
     sheet['G2'] = ': ' + tanggal
     sheet['G3'] = ': ' + hari
     sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
