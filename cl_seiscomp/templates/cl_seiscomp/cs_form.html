@@ -101,8 +101,8 @@
         <div class="form-group">
             <label for="slmon_image">Upload SLMon Image:</label>
             <input type="file" name="slmon_image" id="slmon_image" class="form-control">
-            <div id="drop_zone" class="border border-primary p-3 mt-2" style="text-align: center;">
-                Drag and drop an image here or press Ctrl+V to paste
+            <div id="drop_zone" class="border border-primary border-4 p-3 mt-2 text-center rounded" style="background-color: #f8f9fa;">
+                <p class="mb-0">Drag and drop an image here or press <strong>Ctrl+V</strong> to paste</p>
             </div>
             {% if form.instance.slmon_image %}
             <div class="mt-2">

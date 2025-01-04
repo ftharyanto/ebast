@@ -55,18 +55,21 @@ class CsRecordModel(models.Model):
         # Modify the group field here
         if self.gaps:
             self.gaps = self.gaps.upper()
-            self.gaps = clean_sensor(self.gaps.split('\r\n'))
+            self.gaps = clean_sensor(self.gaps.splitlines())
             self.count_gaps = len(self.gaps)
+            self.gaps = '\n'.join(self.gaps)
 
         if self.spikes:
             self.spikes = self.spikes.upper()
-            self.spikes = clean_sensor(self.spikes.split('\r\n'))
+            self.spikes = clean_sensor(self.spikes.splitlines())
             self.count_spikes = len(self.spikes)
+            self.spikes = '\n'.join(self.spikes)
 
         if self.blanks:
             self.blanks = self.blanks.upper()
-            self.blanks = clean_sensor(self.blanks.split('\r\n'))
+            self.blanks = clean_sensor(self.blanks.splitlines())
             self.count_blanks = len(self.blanks)
+            self.blanks = '\n'.join(self.blanks)
 
         super().save(*args, **kwargs)
         if self.slmon_image:
