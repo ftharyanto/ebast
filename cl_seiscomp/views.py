@@ -99,10 +99,14 @@ class CsUpdateView(UpdateView):
         form.instance.slmon_image = self.request.FILES.get('slmon_image')
         return super().form_valid(form)
 
-class CsDeleteView(DeleteView):
-    model = CsRecordModel
-    template_name = 'cl_seiscomp/cs_confirm_delete.html'
-    success_url = reverse_lazy('cl_seiscomp:cs_list')
+class CsDeleteView(View):
+    def post(self, request, pk, *args, **kwargs):
+        try:
+            record = CsRecordModel.objects.get(pk=pk)
+            record.delete()
+            return redirect('cl_seiscomp:cs_list')
+        except CsRecordModel.DoesNotExist:
+            return HttpResponse(status=404)
 
 def cs_export_excel(request, record_id):
     from qc.views import format_date_indonesian, get_hari_indonesia
