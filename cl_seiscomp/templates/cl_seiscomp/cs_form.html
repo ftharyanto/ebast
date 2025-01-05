@@ -48,7 +48,7 @@
                     Please provide a valid jam pelaksanaan.
                 </div>
             </div>
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-4" style="display: none;">
                 {{ form.cs_id.label_tag }}
                 {{ form.cs_id|add_class:"form-control" }}
                 <div class="invalid-feedback">
@@ -180,6 +180,8 @@
             const dateInput = document.getElementById('date_input');
             const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
             const qcIdInput = document.getElementById('{{ form.cs_id.id_for_label }}');
+            const jamPelaksanaanSelect = document.getElementById('{{ form.jam_pelaksanaan.id_for_label }}');
+
             qcIdInput.value = "CS-" + dateInput.value + "-" + waktuDinasSelect.value[0];
 
             function updateQcId() {
@@ -188,8 +190,29 @@
                 qcIdInput.value = "CS-" + dateValue + "-" + waktuDinasValue[0];
             }
 
+            function updateJamPelaksanaan() {
+                const shiftValue = waktuDinasSelect.value;
+                let jamPelaksanaanValue = "";
+                if (shiftValue === "Pagi") {
+                    jamPelaksanaanValue = "12:00 WIB";
+                } else if (shiftValue === "Siang") {
+                    jamPelaksanaanValue = "18:00 WIB";
+                } else if (shiftValue === "Malam") {
+                    jamPelaksanaanValue = "00:00 WIB";
+                } else {
+                    jamPelaksanaanValue = "06:00 WIB";
+                }
+                jamPelaksanaanSelect.value = jamPelaksanaanValue;
+            }
+
             dateInput.addEventListener('change', updateQcId);
-            waktuDinasSelect.addEventListener('change', updateQcId);
+            waktuDinasSelect.addEventListener('change', function() {
+                updateQcId();
+                updateJamPelaksanaan();
+            });
+
+            // Initialize jam_pelaksanaan based on the default shift value
+            updateJamPelaksanaan();
         });
     </script>
     {% endblock %}

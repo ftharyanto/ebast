@@ -107,7 +107,6 @@ class CsDeleteView(DeleteView):
 def cs_export_excel(request, record_id):
     from qc.views import format_date_indonesian, get_hari_indonesia
     from datetime import timedelta
-    import ast
 
     try:
         record = CsRecordModel.objects.get(id=record_id)
@@ -136,17 +135,17 @@ def cs_export_excel(request, record_id):
 
 
     if record.gaps:
-        gaps = ast.literal_eval(record.gaps)
+        gaps = record.gaps.splitlines()
     else:
         gaps = []
 
     if record.spikes:
-        spikes = ast.literal_eval(record.spikes)
+        spikes = record.spikes.splitlines()
     else:
         spikes = []
 
     if record.blanks:
-        blanks = ast.literal_eval(record.blanks)
+        blanks = record.blanks.splitlines()
     else:
         blanks = []
 
