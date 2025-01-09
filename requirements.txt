@@ -1,0 +1,51 @@
+asgiref @ file:///work/perseverance-python-buildout/croot/asgiref_1728402006833/work
+Bottleneck @ file:///croot/bottleneck_1731058641041/work
+Brotli @ file:///work/perseverance-python-buildout/croot/brotli-split_1728385783584/work
+certifi @ file:///work/perseverance-python-buildout/croot/certifi_1728386469937/work/certifi
+charset-normalizer @ file:///croot/charset-normalizer_1721748349566/work
+defusedxml==0.7.1
+Django @ file:///home/conda/feedstock_root/build_artifacts/django_1730803452423/work
+django-materializecss-form==1.1.17
+django-tables2 @ file:///home/conda/feedstock_root/build_artifacts/django-tables2_1702139516833/work
+djangorestframework @ file:///home/conda/feedstock_root/build_artifacts/djangorestframework_1733236662144/work
+docx2pdf==0.1.8
+et_xmlfile @ file:///work/perseverance-python-buildout/croot/et_xmlfile_1728399116833/work
+fpdf==1.7.2
+idna @ file:///work/perseverance-python-buildout/croot/idna_1728385935861/work
+lml==0.1.0
+mod_wsgi==5.0.2
+numexpr @ file:///io/perseverance-python-buildout/croot/numexpr_1731701292781/work
+numpy @ file:///home/conda/feedstock_root/build_artifacts/numpy_1733688217547/work/dist/numpy-2.2.0-cp313-cp313-linux_x86_64.whl#sha256=cbe7c73f8da28f6df8be696bed0ca894ffd6040155d3adc2a1144e8096a9aa07
+odfpy==1.4.1
+openpyxl @ file:///work/perseverance-python-buildout/croot/openpyxl_1728409478059/work
+packaging==24.2
+pandas @ file:///croot/pandas_1732735089971/work/dist/pandas-2.2.3-cp313-cp313-linux_x86_64.whl#sha256=248baa16b8f7b48e3a9c0e641fba9a72bce9c95c0dddf7c9a7547016b61fe3fb
+pdfkit==1.0.0
+pillow @ file:///croot/pillow_1734504961884/work
+plotly==5.24.1
+plum-dispatch==1.7.4
+psycopg2 @ file:///home/conda/feedstock_root/build_artifacts/psycopg2-split_1727892825850/work
+pyexcel-io==0.6.7
+pyexcel-ods==0.6.0
+pyexcel-xls==0.7.0
+pyexcel-xlsx==0.6.0
+pypandoc==1.14
+PySocks @ file:///work/perseverance-python-buildout/croot/pysocks_1728386193338/work
+python-dateutil @ file:///work/perseverance-python-buildout/croot/python-dateutil_1728385355105/work
+pytz @ file:///work/perseverance-python-buildout/croot/pytz_1728386814080/work
+reportlab @ file:///work/perseverance-python-buildout/croot/reportlab_1728513972620/work
+requests @ file:///croot/requests_1730999120400/work
+setuptools==75.1.0
+six @ file:///tmp/build/80754af9/six_1644875935023/work
+Spire.Xls==14.12.0
+sqlparse @ file:///work/perseverance-python-buildout/croot/sqlparse_1728412073878/work
+tenacity==9.0.0
+tqdm==4.67.1
+typing_extensions @ file:///work/perseverance-python-buildout/croot/typing_extensions_1728386414866/work
+tzdata @ file:///croot/python-tzdata_1690578112552/work
+urllib3 @ file:///work/perseverance-python-buildout/croot/urllib3_1728386864107/work
+wheel==0.44.0
+xlrd==2.0.1
+xlsx2pdf==1.0.4
+XlsxWriter==3.2.0
+xlwt==1.3.0

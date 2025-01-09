@@ -117,7 +117,7 @@ def cs_export_excel(request, record_id):
     except CsRecordModel.DoesNotExist:
         return HttpResponse(status=404)
 
-    file_path = os.path.join(os.path.dirname(__file__), 'static/cl_seiscomp/cl_Seiscomp.xlsx')
+    file_path = os.path.join(os.path.dirname(__file__), 'static/cl_seiscomp/cl_seiscomp.xlsx')
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook['checklist_seiscomp']
     sheet.title = 'Checklist Seiscomp'
@@ -223,7 +223,7 @@ def cs_export_pdf(request, record_id):
     except CsRecordModel.DoesNotExist:
         return HttpResponse(status=404)
 
-    file_path = os.path.join(os.path.dirname(__file__), 'static/cl_seiscomp/cl_Seiscomp.xlsx')
+    file_path = os.path.join(os.path.dirname(__file__), 'static/cl_seiscomp/cl_seiscomp.xlsx')
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook['checklist_seiscomp']
     sheet.title = 'Checklist Seiscomp'
@@ -337,8 +337,8 @@ def cs_export_pdf(request, record_id):
 
     if os.path.exists(temp_pdf):
         os.remove(temp_pdf)
-
     return response
+
 
 def date_range_to_string(date_range):
     import locale

@@ -1,0 +1,39 @@
+# This is a .gitignore file for a Django project.
+# It ignores common files and directories that should not be tracked by Git.
+
+# Python cache files
+__pycache__
+*.pyc
+*.pyo
+
+# Python test files
+*.pytest_cache/
+.pytest_history
+
+# Django-specific files
+.DS_Store # macOS
+.idea/ # IntelliJ IDEA
+*.sqlite3 # SQLite database files
+local_settings.py # Local settings file
+db.sqlite3 # Default SQLite database file
+media/ # Media files (images, documents, etc.)
+static/ # Static files (CSS, JavaScript, images, etc.) - if generated locally
+*.log # Log files
+
+# Virtual environment files
+venv/
+env/
+.venv/
+
+# IDE-specific files
+.vscode/
+*.suo # Visual Studio
+*.user # Visual Studio
+
+# Build files
+dist/
+build/
+
+# Miscellaneous
+*.swp # Vim swap files
+*~ # Emacs temporary files
