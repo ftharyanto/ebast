@@ -37,3 +37,6 @@ build/
 # Miscellaneous
 *.swp # Vim swap files
 *~ # Emacs temporary files
+
+# secrets
+local_settings.py
