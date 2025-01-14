@@ -1,5 +1,6 @@
 from django.db import models
 from core.models import Operator
+from django.utils import timezone
 from PIL import Image  # Add this import
 
 KELOMPOK = (
@@ -26,6 +27,7 @@ SHIFT = (
 
 class CsRecordModel(models.Model):
     # fields of the model
+    date = models.DateField(default=timezone.now)
     cs_id = models.CharField(max_length=15, default='0')
     shift = models.CharField(max_length=15, choices=SHIFT, default='P')
     jam_pelaksanaan = models.CharField(max_length=20, choices=WAKTU, default='12:00 WIB')
