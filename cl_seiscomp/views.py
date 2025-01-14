@@ -96,7 +96,10 @@ class CsUpdateView(UpdateView):
     success_url = reverse_lazy('cl_seiscomp:cs_list')
 
     def form_valid(self, form):
-        form.instance.slmon_image = self.request.FILES.get('slmon_image')
+        if 'clear_image' in self.request.POST:
+            form.instance.slmon_image = None
+        else:
+            form.instance.slmon_image = self.request.FILES.get('slmon_image')
         return super().form_valid(form)
 
 class CsDeleteView(View):

@@ -104,15 +104,21 @@
         <div class="form-group">
             <label for="slmon_image">Upload SLMon Image:</label>
             <input type="file" name="slmon_image" id="slmon_image" class="form-control">
-            <div id="drop_zone" class="border border-primary border-4 p-3 mt-2 text-center rounded" style="background-color: #f8f9fa;">
-                <p class="mb-0">Drag and drop an image here or press <strong>Ctrl+V</strong> to paste</p>
-            </div>
             {% if form.instance.slmon_image %}
             <div class="mt-2">
                 <a href="{{ form.instance.slmon_image.url }}" target="_blank">View current image</a>
             </div>
             <img id="pasted_image" src="{{ form.instance.slmon_image.url }}" style="max-width: 100%; margin-top: 10px;">
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" name="clear_image" id="clear_image">
+                <label class="form-check-label" for="clear_image">
+                    Clear current image
+                </label>
+            </div>
             {% else %}
+            <div id="drop_zone" class="border border-primary border-4 p-3 mt-2 text-center rounded" style="background-color: #f8f9fa;">
+                <p class="mb-0">Drag and drop an image here or press <strong>Ctrl+V</strong> to paste</p>
+            </div>
             <img id="pasted_image" style="display:none; max-width: 100%; margin-top: 10px;">
             {% endif %}
         </div>
@@ -143,6 +149,7 @@
                         const dataTransfer = new DataTransfer();
                         dataTransfer.items.add(file);
                         document.getElementById('slmon_image').files = dataTransfer.files;
+                        document.getElementById('drop_zone').style.display = 'none';
                     };
                     reader.readAsDataURL(file);
                 }
@@ -177,6 +184,7 @@
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(file);
                     document.getElementById('slmon_image').files = dataTransfer.files;
+                    dropZone.style.display = 'none';
                 };
                 reader.readAsDataURL(file);
             }
