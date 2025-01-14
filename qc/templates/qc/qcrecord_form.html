@@ -22,8 +22,11 @@
         {% endif %}
         <div class="form-group row">
             <div class="col-md-4">
-                <label for="date_input">Date</label>
-                <input type="date" id="date_input" name="date_input" class="form-control">
+                {{ form.date.label_tag }}
+                {{ form.date|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid date.
+                </div>
             </div>
             <div class="col-md-4">
                 <label for="waktu_dinas">Waktu Dinas</label>
@@ -251,8 +254,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-    // set the date_input default value to today
-    document.getElementById('date_input').valueAsDate = new Date();
+    // date picker initialization
+    document.addEventListener('DOMContentLoaded', function () {
+                    const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+                    dateInput.type = 'date';
+                });
 
     // Example starter JavaScript for disabling form submissions if there are invalid fields
     (function () {
@@ -275,7 +281,7 @@
 
     // change qc_id value based on date_input and waktu_dinas
     document.addEventListener('DOMContentLoaded', function () {
-        const dateInput = document.getElementById('date_input');
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
         const waktuDinasSelect = document.getElementById('waktu_dinas');
         const qcIdInput = document.getElementById('{{ form.qc_id.id_for_label }}');
         qcIdInput.value = "QC-" + dateInput.value + "-" + waktuDinasSelect.value;
@@ -352,7 +358,7 @@
 
     // set the datetime_qc_prev_start and datetime_qc_prev_end default value to be dependent on the waktu_dinas
     document.addEventListener('DOMContentLoaded', function () {
-        const dateInput = document.getElementById('date_input');
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
         const waktuDinasSelect = document.getElementById('waktu_dinas');
         const datetimeQcPrevStart = document.getElementById('datetime_qc_prev_start');
         const datetimeQcPrevEnd = document.getElementById('datetime_qc_prev_end');
