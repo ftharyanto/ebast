@@ -99,7 +99,10 @@ class CsUpdateView(UpdateView):
         if 'clear_image' in self.request.POST:
             form.instance.slmon_image = None
         else:
-            form.instance.slmon_image = self.request.FILES.get('slmon_image')
+            if not self.request.FILES.get('slmon_image'):
+                form.instance.slmon_image = self.get_object().slmon_image
+            else:
+                form.instance.slmon_image = self.request.FILES.get('slmon_image')
         return super().form_valid(form)
 
 class CsDeleteView(View):
@@ -168,7 +171,7 @@ def cs_export_excel(request, record_id):
             sheet.cell(row=row, column=6).value = 1
 
     # for cells I7:I250
-    for row in range(7, 250+1):  # Iterate through rows 7 to 269
+    for row in range(7, 250+1):  # Iterate through rows 7 to 250
         cell_value = sheet.cell(row=row, column=9).value  # Get the cell value in column B
 
         if cell_value in gaps:
@@ -274,7 +277,7 @@ def cs_export_pdf(request, record_id):
             sheet.cell(row=row, column=6).value = 1
 
     # for cells I7:I250
-    for row in range(7, 250+1):  # Iterate through rows 7 to 269
+    for row in range(7, 250+1):  # Iterate through rows 7 to 250
         cell_value = sheet.cell(row=row, column=9).value  # Get the cell value in column B
 
         if cell_value in gaps:
