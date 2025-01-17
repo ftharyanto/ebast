@@ -1,0 +1,17 @@
+[Unit]
+Description=Gunicorn daemon for ebast application
+Requires=ebast.socket
+After=network.target
+
+[Service]
+User=sysop
+Group=www-data
+WorkingDirectory=/home/sysop/Fajar/ebast
+ExecStart=/home/sysop/miniconda3/envs/django/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/ebast.sock \
+          ebast.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
