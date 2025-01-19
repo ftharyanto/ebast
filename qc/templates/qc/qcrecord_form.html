@@ -37,11 +37,11 @@
                     <option value="D">D</option>
                 </select>
             </div>
-            <div class="col-md-4" style="display: none;">
+            <div class="col-md-4">
                 {{ form.qc_id.label_tag }}
-                {{ form.qc_id|add_class:"form-control" }}
+                <input type="text" id="qc_id_input" class="form-control" value="{{ form.qc_id.value }}" readonly>
                 <div class="invalid-feedback">
-                    Please provide a valid QC ID.
+                    Please provide a valid CS ID.
                 </div>
             </div>
         </div>
@@ -281,9 +281,10 @@
 
     // change qc_id value based on date_input and waktu_dinas
     document.addEventListener('DOMContentLoaded', function () {
+        const qcIdInput = document.getElementById('qc_id_input');
+        qcIdInput.readOnly = !qcIdInput.readOnly;
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
         const waktuDinasSelect = document.getElementById('waktu_dinas');
-        const qcIdInput = document.getElementById('{{ form.qc_id.id_for_label }}');
         qcIdInput.value = "QC-" + dateInput.value + "-" + waktuDinasSelect.value;
 
         function updateQcId() {
@@ -294,6 +295,7 @@
 
         dateInput.addEventListener('change', updateQcId);
         waktuDinasSelect.addEventListener('change', updateQcId);
+        qcIdInput.readOnly = !qcIdInput.readOnly;
     });
 
     // Fetch data and fill qc_prev

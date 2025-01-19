@@ -51,9 +51,9 @@
                     Please provide a valid jam pelaksanaan.
                 </div>
             </div>
-            <div class="form-group col-md-4" style="display: none;">
+            <div class="form-group col-md-4">
                 {{ form.cs_id.label_tag }}
-                {{ form.cs_id|add_class:"form-control" }}
+                <input type="text" id="cs_id_input" class="form-control" value="{{ form.cs_id.value }}" readonly>
                 <div class="invalid-feedback">
                     Please provide a valid CS ID.
                 </div>
@@ -192,17 +192,18 @@
 
         // change cs_id value based on date_input and waktu_dinas
         document.addEventListener('DOMContentLoaded', function () {
+            const csIdInput = document.getElementById('cs_id_input');
+            csIdInput.readOnly = !csIdInput.readOnly; 
             const dateInput = document.getElementById('{{ form.date.id_for_label }}');
             const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
-            const qcIdInput = document.getElementById('{{ form.cs_id.id_for_label }}');
             const jamPelaksanaanSelect = document.getElementById('{{ form.jam_pelaksanaan.id_for_label }}');
 
-            qcIdInput.value = "CS-" + dateInput.value + "-" + waktuDinasSelect.value[0];
+            csIdInput.value = "CS-" + dateInput.value + "-" + waktuDinasSelect.value[0];
 
             function updateQcId() {
                 const dateValue = dateInput.value;
                 const waktuDinasValue = waktuDinasSelect.value;
-                qcIdInput.value = "CS-" + dateValue + "-" + waktuDinasValue[0];
+                csIdInput.value = "CS-" + dateValue + "-" + waktuDinasValue[0];
             }
 
             function updateJamPelaksanaan() {
@@ -228,6 +229,7 @@
 
             // Initialize jam_pelaksanaan based on the default shift value
             updateJamPelaksanaan();
+            csIdInput.readOnly = !csIdInput.readOnly; 
         });
     </script>
     {% endblock %}
