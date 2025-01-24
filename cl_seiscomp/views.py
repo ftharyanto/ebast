@@ -98,8 +98,6 @@ class CsUpdateView(UpdateView):
     def form_valid(self, form):
         if 'clear_image' in self.request.POST:
             form.instance.slmon_image = None
-        else:
-            form.instance.slmon_image = self.request.FILES.get('slmon_image')
         return super().form_valid(form)
 
 class CsDeleteView(View):
