@@ -29,13 +29,8 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <label for="waktu_dinas">Waktu Dinas</label>
-                <select id="waktu_dinas" name="waktu_dinas" class="form-control">
-                    <option value="P">P</option>
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="D">D</option>
-                </select>
+                {{ form.shift.label_tag }}
+                {{ form.shift|add_class:"form-control" }}
             </div>
             <div class="col-md-4" style="display: none;">
                 {{ form.qc_id.label_tag }}
@@ -282,14 +277,14 @@
     // change qc_id value based on date_input and waktu_dinas
     document.addEventListener('DOMContentLoaded', function () {
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
-        const waktuDinasSelect = document.getElementById('waktu_dinas');
+        const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
         const qcIdInput = document.getElementById('{{ form.qc_id.id_for_label }}');
-        qcIdInput.value = "QC-" + dateInput.value + "-" + waktuDinasSelect.value;
+        qcIdInput.value = "QC-" + dateInput.value + "-" + waktuDinasSelect.value[0];
 
         function updateQcId() {
             const dateValue = dateInput.value;
             const waktuDinasValue = waktuDinasSelect.value;
-            qcIdInput.value = "QC-" + dateValue + "-" + waktuDinasValue;
+            qcIdInput.value = "QC-" + dateValue + "-" + waktuDinasValue[0];
         }
 
         dateInput.addEventListener('change', updateQcId);
@@ -359,7 +354,7 @@
     // set the datetime_qc_prev_start and datetime_qc_prev_end default value to be dependent on the waktu_dinas
     document.addEventListener('DOMContentLoaded', function () {
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
-        const waktuDinasSelect = document.getElementById('waktu_dinas');
+        const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
         const datetimeQcPrevStart = document.getElementById('datetime_qc_prev_start');
         const datetimeQcPrevEnd = document.getElementById('datetime_qc_prev_end');
         const datetimeQcStart = document.getElementById('datetime_qc_start');
@@ -370,7 +365,7 @@
             const waktuDinasValue = waktuDinasSelect.value;
             let startDatetime, endDatetime;
 
-            switch (waktuDinasValue) {
+            switch (waktuDinasValue[0]) {
                 case 'P':
                     const prevDay = new Date(dateValue);
                     prevDay.setDate(prevDay.getDate() - 1);
@@ -422,7 +417,7 @@
                     if (data.nip) {
                         nipInput.value = data.nip;
                     } else {
-                        console.error('Error fetching NIP:', data.error);
+                        nipInput.value = ''
                     }
                 })
                 .catch(error => console.error('Error fetching NIP:', error));

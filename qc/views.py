@@ -30,8 +30,6 @@ class QcRecordUpdateView(UpdateView):
     success_url = reverse_lazy('qc:qcrecord_list')
 
     def form_valid(self, form):
-        if 'slmon_image' not in form.cleaned_data or not form.cleaned_data['slmon_image']:
-            form.cleaned_data['slmon_image'] = self.object.slmon_image
         return super().form_valid(form)
 
 class QcRecordDeleteDirectView(View):
