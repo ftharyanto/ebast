@@ -1,6 +1,9 @@
 # This is a .gitignore file for a Django project.
 # It ignores common files and directories that should not be tracked by Git.
 
+# database
+db.sqlite3
+
 # Python cache files
 __pycache__
 *.pyc
