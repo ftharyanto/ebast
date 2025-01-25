@@ -88,6 +88,7 @@ def fetch_data(request, start_datetime='2024-12-11 13:00:00', end_datetime='2024
     if response.status_code == 200:
         data = clean_index3(response.content, start_datetime, end_datetime)
         csv_data = data.to_csv(index=False)
+        table_data = data.insert(0, 'No', range(1, len(data) + 1))
         table_data = data.to_dict(orient='records')
         return JsonResponse({'csv': csv_data, 'table_data': table_data})
     else:
