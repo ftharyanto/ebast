@@ -366,3 +366,21 @@ def date_range_to_string(date_range):
         return f"{start_weekday} - {end_weekday}, {start_date} {start_month} - {end_date} {end_month} {start_year}"
     else:
         return f"{start_weekday} - {end_weekday}, {start_date} - {end_date} {start_month} {start_year}"
+
+# function to get waveform data (gaps, blanks)
+def fetch_gaps_blanks(request):
+    # open the data located in static/cl_seiscomp/checklist.txt
+    file_path = os.path.join(os.path.dirname(__file__), 'static/cl_seiscomp/checklist.txt')
+    with open(file_path, 'r') as f:
+        data = f.read()
+        data = data.split('\n\n')
+        gaps = data[2]
+        # skip the first line
+        gaps = gaps.split('\n')[1:]
+        gaps = '\n'.join(gaps)
+        blanks = data[1]
+        # skip the first line
+        blanks = blanks.split('\n')[1:]
+        blanks = '\n'.join(blanks)
+
+    return JsonResponse({'gaps': gaps, 'blanks': blanks})
