@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'core',
     'qc',
     'cl_seiscomp',
+    'text_formatter',
 ]
 
 MIDDLEWARE = [

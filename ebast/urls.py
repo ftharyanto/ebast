@@ -26,6 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('qc/', include('qc.urls')),
     path('cl_seiscomp/', include('cl_seiscomp.urls')),
+    path('text_formatter/', include('text_formatter.urls')),
 ]
 
 if settings.DEBUG:  # Only for development
