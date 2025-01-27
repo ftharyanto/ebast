@@ -382,5 +382,7 @@ def fetch_gaps_blanks(request):
         # skip the first line
         blanks = blanks.split('\n')[1:]
         blanks = '\n'.join(blanks)
+        last_update = data[0].split(' ')[1:]
+        last_update = ' '.join(last_update)
 
-    return JsonResponse({'gaps': gaps, 'blanks': blanks})
+    return JsonResponse({'last_update': last_update, 'gaps': gaps, 'blanks': blanks})
