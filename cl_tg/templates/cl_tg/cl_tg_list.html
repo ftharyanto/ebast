@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+{% block title %}Ceklis Seiscomp{% endblock %}
+
+{% block content %}
+<h1 class="mt-5">Ceklis Seiscomp</h1>
+<a href="{% url 'cl_seiscomp:cs_create' %}" class="btn btn-primary">
+    <i class="fas fa-plus"></i> Add New Record
+</a>
+<table class="table mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Jam Pelaksanaan</th>
+            <th>Kelompok</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in csrecords %}
+        <tr>
+            <td>{{ record.cs_id }}</td>
+            <td>{{ record.jam_pelaksanaan }}</td>
+            <td>{{ record.kelompok }}</td>
+            <td>
+                <a href="{% url 'cl_seiscomp:cs_update' record.pk %}" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <form action="{% url 'cl_seiscomp:cs_delete' record.pk %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-sm btn-danger delete-button" data-toggle="tooltip" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+                <a href="{% url 'cl_seiscomp:cs_export_excel' record.pk %}" class="btn btn-sm btn-light text-success">
+                    <i class="fas fa-file-excel"></i>
+                </a>
+                <a href="{% url 'cl_seiscomp:cs_export_pdf' record.pk %}" class="btn btn-sm btn-light text-danger">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
