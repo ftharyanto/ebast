@@ -367,11 +367,12 @@
             const waktuDinasValue = waktuDinasSelect.value;
             let startDatetime, endDatetime;
 
+            const prevDay = new Date(dateValue);
+            prevDay.setDate(prevDay.getDate() - 1);
+            const prevDayValue = prevDay.toISOString().split('T')[0];
+
             switch (waktuDinasValue[0]) {
                 case 'P':
-                    const prevDay = new Date(dateValue);
-                    prevDay.setDate(prevDay.getDate() - 1);
-                    const prevDayValue = prevDay.toISOString().split('T')[0];
                     startDatetime = `${prevDayValue} 19:00:00`;
                     endDatetime = `${dateValue} 01:00:00`;
                     break;
@@ -384,8 +385,8 @@
                     endDatetime = `${dateValue} 13:00:00`;
                     break;
                 case 'D':
-                    startDatetime = `${dateValue} 13:00:00`;
-                    endDatetime = `${dateValue} 19:00:00`;
+                    startDatetime = `${prevDayValue} 13:00:00`;
+                    endDatetime = `${prevDayValue} 19:00:00`;
                     break;
             }
 

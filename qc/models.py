@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from core.models import Operator
+import pytz
 
 KELOMPOK = (
     ('1', '1'),
@@ -16,8 +17,12 @@ SHIFT = (
     ('Malam', 'Malam'),
     ('Dini Hari', 'Dini Hari'),
 )
+
+def get_default_date():
+    return timezone.now().astimezone(pytz.timezone('Asia/Jakarta')).date()
+
 class QcRecord(models.Model):
-    date = models.DateField(default=timezone.now)
+    date = models.DateField(default=get_default_date)
     qc_id = models.CharField(max_length=15, default='0')
 
     shift = models.CharField(max_length=15, choices=SHIFT, default='P')
