@@ -1,0 +1,334 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container">
+    <h1 class="mt-5">BAST Record Form</h1>
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {% load form_tags %}
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Please correct the errors below.
+            <ul>
+                {% for field in form %}
+                {% if field.errors %}
+                {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <div class="form-group row">
+            <div class="col-md-4">
+                {{ form.date.label_tag }}
+                {{ form.date|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid date.
+                </div>
+            </div>
+            <div class="col-md-4">
+                {{ form.shift.label_tag }}
+                {{ form.shift|add_class:"form-control" }}
+            </div>
+            <div class="col-md-4">
+                {{ form.bast_id.label_tag }}
+                {{ form.bast_id|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid BAST ID.
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="row">
+                <div class="form-group col-md-4">
+                    {{ form.kelompok.label_tag }}
+                    {{ form.kelompok|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please select a valid kelompok.
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="{{ form.kel_berikut.id_for_label }}">Kelompok Berikutnya</label>
+                    {{ form.kel_berikut|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please fill a valid kelompok berikutnya.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label for="datetime_bast_start">Start Date and Time (UTC)</label>
+                    <input type="datetime-local" id="datetime_bast_start" class="form-control"
+                        value="2024-12-14 00:00:00">
+                </div>
+                <div class="col-md-4">
+                    <label for="datetime_bast_end">End Date and Time (UTC)</label>
+                    <input type="datetime-local" id="datetime_bast_end" class="form-control"
+                        value="2024-12-14 07:00:00">
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="button" id="fetch_bast" class="btn btn-primary align-bottom">Fetch
+                        Data</button>
+                </div>
+            </div>
+            <!-- Accordion for fetched data and bast form -->
+            <div class="accordion" id="fetchedDataAccordion">
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link" type="button" data-toggle="collapse"
+                                data-target="#fetchedDataSection" aria-expanded="true"
+                                aria-controls="fetchedDataSection">
+                                Fetched Data
+                            </button>
+                        </h2>
+                    </div>
+
+                    <div id="fetchedDataSection" class="collapse" aria-labelledby="headingOne"
+                        data-parent="#fetchedDataAccordion">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover table-sm" id="fetched-data-table">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Date</th>
+                                            <th>OT (UTC)</th>
+                                            <th>Lat</th>
+                                            <th>Long</th>
+                                            <th>D(Km)</th>
+                                            <th>Mag</th>
+                                            <th>TypeMag</th>
+                                            <th>Region</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            {{ form.events.label_tag }}
+                            {{ form.events|add_class:"form-control" }}
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    {{ form.event_indonesia.label_tag }}
+                                    {{ form.event_indonesia|add_class:"form-control" }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form.event_luar.label_tag }}
+                                    {{ form.event_luar|add_class:"form-control" }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form.event_dirasakan.label_tag }}
+                                    {{ form.event_dirasakan|add_class:"form-control" }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form.event_dikirim.label_tag }}
+                                    {{ form.event_dikirim|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            <div class="invalid-feedback">
+                                Please provide a valid event luar.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-6">
+                {{ form.spv.label_tag }}
+                {{ form.spv|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please select a valid SPV.
+                </div>
+            </div>
+            <div class="col-md-6">
+                {{ form.NIP.label_tag }}
+                {{ form.NIP|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid NIP.
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="invalid-feedback">
+                Please provide a valid date.
+            </div>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Please correct the errors below.
+            <ul>
+                {% for field in form %}
+                {% if field.errors %}
+                {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary"
+            onclick="window.location.href='{% url 'bast:bastrecord_list' %}'">Cancel</button>
+    </form>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // date picker initialization
+    document.addEventListener('DOMContentLoaded', function () {
+                    const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+                    dateInput.type = 'date';
+                });
+
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // change bast_id value based on date_input and waktu_dinas
+    document.addEventListener('DOMContentLoaded', function () {
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+        const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
+        const bastIdInput = document.getElementById('{{ form.bast_id.id_for_label }}');
+        bastIdInput.value = "BAST-" + dateInput.value + "-" + waktuDinasSelect.value[0];
+
+        function updateBastId() {
+            const dateValue = dateInput.value;
+            const waktuDinasValue = waktuDinasSelect.value;
+            bastIdInput.value = "BAST-" + dateValue + "-" + waktuDinasValue[0];
+        }
+
+        dateInput.addEventListener('change', updateBastId);
+        waktuDinasSelect.addEventListener('change', updateBastId);
+    });
+
+    // Fetch data and fill events
+    document.getElementById('fetch_bast').addEventListener('click', function () {
+        const startDatetime = document.getElementById('datetime_bast_start').value.replace('T', ' ');
+        const endDatetime = document.getElementById('datetime_bast_end').value.replace('T', ' ');
+        const url = `{% url 'bast:fetch_data' 'start_datetime' 'end_datetime' %}`
+            .replace('start_datetime', encodeURIComponent(startDatetime))
+            .replace('end_datetime', encodeURIComponent(endDatetime));
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const bastInput = document.querySelector('[name="{{ form.events.name }}"]');
+                bastInput.value = data.csv;
+
+                // Populate the table with fetched data
+                const tableBody = document.getElementById('fetched-data-table').querySelector('tbody');
+                tableBody.innerHTML = '';
+                data.table_data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    Object.values(row).forEach(cell => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    });
+
+    // set the datetime_bast_start and datetime_bast_end default value to be dependent on the waktu_dinas
+    document.addEventListener('DOMContentLoaded', function () {
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+        const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
+        const datetimeBastStart = document.getElementById('datetime_bast_start');
+        const datetimeBastEnd = document.getElementById('datetime_bast_end');
+
+        function updateDatetime() {
+            const dateValue = dateInput.value;
+            const waktuDinasValue = waktuDinasSelect.value;
+            let startDatetime, endDatetime;
+
+            const prevDay = new Date(dateValue);
+            prevDay.setDate(prevDay.getDate() - 1);
+            const prevDayValue = prevDay.toISOString().split('T')[0];
+
+            switch (waktuDinasValue[0]) {
+                case 'P':
+                    startDatetime = `${dateValue} 01:00:00`;
+                    endDatetime = `${dateValue} 07:00:00`;
+                    break;
+                case 'S':
+                    startDatetime = `${dateValue} 07:00:00`;
+                    endDatetime = `${dateValue} 13:00:00`;
+                    break;
+                case 'M':
+                    startDatetime = `${prevDayValue} 13:00:00`;
+                    endDatetime = `${prevDayValue} 19:00:00`;
+                    break;
+                case 'D':
+                    startDatetime = `${prevDayValue} 19:00:00`;
+                    endDatetime = `${dateValue} 01:30:00`;
+                    break;
+            }
+
+            datetimeBastStart.value = startDatetime;
+            datetimeBastEnd.value = endDatetime;
+        }
+
+        dateInput.addEventListener('change', updateDatetime);
+        waktuDinasSelect.addEventListener('change', updateDatetime);
+        updateDatetime()
+
+        function updateDatetimeBastStart() {
+            const dateValue = dateInput.value;
+            const waktuDinasValue = waktuDinasSelect.value;
+            bastIdInput.value = dateValue + "-" + waktuDinasValue;
+        }
+    });
+
+    // Set NIP's value based on the selected spv
+    document.addEventListener('DOMContentLoaded', function () {
+        const spvSelect = document.getElementById('{{ form.spv.id_for_label }}');
+        const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
+
+        function updateNip() {
+            const selectedSpv = spvSelect.value;
+            fetch(`/bast/api/get_nip/${selectedSpv}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.nip) {
+                        nipInput.value = data.nip;
+                    } else {
+                        nipInput.value = ''
+                    }
+                })
+                .catch(error => console.error('Error fetching NIP:', error));
+        }
+
+        spvSelect.addEventListener('change', updateNip);
+        updateNip();
+    });
+</script>
+{% endblock %}

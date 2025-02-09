@@ -1,7 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from .models import QcRecord
-from .forms import QcRecordForm
+from .models import BastRecordModel
+from .forms import BastRecordForm
 from django.shortcuts import render
 import requests, openpyxl, datetime, os
 import pandas as pd
@@ -12,35 +12,34 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from django.views import View
 from django.shortcuts import redirect
 
-class QcRecordListView(ListView):
-    model = QcRecord
-    template_name = 'qc/qcrecord_list.html'
-    context_object_name = 'qcrecords'
+class BastRecordListView(ListView):
+    model = BastRecordModel
+    template_name = 'bast/bastrecord_list.html'
+    context_object_name = 'bastrecords'
 
-class QcRecordCreateView(CreateView):
-    model = QcRecord
-    form_class = QcRecordForm
-    template_name = 'qc/qcrecord_form.html'
-    success_url = reverse_lazy('qc:qcrecord_list')
+class BastRecordCreateView(CreateView):
+    model = BastRecordModel
+    form_class = BastRecordForm
+    template_name = 'bast/bastrecord_form.html'
+    success_url = reverse_lazy('bast:bastrecord_list')
 
-class QcRecordUpdateView(UpdateView):
-    model = QcRecord
-    form_class = QcRecordForm
-    template_name = 'qc/qcrecord_form.html'
-    success_url = reverse_lazy('qc:qcrecord_list')
+class BastRecordUpdateView(UpdateView):
+    model = BastRecordModel
+    form_class = BastRecordForm
+    template_name = 'bast/bastrecord_form.html'
+    success_url = reverse_lazy('bast:bastrecord_list')
 
     def form_valid(self, form):
         return super().form_valid(form)
 
-class QcRecordDeleteDirectView(View):
+class BastRecordDeleteDirectView(View):
     def post(self, request, pk, *args, **kwargs):
         try:
-            record = QcRecord.objects.get(pk=pk)
+            record = BastRecordModel.objects.get(pk=pk)
             record.delete()
-            return redirect('qc:qcrecord_list')
-        except QcRecord.DoesNotExist:
+            return redirect('bast:bastrecord_list')
+        except BastRecordModel.DoesNotExist:
             return HttpResponse(status=404)
-
 
 # Functions
 def clean_index3(data, start_datetime='2024-12-11 13:00:00', end_datetime='2024-12-11 19:00:00'):
@@ -73,8 +72,11 @@ def clean_index3(data, start_datetime='2024-12-11 13:00:00', end_datetime='2024-
 
     # sort the columns to be 'Date', 'OT (UTC)', 'Lat', 'Long', 'Mag', 'D(Km)', 'Phase', 'RMS', 'Az.Gap', 'Region', but first turn the respective column names into the desired ones
     df_selected = df_selected.rename(columns={'Lon': 'Long', 'Depth': 'D(Km)', 'cntP': 'Phase', 'AZgap': 'Az. Gap', 'Remarks': 'Region'})
-    df_selected = df_selected[['Date', 'OT (UTC)', 'Lat', 'Long', 'Mag', 'TypeMag', 'D(Km)', 'Phase', 'RMS', 'Az. Gap', 'Region']]
+    df_selected = df_selected[['Date', 'OT (UTC)', 'Lat', 'Long', 'D(Km)', 'Mag', 'TypeMag', 'Region']]
     df_selected = df_selected.reset_index(drop=True)
+
+    # add numbering to the first column
+    df_selected.insert(0, 'No', range(1, len(df_selected) + 1))
 
     # Check for duplicate columns
     df_selected = df_selected.loc[:, ~df_selected.columns.duplicated()]
@@ -88,7 +90,6 @@ def fetch_data(request, start_datetime='2024-12-11 13:00:00', end_datetime='2024
     if response.status_code == 200:
         data = clean_index3(response.content, start_datetime, end_datetime)
         csv_data = data.to_csv(index=False)
-        table_data = data.insert(0, 'No', range(1, len(data) + 1))
         table_data = data.to_dict(orient='records')
         return JsonResponse({'csv': csv_data, 'table_data': table_data})
     else:
@@ -107,7 +108,7 @@ def export_to_excel(request, record_id):
     except QcRecord.DoesNotExist:
         return HttpResponse(status=404)
 
-    file_path = os.path.join(os.path.dirname(__file__), 'static/qc/QC Seiscomp.xlsx')
+    file_path = os.path.join(os.path.dirname(__file__), 'static/bast/BAST.xlsx')
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
     sheet.title = 'QC Records'
@@ -188,89 +189,70 @@ def export_to_excel(request, record_id):
     return response
 
 def export_to_pdf(request, record_id):
+    from qc.views import format_date_indonesian, get_hari_indonesia
+
     try:
-        record = QcRecord.objects.get(id=record_id)
-    except QcRecord.DoesNotExist:
+        record = BastRecordModel.objects.get(id=record_id)
+    except BastRecordModel.DoesNotExist:
         return HttpResponse(status=404)
 
-    file_path = os.path.join(os.path.dirname(__file__), 'static/qc/QC Seiscomp.xlsx')
+    file_path = os.path.join(os.path.dirname(__file__), 'static/bast/BAST.xlsx')
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
-    sheet.title = 'QC Records'
+    sheet.title = 'BAST'
 
-    tanggal = format_date_indonesian(record.qc_id[3:-2])
-    hari = get_hari_indonesia(record.qc_id[3:-2])
-    sheet['G2'] = ': ' + tanggal
-    sheet['G3'] = ': ' + hari
-    sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
-    sheet['G5'] = f': Kel. {record.kelompok}'
-    sheet['B6'] = f'Event di Indonesia: {record.event_indonesia}'
-    sheet['G6'] = f'Event di Luar Negeri: {record.event_luar}'
+    tanggal = format_date_indonesian(record.bast_id[5:-2])
+    hari = get_hari_indonesia(record.bast_id[5:-2])
+    sheet['J4'] = f'{record.kelompok}'
+    sheet['J6'] = f'{record.kel_berikut}'
+    sheet['O4'] = f': {tanggal}' 
+    sheet['O5'] = f': {hari}'
+    # sheet['O6'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
+    sheet['G21'] = f'{record.event_indonesia}'
+    sheet['G22'] = f'{record.event_luar}'
 
 
-    # import the qc_prev and qc values from the record using pandas and fill the C8 to M8 row with the qc_prev and qc values alternatingly, add rows as needed
-    qc_prev = pd.read_csv(StringIO(record.qc_prev))
-    
-    # add prev columns with 'prev' values to the last column
-    qc_prev['prev'] = f'Kel. {record.kel_sebelum}'
+    # import the events from the record using pandas
+    events = pd.read_csv(StringIO(record.events))
 
     # add rows to the sheet
-    rows_to_add = len(qc_prev)
-    sheet.insert_rows(8, amount=rows_to_add*2)
-    qc_prev = dataframe_to_rows(qc_prev, index=False, header=False)
-
-    qc = pd.read_csv(StringIO(record.qc))
-
-    # add qc columns with 'QC' values to the last column
-    qc['QC'] = 'QC'
-    qc = dataframe_to_rows(qc, index=False, header=False)
+    rows_to_add = len(events)
+    sheet.insert_rows(28, amount=rows_to_add)
+    events = dataframe_to_rows(events, index=False, header=False)
     
-    # Iterate over the rows of the qc_prev DataFrame
-    for r_idx, row in enumerate(qc_prev, 1):
-        # Iterate over the columns of the current row
+    # insert the events to the sheet
+    for r_idx, row in enumerate(events, 1):
         for c_idx, value in enumerate(row, 1):
-            # Set the value and alignment for the first column (row number)
-            sheet.cell(row=r_idx*2+6, column=2, value=r_idx).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            # Set the value and alignment for the current cell
-            sheet.cell(row=r_idx*2+6, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            # Change the background color of the cell to light grey
-            sheet.cell(row=r_idx*2+6, column=c_idx+2).fill = openpyxl.styles.PatternFill(start_color='FFD3D3D3', end_color='FFD3D3D3', fill_type='solid')
-        # Merge cells for the row number column
-        sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
+            sheet.cell(row=r_idx+27, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            sheet.cell(row=r_idx+27, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
             
-    # Iterate over the rows of the qc DataFrame
-    for r_idx, row in enumerate(qc, 1):
-        # Iterate over the columns of the current row
-        for c_idx, value in enumerate(row, 1):
-            # Set the value and alignment for the current cell
-            sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
     
     # set the M8 column to align left horizontally
-    for r_idx in range(rows_to_add*2):
-        sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
+    # for r_idx in range(rows_to_add*2):
+    #     sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
 
     # add borders to the cell in the data
-    for r_idx in range(rows_to_add*2):
-        for c_idx in range(13):
-            sheet.cell(row=r_idx+8, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
+    # for r_idx in range(rows_to_add*2):
+    #     for c_idx in range(13):
+    #         sheet.cell(row=r_idx+8, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
 
     # set the height of the rows in the data to 15
-    for r_idx in range(rows_to_add*2):
-        sheet.row_dimensions[r_idx+8].height = 15
+    # for r_idx in range(rows_to_add*2):
+    #     sheet.row_dimensions[r_idx+8].height = 15
 
     # Dynamically set the value of 'M' column based on the number of rows added
-    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=tanggal)
-    sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
-    sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
-    sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(name='Calibri', underline='single', size=18, bold=True)
-    sheet.row_dimensions[8 + rows_to_add * 2 + 8].height = 23.5
-    sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
+    # sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=tanggal)
+    # sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
+    # sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
+    # sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(name='Calibri', underline='single', size=18, bold=True)
+    # sheet.row_dimensions[8 + rows_to_add * 2 + 8].height = 23.5
+    # sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
 
     # temporarily save the workbook to a file
-    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/qc/{record.qc_id}.xlsx')
+    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/bast/{record.bast_id}.xlsx')
     workbook.save(temp_xlsx)
-    temp_pdf_dir = os.path.join(os.path.dirname(__file__), 'static/qc')
-    temp_pdf = os.path.join(temp_pdf_dir, f'{record.qc_id}.pdf')
+    temp_pdf_dir = os.path.join(os.path.dirname(__file__), 'static/bast')
+    temp_pdf = os.path.join(temp_pdf_dir, f'{record.bast_id}.pdf')
 
     import subprocess
     try:
@@ -286,52 +268,9 @@ def export_to_pdf(request, record_id):
     # Read the generated PDF file and return it in the response
     with open(temp_pdf, 'rb') as pdf_file:
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'inline; filename={record.qc_id}.pdf'
+        response['Content-Disposition'] = f'inline; filename={record.bast_id}.pdf'
 
     if os.path.exists(temp_pdf):
         os.remove(temp_pdf)
 
     return response
-
-
-def format_date_indonesian(date_string):
-    """Formats a date string in YYYY-MM-DD format into Indonesian date format.
-
-    Args:
-    date_string: The date string in YYYY-MM-DD format.
-
-    Returns:
-    The formatted date string in Indonesian format (DD MMMM YYYY).
-    """
-
-    date_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d")
-    bulan_indonesia = {
-        1: "Januari", 2: "Februari", 3: "Maret", 4: "April",
-        5: "Mei", 6: "Juni", 7: "Juli", 8: "Agustus",
-        9: "September", 10: "Oktober", 11: "November", 12: "Desember"
-    }
-    formatted_date = f"{date_obj.day} {bulan_indonesia[date_obj.month]} {date_obj.year}"
-    return formatted_date
-
-def get_hari_indonesia(date_string):
-    """
-    Converts a date string (YYYY-MM-DD) to its corresponding Indonesian day name.
-    Works reliably across operating systems.
-    """
-
-    import datetime
-    import calendar
-    date_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d")
-    day_of_week_num = date_obj.weekday()  # Monday is 0, Sunday is 6
-
-    hari_indonesia_map = {
-        0: "Senin",
-        1: "Selasa",
-        2: "Rabu",
-        3: "Kamis",
-        4: "Jumat",
-        5: "Sabtu",
-        6: "Minggu"
-    }
-
-    return hari_indonesia_map[day_of_week_num]
