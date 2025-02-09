@@ -224,11 +224,32 @@ def export_to_pdf(request, record_id):
     for r_idx, row in enumerate(events, 1):
         for c_idx, value in enumerate(row, 1):
             sheet.cell(row=r_idx+27, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            sheet.cell(row=r_idx+27, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
-            
+            # set the border of the first column to the left and the last column to the right, to thick
+            sheet.cell(row=r_idx+27, column=2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='medium'))
+            sheet.cell(row=r_idx+27, column=19).border = openpyxl.styles.Border(right=openpyxl.styles.Side(style='medium'))
     
+    # set the inserted cell border expanded to column 18 to thin
+    for r_idx in range(rows_to_add):
+        for c_idx in range(16):  # Iterate up to column 18 (index 15)
+            cell = sheet.cell(row=r_idx + 28, column=c_idx + 3) # Get the cell object
+
+            if c_idx == 9 or c_idx == 10 or c_idx == 11:  # Column 13 (index 10)
+                cell.border = openpyxl.styles.Border(
+                    left=openpyxl.styles.Side(style=None),
+                    right=openpyxl.styles.Side(style=None),
+                    top=openpyxl.styles.Side(style='thin'),
+                    bottom=openpyxl.styles.Side(style='thin')
+                )
+            else: # For other columns up to 18
+                cell.border = openpyxl.styles.Border(
+                    left=openpyxl.styles.Side(style='thin'),
+                    right=openpyxl.styles.Side(style='thin'),
+                    top=openpyxl.styles.Side(style='thin'),
+                    bottom=openpyxl.styles.Side(style='thin')
+                )
+            
     # set the M8 column to align left horizontally
-    # for r_idx in range(rows_to_add*2):
+    # for r_idx in range(rows_to_add*2):    
     #     sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
 
     # add borders to the cell in the data
