@@ -316,23 +316,22 @@ def format_date_indonesian(date_string):
 def get_hari_indonesia(date_string):
     """
     Converts a date string (YYYY-MM-DD) to its corresponding Indonesian day name.
-
-    Args:
-        date_string: The date string in YYYY-MM-DD format.
-
-    Returns:
-        The Indonesian day name.
+    Works reliably across operating systems.
     """
 
+    import datetime
+    import calendar
     date_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d")
-    hari_indonesia = date_obj.strftime("%A")
+    day_of_week_num = date_obj.weekday()  # Monday is 0, Sunday is 6
+
     hari_indonesia_map = {
-        "Monday": "Senin",
-        "Tuesday": "Selasa",
-        "Wednesday": "Rabu",
-        "Thursday": "Kamis",
-        "Friday": "Jumat",
-        "Saturday": "Sabtu",
-        "Sunday": "Minggu"
+        0: "Senin",
+        1: "Selasa",
+        2: "Rabu",
+        3: "Kamis",
+        4: "Jumat",
+        5: "Sabtu",
+        6: "Minggu"
     }
-    return hari_indonesia_map[hari_indonesia]
+
+    return hari_indonesia_map[day_of_week_num]
