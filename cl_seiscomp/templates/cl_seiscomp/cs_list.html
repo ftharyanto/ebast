@@ -6,12 +6,13 @@
 <a href="{% url 'cl_seiscomp:cs_create' %}" class="btn btn-primary">
     <i class="fas fa-plus"></i> Add New Record
 </a>
-<table class="table mt-3">
+<table class="table mt-3 table-sm">
     <thead>
         <tr>
             <th>ID</th>
             <th>Jam Pelaksanaan</th>
             <th>Kelompok</th>
+            <th>Operator</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -21,6 +22,7 @@
             <td>{{ record.cs_id }}</td>
             <td>{{ record.jam_pelaksanaan }}</td>
             <td>{{ record.kelompok }}</td>
+            <td>{{ record.operator }}</td>
             <td>
                 <a href="{% url 'cl_seiscomp:cs_update' record.pk %}" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Edit">
                     <i class="fas fa-edit"></i>
