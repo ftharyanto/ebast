@@ -33,11 +33,13 @@
             <tr>
                 <th onclick="sortTable(0)" style="cursor: pointer;">Name <span id="nameSortArrow">↑</span></th>
                 <th onclick="sortTable(1)" style="cursor: pointer;">NIP <span id="nipSortArrow"></span></th>
+                <th onclick="sortTable(2)" style="cursor: pointer;">Nickname <span id="nicknameSortArrow"></span></th>
                 <th>Actions</th>
             </tr>
             <tr>
                 <th><input type="text" id="nameFilter" onkeyup="filterTable(0)" placeholder="Filter by Name" class="form-control"></th>
                 <th><input type="text" id="nipFilter" onkeyup="filterTable(1)" placeholder="Filter by NIP" class="form-control"></th>
+                <th><input type="text" id="nicknameFilter" onkeyup="filterTable(1)" placeholder="Filter by Nickname" class="form-control"></th>
                 <th></th>
             </tr>
         </thead>
@@ -46,6 +48,7 @@
             <tr>
                 <td>{{ record.name }}</td>
                 <td>{{ record.NIP }}</td>
+                <td>{{ record.nickname }}</td>
                 <td>
                     <a href="{% url 'core:operator_update' record.pk %}" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Edit">
                         <i class="fas fa-edit"></i>
@@ -142,6 +145,7 @@ function sortTable(n) {
 function resetArrows() {
     document.getElementById("nameSortArrow").innerHTML = "";
     document.getElementById("nipSortArrow").innerHTML = "";
+    document.getElementById("nicknameSortArrow").innerHTML = "";
 }
 
 function setArrow(n, dir) {
@@ -150,6 +154,8 @@ function setArrow(n, dir) {
         document.getElementById("nameSortArrow").innerHTML = arrow;
     } else if (n == 1) {
         document.getElementById("nipSortArrow").innerHTML = arrow;
+    } else if (n == 2) {
+        document.getElementById("nicknameSortArrow").innerHTML = arrow;
     }
 }
 
