@@ -4,6 +4,7 @@ from django.db import models
 class Operator(models.Model):
     name = models.CharField(max_length=100)
     NIP = models.CharField(max_length=18)
+    nickname = models.CharField(max_length=100, default='')
 
     def __str__(self):
         return self.name
