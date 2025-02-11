@@ -94,7 +94,8 @@
                         data-parent="#fetchedDataAccordion">
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-hover table-sm" id="fetched-data-table">
+                                <table class="table table-bordered table-striped table-hover table-sm"
+                                    id="fetched-data-table">
                                     <thead class="thead-dark">
                                         <tr>
                                             <th>No</th>
@@ -106,6 +107,9 @@
                                             <th>Mag</th>
                                             <th>TypeMag</th>
                                             <th>Region</th>
+                                            <th>MMI</th>
+                                            <th>disPGN</th>
+                                            <th>disPGR</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -115,7 +119,7 @@
                             </div>
                             {{ form.events.label_tag }}
                             {{ form.events|add_class:"form-control" }}
-                            <div class="form-group row">
+                            <div class="form-group row mt-3">
                                 <div class="col-md-3">
                                     {{ form.event_indonesia.label_tag }}
                                     {{ form.event_indonesia|add_class:"form-control" }}
@@ -177,7 +181,7 @@
             </ul>
         </div>
         {% endif %}
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="submit" class="btn btn-primary" id="submit-button">Save</button>
         <button type="button" class="btn btn-secondary"
             onclick="window.location.href='{% url 'bast:bastrecord_list' %}'">Cancel</button>
     </form>
@@ -188,9 +192,9 @@
 <script>
     // date picker initialization
     document.addEventListener('DOMContentLoaded', function () {
-                    const dateInput = document.getElementById('{{ form.date.id_for_label }}');
-                    dateInput.type = 'date';
-                });
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+        dateInput.type = 'date';
+    });
 
     // Example starter JavaScript for disabling form submissions if there are invalid fields
     (function () {
@@ -247,9 +251,12 @@
                 tableBody.innerHTML = '';
                 data.table_data.forEach(row => {
                     const tr = document.createElement('tr');
-                    Object.values(row).forEach(cell => {
+                    Object.entries(row).forEach(([key, cell]) => {
                         const td = document.createElement('td');
                         td.textContent = cell;
+                        if (['MMI', 'disPGN', 'disPGR'].includes(key)) {
+                            td.contentEditable = true;
+                        }
                         tr.appendChild(td);
                     });
                     tableBody.appendChild(tr);
@@ -330,5 +337,97 @@
         spvSelect.addEventListener('change', updateNip);
         updateNip();
     });
+
+    // Convert table to CSV and put it in events form
+    function convertTableToCSV() {
+        const table = document.getElementById('fetched-data-table');
+        let csv = [];
+        for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
+            let row = table.rows[rowIndex];
+            let rowData = [];
+            for (let cell of row.cells) {
+                let cellText = cell.textContent;
+                if (rowIndex !== 0 && cell.cellIndex === 8 && !cellText.startsWith('"')) { // Assuming "Region" is the 9th column (index 8)
+                    cellText = `"${cellText}"`;
+                }
+                rowData.push(cellText);
+            }
+            csv.push(rowData.join(','));
+        }
+        const csvString = csv.join('\n');
+        const bastInput = document.querySelector('[name="{{ form.events.name }}"]');
+        bastInput.value = csvString;
+    }
+
+    // Trigger convertTableToCSV when submit button is clicked
+    document.getElementById('submit-button').addEventListener('click', function (event) {
+        convertTableToCSV();
+    });
+
+    // Populate table with existing data when editing the form
+    document.addEventListener('DOMContentLoaded', function () {
+        const existingDataCSV = `{{ existing_data|safe }}`;
+        if (existingDataCSV) {
+            const rows = existingDataCSV.split('\n');
+            const tableBody = document.getElementById('fetched-data-table').querySelector('tbody');
+            if (tableBody) {
+                tableBody.innerHTML = '';
+                rows.forEach((row, rowIndex) => {
+                    // Skip the header row (rowIndex === 0)
+                    if (rowIndex === 0) return; // or continue;
+
+                    const tr = document.createElement('tr');
+                    const cells = parseCSV(row);
+                    cells.forEach((cell, cellIndex) => {
+                        const td = document.createElement('td');
+                        if (cell) {
+                            td.textContent = cell;
+                        }
+
+                        const thead = tableBody.parentElement.querySelector('thead');
+                        if (thead) {
+                            const th = thead.querySelector('th:nth-child(' + (cellIndex + 1) + ')');
+                            if (th && ['MMI', 'disPGN', 'disPGR'].includes(th.textContent)) {
+                                td.contentEditable = true;
+                            }
+                        }
+
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+            } else {
+                console.error("Table body not found!");
+            }
+        }
+    });
+
+    // Parse CSV string into an array of arrays
+    function parseCSV(csvString) {
+        const result = [];
+        let inQuotes = false;
+        let currentField = '';
+
+        for (let i = 0; i < csvString.length; i++) {
+            const char = csvString[i];
+
+            if (char === '"') {
+                if (inQuotes && i + 1 < csvString.length && csvString[i + 1] === '"') {
+                    // Escaped double quote
+                    currentField += '"';
+                    i++; // Skip the next quote
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (char === ',' && !inQuotes) {
+                result.push(currentField.trim());
+                currentField = '';
+            } else {
+                currentField += char;
+            }
+        }
+        result.push(currentField.trim()); // Add the last field
+        return result;
+    }
 </script>
 {% endblock %}

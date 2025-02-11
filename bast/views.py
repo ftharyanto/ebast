@@ -32,6 +32,12 @@ class BastRecordUpdateView(UpdateView):
     def form_valid(self, form):
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        record = self.get_object()
+        context['existing_data'] = record.events
+        return context
+
 class BastRecordDeleteDirectView(View):
     def post(self, request, pk, *args, **kwargs):
         try:
@@ -80,6 +86,11 @@ def clean_index3(data, start_datetime='2024-12-11 13:00:00', end_datetime='2024-
 
     # Check for duplicate columns
     df_selected = df_selected.loc[:, ~df_selected.columns.duplicated()]
+
+    # add MMI, terkirim M>5, and terkirim M>5 columns with empty values
+    df_selected['MMI'] = ''
+    df_selected['disPGN'] = ''
+    df_selected['disPGR'] = '' 
     
     return df_selected
 
