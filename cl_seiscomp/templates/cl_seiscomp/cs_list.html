@@ -27,10 +27,11 @@
 <table class="table mt-3 table-striped table-sm" id="csRecordTable">
     <thead>
         <tr>
-            <th onclick="sortTable(0)" style="cursor: pointer;">ID <span id="idSortArrow">↓</span></th>
-            <th onclick="sortTable(1)" style="cursor: pointer;">Jam Pelaksanaan <span id="jampelSortArrow"></span></th>
-            <th onclick="sortTable(2)" style="cursor: pointer;">Kelompok <span id="kelompokSortArrow"></span></th>
-            <th onclick="sortTable(3)" style="cursor: pointer;">Operator <span id="operatorSortArrow"></span></th>
+            <th onclick="sortTable(0)" style="cursor: pointer; text-align: center;" width="20%">ID <span id="idSortArrow">↓</span></th>
+            <th onclick="sortTable(1)" style="cursor: pointer; text-align: center;" width="15%">Jam Pelaksanaan <span id="jampelSortArrow"></span></th>
+            <th onclick="sortTable(2)" style="cursor: pointer; text-align: center;" width="5%">Kelompok <span id="kelompokSortArrow"></span></th>
+            <th onclick="sortTable(3)" style="cursor: pointer; text-align: center;">Operator <span id="operatorSortArrow"></span></th>
+            <th style="text-align: center;">Actions</th>
         </tr>
         <tr>
             <th><input type="text" id="idFilter" onkeyup="filterTable(0)" placeholder="Filter by ID" class="form-control"></th>
@@ -43,9 +44,9 @@
     <tbody id="csRecordTableBody">
         {% for record in csrecords %}
         <tr>
-            <td>{{ record.cs_id }}</td>
-            <td>{{ record.jam_pelaksanaan }}</td>
-            <td>{{ record.kelompok }}</td>
+            <td style="text-align: center;">{{ record.cs_id }}</td>
+            <td style="text-align: center;">{{ record.jam_pelaksanaan }}</td>
+            <td style="text-align: center;">{{ record.kelompok }}</td>
             <td>{{ record.operator }}</td>
             <td>
                 <a href="{% url 'cl_seiscomp:cs_update' record.pk %}" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Edit">
