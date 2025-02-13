@@ -82,7 +82,7 @@
                             const blanksField = document.getElementById('{{ form.blanks.id_for_label }}');
                             const lastUpdate = document.getElementById('last_update');
                             data = JSON.parse(data);
-                            lastUpdate.textContent = 'Last Update: ' + data.last_update;
+                            lastUpdate.innerHTML = `Last Update: <strong>${data.last_update}</strong>`;
                             gapsField.value = data.gaps;
                             blanksField.value = data.blanks;
                         })
