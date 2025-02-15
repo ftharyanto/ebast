@@ -185,7 +185,14 @@ def cs_export_excel(request, record_id):
     from openpyxl.drawing.image import Image
 
     sheet = workbook['slmon']
-    tanggal = format_date_indonesian(record.cs_id[3:-2])
+    tanggal = datetime.datetime.strptime(record.cs_id[3:-2], "%Y-%m-%d")
+
+    if record.shift.upper() == 'MALAM':
+        tanggal = (tanggal + timedelta(days=1)).strftime('%Y-%m-%d')
+    else:
+        tanggal = tanggal.strftime('%Y-%m-%d')
+
+    tanggal = format_date_indonesian(tanggal)
     sheet['A2'] = f'{tanggal}, pukul {record.jam_pelaksanaan}'
     sheet['M24'] = f'Jakarta, {tanggal}'
     sheet['C28'] = f'{record.operator}'
@@ -291,7 +298,14 @@ def cs_export_pdf(request, record_id):
     from openpyxl.drawing.image import Image
 
     sheet = workbook['slmon']
-    tanggal = format_date_indonesian(record.cs_id[3:-2])
+    tanggal = datetime.datetime.strptime(record.cs_id[3:-2], "%Y-%m-%d")
+
+    if record.shift.upper() == 'MALAM':
+        tanggal = (tanggal + timedelta(days=1)).strftime('%Y-%m-%d')
+    else:
+        tanggal = tanggal.strftime('%Y-%m-%d')
+
+    tanggal = format_date_indonesian(tanggal)
     sheet['A2'] = f'{tanggal}, pukul {record.jam_pelaksanaan}'
     sheet['M24'] = f'Jakarta, {tanggal}'
     sheet['C28'] = f'{record.operator}'
