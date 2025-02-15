@@ -327,7 +327,7 @@ def cs_export_pdf(request, record_id):
 
     import subprocess
     try:
-        command = ['soffice', '--headless', '--convert-to', 'pdf:impress_pdf_Export', temp_xlsx, '--outdir', temp_pdf_dir]
+        command = ['soffice', '--headless', '--convert-to', 'pdf:calc_pdf_Export', temp_xlsx, '--outdir', temp_pdf_dir]
         subprocess.run(command, check=True)
         print(temp_xlsx)
     except subprocess.CalledProcessError as e:
