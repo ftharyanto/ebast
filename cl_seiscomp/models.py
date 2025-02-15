@@ -50,10 +50,11 @@ class CsRecordModel(models.Model):
         sensor_list = StationListModel.objects.values_list('code', flat=True)
 
         def clean_sensor(data):
+            cleaned_data = []
             for item in data:
-                if item not in sensor_list:
-                    data.remove(item)
-            return data
+                if item in sensor_list:
+                    cleaned_data.append(item)
+            return cleaned_data
         
         # Modify the group field here
         if self.gaps:
