@@ -170,8 +170,8 @@ def cs_export_excel(request, record_id):
         if cell_value in blanks:
             sheet.cell(row=row, column=6).value = 1
 
-    # for cells I7:I250
-    for row in range(7, 250+1):  # Iterate through rows 7 to 250
+    # for cells I7:I249
+    for row in range(7, 249+1):  # Iterate through rows 7 to 249
         cell_value = sheet.cell(row=row, column=9).value  # Get the cell value in column B
 
         if cell_value in gaps:
@@ -276,8 +276,8 @@ def cs_export_pdf(request, record_id):
         if cell_value in blanks:
             sheet.cell(row=row, column=6).value = 1
 
-    # for cells I7:I250
-    for row in range(7, 250+1):  # Iterate through rows 7 to 250
+    # for cells I7:I249
+    for row in range(7, 249+1):  # Iterate through rows 7 to 249
         cell_value = sheet.cell(row=row, column=9).value  # Get the cell value in column B
 
         if cell_value in gaps:
