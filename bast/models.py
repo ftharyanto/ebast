@@ -35,6 +35,7 @@ class BastRecordModel(models.Model):
     event_luar = models.IntegerField(default=0)
     event_dirasakan = models.IntegerField(default=0)
     event_dikirim = models.IntegerField(default=0)
+    member = models.CharField(max_length=300, default='')
 
     def __str__(self):
         return self.bast_id
