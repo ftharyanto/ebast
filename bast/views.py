@@ -1,6 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import BastRecordModel
+from core.models import Kelompok
 from .forms import BastRecordForm
 from django.shortcuts import render
 import requests, openpyxl, datetime, os
@@ -36,6 +37,12 @@ class BastRecordUpdateView(UpdateView):
         context = super().get_context_data(**kwargs)
         record = self.get_object()
         context['existing_data'] = record.events
+        return context
+
+    def get_member_data(self, **kwargs):
+        context = super().get_member_data(**kwargs)
+        record = self.get_object()
+        context['existing_member_data'] = record.member
         return context
 
 class BastRecordDeleteDirectView(View):
@@ -112,6 +119,14 @@ def get_nip(request, operator_id):
         return JsonResponse({'nip': operator.NIP})
     except Operator.DoesNotExist:
         return JsonResponse({'error': 'Operator not found'}, status=404)
+
+def get_member_data(request, kelompok):
+    try:
+        kelompok = Kelompok.objects.get(name=kelompok)
+        member_data = kelompok.member.values_list('name', flat=True)
+        return JsonResponse({'member_data': list(member_data)})
+    except Kelompok.DoesNotExist:
+        return JsonResponse({'error': 'Kelompok not found'}, status=404)
 
 def export_to_excel(request, record_id):
     try:

@@ -57,6 +57,30 @@
                         Please fill a valid kelompok berikutnya.
                     </div>
                 </div>
+
+                <!-- create a table of members from "Kelompok" model -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover table-sm" id="member-data-table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>No</th>
+                                <th>Nama</th>
+                                <th>Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="form-group col-md-4">
+                    {{ form.member.label_tag }}
+                    {{ form.member|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid member.
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -265,6 +289,36 @@
             .catch(error => console.error('Error fetching data:', error));
     });
 
+    // populate the table with members from the selected kelompok
+    document.addEventListener('DOMContentLoaded', function () {
+        const kelompokSelect = document.getElementById('{{ form.kelompok.id_for_label }}');
+        const tableBody = document.getElementById('member-data-table').querySelector('tbody');
+
+        function updateMembers() {
+            const selectedKelompok = kelompokSelect.value;
+            fetch(`/bast/api/get_member_data/${selectedKelompok}/`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    tableBody.innerHTML = '';
+                    data.member_data.forEach((name, index) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${name}</td>
+                            <td contentEditable=true></td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error('Error fetching members:', error));
+        }
+
+        kelompokSelect.addEventListener('change', updateMembers);
+        updateMembers();
+    });
+
+
     // set the datetime_bast_start and datetime_bast_end default value to be dependent on the waktu_dinas
     document.addEventListener('DOMContentLoaded', function () {
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
@@ -401,6 +455,44 @@
             }
         }
     });
+
+    // Populate members table with existing data when editing the form
+    // document.addEventListener('DOMContentLoaded', function () {
+    //     const existingDataCSV = `{{ existing_member_data|safe }}`;
+    //     if (existingDataCSV) {
+    //         const rows = existingDataCSV.split(',');
+    //         const tableBody = document.getElementById('fetched-data-table').querySelector('tbody');
+    //         if (tableBody) {
+    //             tableBody.innerHTML = '';
+    //             rows.forEach((row, rowIndex) => {
+    //                 // Skip the header row (rowIndex === 0)
+    //                 if (rowIndex === 0) return; // or continue;
+
+    //                 const tr = document.createElement('tr');
+    //                 const cells = parseCSV(row);
+    //                 cells.forEach((cell, cellIndex) => {
+    //                     const td = document.createElement('td');
+    //                     if (cell) {
+    //                         td.textContent = cell;
+    //                     }
+
+    //                     const thead = tableBody.parentElement.querySelector('thead');
+    //                     if (thead) {
+    //                         const th = thead.querySelector('th:nth-child(' + (cellIndex + 1) + ')');
+    //                         if (th && ['MMI', 'disPGN', 'disPGR'].includes(th.textContent)) {
+    //                             td.contentEditable = true;
+    //                         }
+    //                     }
+
+    //                     tr.appendChild(td);
+    //                 });
+    //                 tableBody.appendChild(tr);
+    //             });
+    //         } else {
+    //             console.error("Table body not found!");
+    //         }
+    //     }
+    // });
 
     // Parse CSV string into an array of arrays
     function parseCSV(csvString) {
