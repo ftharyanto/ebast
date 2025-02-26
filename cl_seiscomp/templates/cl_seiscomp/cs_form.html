@@ -153,11 +153,47 @@
     <script>
 
         // date picker initialization
-        document.addEventListener('DOMContentLoaded', function () {
-                        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
-                        dateInput.type = 'date';
-                    });
-                    
+        (function() {
+            const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+            dateInput.type = 'date';
+
+            // change cs_id value based on date_input and waktu_dinas
+            const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
+            const qcIdInput = document.getElementById('{{ form.cs_id.id_for_label }}');
+            const jamPelaksanaanSelect = document.getElementById('{{ form.jam_pelaksanaan.id_for_label }}');
+
+            function updateQcId() {
+                const dateValue = dateInput.value;
+                const waktuDinasValue = waktuDinasSelect.value;
+                qcIdInput.value = "CS-" + dateValue + "-" + waktuDinasValue[0];
+            }
+
+            function updateJamPelaksanaan() {
+                const shiftValue = waktuDinasSelect.value;
+                let jamPelaksanaanValue = "";
+                if (shiftValue === "Pagi") {
+                    jamPelaksanaanValue = "12:00 WIB";
+                } else if (shiftValue === "Siang") {
+                    jamPelaksanaanValue = "18:00 WIB";
+                } else if (shiftValue === "Malam") {
+                    jamPelaksanaanValue = "00:00 WIB";
+                } else {
+                    jamPelaksanaanValue = "06:00 WIB";
+                }
+                jamPelaksanaanSelect.value = jamPelaksanaanValue;
+            }
+
+            dateInput.addEventListener('change', updateQcId);
+            waktuDinasSelect.addEventListener('change', function() {
+                updateQcId();
+                updateJamPelaksanaan();
+            });
+
+            // Initialize cs_id and jam_pelaksanaan based on the default values
+            updateQcId();
+            updateJamPelaksanaan();
+        })();
+
         // Paste functionality
         document.addEventListener('paste', function (event) {
             const items = event.clipboardData.items;
@@ -211,46 +247,6 @@
                 };
                 reader.readAsDataURL(file);
             }
-        });
-
-        // change cs_id value based on date_input and waktu_dinas
-        document.addEventListener('DOMContentLoaded', function () {
-            const dateInput = document.getElementById('{{ form.date.id_for_label }}');
-            const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
-            const qcIdInput = document.getElementById('{{ form.cs_id.id_for_label }}');
-            const jamPelaksanaanSelect = document.getElementById('{{ form.jam_pelaksanaan.id_for_label }}');
-
-            qcIdInput.value = "CS-" + dateInput.value + "-" + waktuDinasSelect.value[0];
-
-            function updateQcId() {
-                const dateValue = dateInput.value;
-                const waktuDinasValue = waktuDinasSelect.value;
-                qcIdInput.value = "CS-" + dateValue + "-" + waktuDinasValue[0];
-            }
-
-            function updateJamPelaksanaan() {
-                const shiftValue = waktuDinasSelect.value;
-                let jamPelaksanaanValue = "";
-                if (shiftValue === "Pagi") {
-                    jamPelaksanaanValue = "12:00 WIB";
-                } else if (shiftValue === "Siang") {
-                    jamPelaksanaanValue = "18:00 WIB";
-                } else if (shiftValue === "Malam") {
-                    jamPelaksanaanValue = "00:00 WIB";
-                } else {
-                    jamPelaksanaanValue = "06:00 WIB";
-                }
-                jamPelaksanaanSelect.value = jamPelaksanaanValue;
-            }
-
-            dateInput.addEventListener('change', updateQcId);
-            waktuDinasSelect.addEventListener('change', function() {
-                updateQcId();
-                updateJamPelaksanaan();
-            });
-
-            // Initialize jam_pelaksanaan based on the default shift value
-            updateJamPelaksanaan();
         });
     </script>
     {% endblock %}
