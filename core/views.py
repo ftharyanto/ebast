@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
-from .models import Operator
+from .models import Operator, Kelompok
 from django.urls import reverse_lazy
-from .forms import OperatorForm
+from .forms import OperatorForm, KelompokForm
 from django.views import View
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
@@ -61,3 +61,29 @@ class OperatorBulkCreateView(View):
                 Operator.objects.create(name=row[0], NIP=row[1])
 
         return redirect('core:operator_list')
+
+class KelompokListView(ListView):
+    model = Kelompok
+    template_name = 'core/kelompok_list.html'
+    context_object_name = 'kelompok'
+
+class KelompokCreateView(CreateView):
+    model = Kelompok
+    form_class = KelompokForm
+    template_name = 'core/kelompok_form.html'
+    success_url = reverse_lazy('core:kelompok_list')
+
+class KelompokUpdateView(UpdateView):
+    model = Kelompok
+    form_class = KelompokForm
+    template_name = 'core/kelompok_form.html'
+    success_url = reverse_lazy('core:kelompok_list')
+
+class KelompokDeleteDirectView(View):
+    def post(self, request, pk, *args, **kwargs):
+        try:
+            record = Kelompok.objects.get(pk=pk)
+            record.delete()
+            return redirect('core:kelompok_list')
+        except Kelompok.DoesNotExist:
+            return HttpResponse(status=404)
