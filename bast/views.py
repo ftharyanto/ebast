@@ -129,92 +129,6 @@ def get_member_data(request, kelompok):
         return JsonResponse({'error': 'Kelompok not found'}, status=404)
 
 def export_to_excel(request, record_id):
-    try:
-        record = QcRecord.objects.get(id=record_id)
-    except QcRecord.DoesNotExist:
-        return HttpResponse(status=404)
-
-    file_path = os.path.join(os.path.dirname(__file__), 'static/bast/BAST.xlsx')
-    workbook = openpyxl.load_workbook(file_path)
-    sheet = workbook.active
-    sheet.title = 'QC Records'
-
-    tanggal = format_date_indonesian(record.qc_id[3:-2])
-    hari = get_hari_indonesia(record.qc_id[3:-2])
-    sheet['G2'] = ': ' + tanggal
-    sheet['G3'] = ': ' + hari
-    sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
-    sheet['G5'] = f': Kel. {record.kelompok}'
-    sheet['B6'] = f'Event di Indonesia: {record.event_indonesia}'
-    sheet['G6'] = f'Event di Luar Negeri: {record.event_luar}'
-
-
-    # import the qc_prev and qc values from the record using pandas and fill the C8 to M8 row with the qc_prev and qc values alternatingly, add rows as needed
-    qc_prev = pd.read_csv(StringIO(record.qc_prev))
-    
-    # add prev columns with 'prev' values to the last column
-    qc_prev['prev'] = f'Kel. {record.kel_sebelum}'
-
-    # add rows to the sheet
-    rows_to_add = len(qc_prev)
-    sheet.insert_rows(8, amount=rows_to_add*2)
-    qc_prev = dataframe_to_rows(qc_prev, index=False, header=False)
-
-    qc = pd.read_csv(StringIO(record.qc))
-
-    # add qc columns with 'QC' values to the last column
-    qc['QC'] = 'QC'
-    qc = dataframe_to_rows(qc, index=False, header=False)
-    
-    # Iterate over the rows of the qc_prev DataFrame
-    for r_idx, row in enumerate(qc_prev, 1):
-        # Iterate over the columns of the current row
-        for c_idx, value in enumerate(row, 1):
-            # Set the value and alignment for the first column (row number)
-            sheet.cell(row=r_idx*2+6, column=2, value=r_idx).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            # Set the value and alignment for the current cell
-            sheet.cell(row=r_idx*2+6, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            # Change the background color of the cell to light grey
-            sheet.cell(row=r_idx*2+6, column=c_idx+2).fill = openpyxl.styles.PatternFill(start_color='FFD3D3D3', end_color='FFD3D3D3', fill_type='solid')
-        # Merge cells for the row number column
-        sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
-            
-    # Iterate over the rows of the qc DataFrame
-    for r_idx, row in enumerate(qc, 1):
-        # Iterate over the columns of the current row
-        for c_idx, value in enumerate(row, 1):
-            # Set the value and alignment for the current cell
-            sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-    
-    # set the M8 column to align left horizontally
-    for r_idx in range(rows_to_add*2):
-        sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
-
-    # add borders to the cell in the data
-    for r_idx in range(rows_to_add*2):
-        for c_idx in range(13):
-            sheet.cell(row=r_idx+8, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
-
-    # set the height of the rows in the data to 15
-    for r_idx in range(rows_to_add*2):
-        sheet.row_dimensions[r_idx+8].height = 15
-
-    # Dynamically set the value of 'M' column based on the number of rows added
-    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=tanggal)
-    sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
-    sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
-    sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(name='Calibri', underline='single', size=18, bold=True)
-    sheet.row_dimensions[8 + rows_to_add * 2 + 8].height = 23.5
-    sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
-
-    # Save the workbook to a BytesIO object
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename=QC_{record.qc_id}.xlsx'
-    workbook.save(response)
-
-    return response
-
-def export_to_pdf(request, record_id):
     from qc.views import format_date_indonesian, get_hari_indonesia
 
     try:
@@ -229,16 +143,23 @@ def export_to_pdf(request, record_id):
 
     tanggal = format_date_indonesian(record.bast_id[5:-2])
     hari = get_hari_indonesia(record.bast_id[5:-2])
-    sheet['J4'] = f'{record.kelompok}'
-    sheet['J6'] = f'{record.kel_berikut}'
+    sheet['J4'] = f'{convert_to_roman(record.kelompok)} ({convert_to_indonesian(record.kelompok)})'
+    sheet['J6'] = f'{convert_to_roman(record.kel_berikut)} ({convert_to_indonesian(record.kel_berikut)})'
     sheet['N4'] = f': {tanggal}' 
     sheet['N5'] = f': {hari}'
+    sheet['N6'] = f': {record.waktu_pelaksaan}'
     # sheet['m6'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
     sheet['G21'] = f'{record.event_indonesia}'
     sheet['G22'] = f'{record.event_luar}'
     sheet['L21'] = f': {record.event_dirasakan} event'
     sheet['L22'] = f': {record.event_dikirim} event'
-
+    sheet['E33'] = f'IA (505) : Gaps = {record.count_gaps} ; Spike = {record.count_spikes} ; Blank = {record.count_blanks}'
+    sheet['E37'] = f'{record.pulsa_poco}'
+    sheet['E39'] = f'{record.poco_exp.strftime("%d %b %Y")}'
+    sheet['G37'] = f'{record.pulsa_samsung}'
+    sheet['G39'] = f'{record.samsung_exp.strftime("%d %b %Y")}'
+    sheet['C46'] = f'Jakarta, {tanggal}'
+    sheet['C54'] = f'{record.spv}'
 
     # import the events from the record using pandas
     events = pd.read_csv(StringIO(record.events))
@@ -267,27 +188,74 @@ def export_to_pdf(request, record_id):
                 top=openpyxl.styles.Side(style='thin'),
                 bottom=openpyxl.styles.Side(style='thin')
             )
-            
-    # set the M8 column to align left horizontally
-    # for r_idx in range(rows_to_add*2):    
-    #     sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
 
-    # add borders to the cell in the data
-    # for r_idx in range(rows_to_add*2):
-    #     for c_idx in range(13):
-    #         sheet.cell(row=r_idx+8, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
+    # Save the workbook to a BytesIO object
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename={record.bast_id}.xlsx'
+    workbook.save(response)
 
-    # set the height of the rows in the data to 15
-    # for r_idx in range(rows_to_add*2):
-    #     sheet.row_dimensions[r_idx+8].height = 15
+    return response
 
-    # Dynamically set the value of 'M' column based on the number of rows added
-    # sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=tanggal)
-    # sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
-    # sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
-    # sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(name='Calibri', underline='single', size=18, bold=True)
-    # sheet.row_dimensions[8 + rows_to_add * 2 + 8].height = 23.5
-    # sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
+def export_to_pdf(request, record_id):
+    from qc.views import format_date_indonesian, get_hari_indonesia
+
+    try:
+        record = BastRecordModel.objects.get(id=record_id)
+    except BastRecordModel.DoesNotExist:
+        return HttpResponse(status=404)
+
+    file_path = os.path.join(os.path.dirname(__file__), 'static/bast/BAST.xlsx')
+    workbook = openpyxl.load_workbook(file_path)
+    sheet = workbook.active
+    sheet.title = 'BAST'
+
+    tanggal = format_date_indonesian(record.bast_id[5:-2])
+    hari = get_hari_indonesia(record.bast_id[5:-2])
+    sheet['J4'] = f'{convert_to_roman(record.kelompok)} ({convert_to_indonesian(record.kelompok)})'
+    sheet['J6'] = f'{convert_to_roman(record.kel_berikut)} ({convert_to_indonesian(record.kel_berikut)})'
+    sheet['N4'] = f': {tanggal}' 
+    sheet['N5'] = f': {hari}'
+    sheet['N6'] = f': {record.waktu_pelaksaan}'
+    # sheet['m6'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
+    sheet['G21'] = f'{record.event_indonesia}'
+    sheet['G22'] = f'{record.event_luar}'
+    sheet['L21'] = f': {record.event_dirasakan} event'
+    sheet['L22'] = f': {record.event_dikirim} event'
+    sheet['E33'] = f'IA (505) : Gaps = {record.count_gaps} ; Spike = {record.count_spikes} ; Blank = {record.count_blanks}'
+    sheet['E37'] = f'{record.pulsa_poco}'
+    sheet['E39'] = f'{record.poco_exp.strftime("%d %b %Y")}'
+    sheet['G37'] = f'{record.pulsa_samsung}'
+    sheet['G39'] = f'{record.samsung_exp.strftime("%d %b %Y")}'
+    sheet['C46'] = f'Jakarta, {tanggal}'
+    sheet['C54'] = f'{record.spv}'
+
+    # import the events from the record using pandas
+    events = pd.read_csv(StringIO(record.events))
+
+    # add rows to the sheet
+    rows_to_add = len(events)
+    sheet.insert_rows(28, amount=rows_to_add)
+    events = dataframe_to_rows(events, index=False, header=False)
+    
+    # insert the events to the sheet
+    for r_idx, row in enumerate(events, 1):
+        for c_idx, value in enumerate(row, 1):
+            sheet.cell(row=r_idx+27, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            # set the border of the first column to the left and the last column to the right, to thick
+            sheet.cell(row=r_idx+27, column=2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='medium'))
+            sheet.cell(row=r_idx+27, column=17).border = openpyxl.styles.Border(right=openpyxl.styles.Side(style='medium'))
+    
+    # set the inserted cell border expanded to column 17 to thin
+    for r_idx in range(rows_to_add):
+        for c_idx in range(14):  # Iterate up to column 17 (index 14)
+            cell = sheet.cell(row=r_idx + 28, column=c_idx + 3) # Get the cell object
+
+            cell.border = openpyxl.styles.Border(
+                left=openpyxl.styles.Side(style='thin'),
+                right=openpyxl.styles.Side(style='thin'),
+                top=openpyxl.styles.Side(style='thin'),
+                bottom=openpyxl.styles.Side(style='thin')
+            )
 
     # temporarily save the workbook to a file
     temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/bast/{record.bast_id}.xlsx')
@@ -315,3 +283,34 @@ def export_to_pdf(request, record_id):
         os.remove(temp_pdf)
 
     return response
+
+def convert_to_roman(number):
+    number = int(number)
+    val = [
+        1000, 900, 500, 400,
+        100, 90, 50, 40,
+        10, 9, 5, 4,
+        1
+        ]
+    syb = [
+        "M", "CM", "D", "CD",
+        "C", "XC", "L", "XL",
+        "X", "IX", "V", "IV",
+        "I"
+        ]
+    roman_num = ''
+    i = 0
+    while  number > 0:
+        for _ in range(number // val[i]):
+            roman_num += syb[i]
+            number -= val[i]
+        i += 1
+    return roman_num
+
+def convert_to_indonesian(number):
+    number = int(number)
+    indonesian_numbers = ["Nol", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh"]
+    if 0 <= number < len(indonesian_numbers):
+        return indonesian_numbers[number]
+    else:
+        return str(number)
