@@ -21,4 +21,5 @@ urlpatterns = [
     path('kelompok/create/', KelompokCreateView.as_view(), name='kelompok_create'),
     path('kelompok/update/<int:pk>/', KelompokUpdateView.as_view(), name='kelompok_update'),
     path('kelompok/delete-direct/<int:pk>/', KelompokDeleteDirectView.as_view(), name='kelompok_delete_direct'),
+    path('api/get_operator_list/', views.get_operator_list, name='get_operator_list'),
 ]
