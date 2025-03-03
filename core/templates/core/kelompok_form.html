@@ -1,5 +1,26 @@
 {% extends 'core/base.html' %}
 {% block content %}
+<style>
+    .suggestions {
+        border: 1px solid #ccc;
+        border-top: none;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        z-index: 1000;
+        background: #fff;
+        width: 100%;
+    }
+
+    .suggestion-item {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .suggestion-item:hover {
+        background-color: #f0f0f0;
+    }
+</style>
 <div class="container">
     <h1 class="mt-5">Create Kelompok Form</h1>
     <form method="post" class="needs-validation" novalidate>
@@ -39,12 +60,148 @@
                 </div>
             </div>
         </div>
+        <!-- Input with Suggestions -->
+        <div class="mb-3 position-relative">
+            <label for="oprInput" class="form-label">Ketik nama operator:</label>
+            <input type="text" id="oprInput" class="form-control" autocomplete="off" placeholder="Type to search...">
+            <div id="suggestions" class="suggestions d-none"></div>
+        </div>
 
+        <!-- Table -->
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>ID</th>
+                    <th>Nama</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="oprTableBody">
+                <!-- Rows will be dynamically added here -->
+            </tbody>
+        </table>
         <button type="submit" class="btn btn-primary">Save</button>
         <button type="button" class="btn btn-secondary"
             onclick="window.location.href='{% url 'core:kelompok_list' %}'">Cancel</button>
     </form>
 </div>
+
+
+
+<script>
+    const oprInput = document.getElementById('oprInput');
+    const suggestionsBox = document.getElementById('suggestions');
+    const oprTableBody = document.getElementById('oprTableBody');
+    let oprCount = 0;
+    let operators = [];
+
+    // Fetch operators from the server once
+    async function fetchOperators() {
+        try {
+            const response = await fetch('/core/api/get_operator_list/');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            operators = data.operators;
+            console.log(operators);
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+    }
+
+    // Load operators when the page loads
+    window.addEventListener('load', () => {
+        fetchOperators().then(() => {
+            const existingMembers = {{ existing_members|safe }};
+            existingMembers.forEach(memberId => {
+                const operator = operators.find(opr => opr.pk == memberId);
+                if (operator) {
+                    addOprToTable(operator.name);
+                }
+            });
+        });
+    });
+
+    // Show suggestions as user types
+    oprInput.addEventListener('input', () => {
+        const query = oprInput.value.toLowerCase();
+        suggestionsBox.innerHTML = '';
+        if (query) {
+            const matchedOpr = operators.filter(operator => operator.name.toLowerCase().includes(query));
+            if (matchedOpr.length) {
+                matchedOpr.forEach(operator => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.textContent = operator.name;
+                    item.addEventListener('click', () => {
+                        addOprToTable(operator.name);
+                        oprInput.value = '';
+                        suggestionsBox.classList.add('d-none');
+                    });
+                    suggestionsBox.appendChild(item);
+                });
+                suggestionsBox.classList.remove('d-none');
+            } else {
+                suggestionsBox.classList.add('d-none');
+            }
+        } else {
+            suggestionsBox.classList.add('d-none');
+        }
+    });
+
+    // Hide suggestions when input loses focus
+    oprInput.addEventListener('blur', () => {
+        setTimeout(() => suggestionsBox.classList.add('d-none'), 200);
+    });
+
+    // Add operator to the table
+    function addOprToTable(operator) {
+        oprCount++;
+        const operatorData = operators.find(opr => opr.name === operator);
+
+        // Create a new row
+        const row = document.createElement('tr');
+        row.innerHTML = `
+        <td>${oprCount}</td>
+        <td>${operatorData.pk}</td>
+        <td>${operatorData.name}</td>
+        <td>
+          <button class="btn btn-danger btn-sm delete"><i class="fas fa-trash"></i></button>
+        </td>
+      `;
+
+        // Add delete functionality
+        row.querySelector('.delete').addEventListener('click', () => {
+            row.remove();
+            updateRowNumbers();
+            updateMemberInput();
+        });
+
+        // Append row to table
+        oprTableBody.appendChild(row);
+        updateMemberInput();
+    }
+
+    // Update row numbers after deletion
+    function updateRowNumbers() {
+        const rows = oprTableBody.querySelectorAll('tr');
+        oprCount = 0;
+        rows.forEach((row) => {
+            oprCount++;
+            row.children[0].textContent = oprCount;
+        });
+    }
+
+    // Update member input with IDs in comma-separated format
+    function updateMemberInput() {
+        const rows = oprTableBody.querySelectorAll('tr');
+        const ids = Array.from(rows).map(row => row.children[1].textContent);
+        document.getElementById('{{ form.member.id_for_label }}').value = ids.join(',');
+    }
+</script>
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
