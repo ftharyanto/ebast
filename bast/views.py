@@ -123,10 +123,14 @@ def get_nip(request, operator_id):
 def get_member_data(request, kelompok):
     try:
         kelompok = Kelompok.objects.get(name=kelompok)
-        member_data = kelompok.member.values_list('name', flat=True)
-        return JsonResponse({'member_data': list(member_data)})
+        member_data = kelompok.member
+        member_pks = [int(member.strip()) for member in member_data.split(',')]
+        member_names = [Operator.objects.get(pk=pk).name for pk in member_pks]
+        return JsonResponse({'member_data': member_names})
     except Kelompok.DoesNotExist:
         return JsonResponse({'error': 'Kelompok not found'}, status=404)
+    except Operator.DoesNotExist:
+        return JsonResponse({'error': 'One or more members not found'}, status=404)
 
 def export_to_excel(request, record_id):
     from qc.views import format_date_indonesian, get_hari_indonesia
