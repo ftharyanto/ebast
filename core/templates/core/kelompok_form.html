@@ -114,7 +114,7 @@
     // Load operators when the page loads
     window.addEventListener('load', () => {
         fetchOperators().then(() => {
-            const existingMembers = {{ existing_members|safe }};
+            const existingMembers = JSON.parse('{{ existing_members|safe|escapejs }}');
             existingMembers.forEach(memberId => {
                 const operator = operators.find(opr => opr.pk == memberId);
                 if (operator) {

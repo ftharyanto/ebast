@@ -386,7 +386,6 @@
         updateMembers();
     });
 
-
     // set the datetime_bast_start and datetime_bast_end default value to be dependent on the waktu_dinas
     document.addEventListener('DOMContentLoaded', function () {
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
@@ -524,43 +523,45 @@
         }
     });
 
-    // Populate members table with existing data when editing the form
-    // document.addEventListener('DOMContentLoaded', function () {
-    //     const existingDataCSV = `{{ existing_member_data|safe }}`;
-    //     if (existingDataCSV) {
-    //         const rows = existingDataCSV.split(',');
-    //         const tableBody = document.getElementById('fetched-data-table').querySelector('tbody');
-    //         if (tableBody) {
-    //             tableBody.innerHTML = '';
-    //             rows.forEach((row, rowIndex) => {
-    //                 // Skip the header row (rowIndex === 0)
-    //                 if (rowIndex === 0) return; // or continue;
+    // Populate members table with existing data when editing the form based on selected kelompok
+    document.addEventListener('DOMContentLoaded', function () {
+        const kelompokSelect = document.getElementById('{{ form.kelompok.id_for_label }}');
+        const tableBody = document.getElementById('member-data-table').querySelector('tbody');
+        const existingMembers = `{{ existing_members|safe }}`;
 
-    //                 const tr = document.createElement('tr');
-    //                 const cells = parseCSV(row);
-    //                 cells.forEach((cell, cellIndex) => {
-    //                     const td = document.createElement('td');
-    //                     if (cell) {
-    //                         td.textContent = cell;
-    //                     }
+        function updateMembers() {
+            const selectedKelompok = kelompokSelect.value;
+            fetch(`/bast/api/get_member_data/${selectedKelompok}/`)
+                .then(response => response.json())
+                .then(data => {
+                    tableBody.innerHTML = '';
+                    data.member_data.forEach((name, index) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${name}</td>
+                            <td contentEditable=true></td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
 
-    //                     const thead = tableBody.parentElement.querySelector('thead');
-    //                     if (thead) {
-    //                         const th = thead.querySelector('th:nth-child(' + (cellIndex + 1) + ')');
-    //                         if (th && ['MMI', 'disPGN', 'disPGR'].includes(th.textContent)) {
-    //                             td.contentEditable = true;
-    //                         }
-    //                     }
+                    // Populate the table with existing members
+                    if (existingMembers) {
+                        const existingMembersArray = existingMembers.split(',');
+                        existingMembersArray.forEach((member, index) => {
+                            const tr = tableBody.querySelector(`tr:nth-child(${index + 1})`);
+                            if (tr) {
+                                tr.querySelector('td:nth-child(3)').textContent = member;
+                            }
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching members:', error));
+        }
 
-    //                     tr.appendChild(td);
-    //                 });
-    //                 tableBody.appendChild(tr);
-    //             });
-    //         } else {
-    //             console.error("Table body not found!");
-    //         }
-    //     }
-    // });
+        kelompokSelect.addEventListener('change', updateMembers);
+        updateMembers();
+    });
 
     // Parse CSV string into an array of arrays
     function parseCSV(csvString) {
