@@ -42,7 +42,7 @@ class BastRecordModel(models.Model):
     event_luar = models.IntegerField(default=0)
     event_dirasakan = models.IntegerField(default=0)
     event_dikirim = models.IntegerField(default=0)
-    member = models.CharField(max_length=300, default='')
+    member = models.TextField(max_length=1000, default='')
     count_gaps = models.IntegerField(default=0)
     count_spikes = models.IntegerField(default=0)
     count_blanks = models.IntegerField(default=0)
@@ -50,6 +50,7 @@ class BastRecordModel(models.Model):
     poco_exp = models.DateField(default=get_default_date)
     pulsa_samsung = models.IntegerField(default=0)
     samsung_exp = models.DateField(default=get_default_date)
+    notes = models.TextField(max_length=1000, default='', blank=True, null=True)
 
     def __str__(self):
         return self.bast_id
