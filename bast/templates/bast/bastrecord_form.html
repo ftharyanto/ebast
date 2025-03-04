@@ -71,7 +71,11 @@
                             <tr>
                                 <th>No</th>
                                 <th>Nama</th>
-                                <th>Keterangan</th>
+                                <th>Keterangan
+                                    <span data-toggle="tooltip" data-placement="top" title="Isi keterangan dengan nama pengganti atau keterangan izin/cuti/SPT. Contoh: diganti Fajar">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                </th></span>
                             </tr>
                         </thead>
                         <tbody>
@@ -138,8 +142,10 @@
                                             <th>TypeMag</th>
                                             <th>Region</th>
                                             <th>MMI</th>
-                                            <th>disPGN</th>
-                                            <th>disPGR</th>
+                                            <th>Dis. PGN</th>
+                                            <th>Selisih PGN</th>
+                                            <th>Dis. PGR</th>
+                                            <th>Selisih PGR</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -254,11 +260,17 @@
                 </div>
             </div>
         </div>
-        <div class="form-group">
-            <div class="invalid-feedback">
-                Please provide a valid date.
+
+        <div class="form-group row">
+            <div class="col">
+                {{ form.notes.label_tag }}
+                {{ form.notes|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please select a valid notes.
+                </div>
             </div>
         </div>
+
         {% if form.errors %}
         <div class="alert alert-danger">
             Please correct the errors below.
@@ -346,7 +358,7 @@
                     Object.entries(row).forEach(([key, cell]) => {
                         const td = document.createElement('td');
                         td.textContent = cell;
-                        if (['MMI', 'disPGN', 'disPGR'].includes(key)) {
+                        if (['MMI', 'Dis. PGN', 'Dis. PGR'].includes(key)) {
                             td.contentEditable = true;
                         }
                         tr.appendChild(td);
@@ -480,6 +492,29 @@
         bastInput.value = csvString;
     }
 
+    // Convert member table to JSON and put it in member form in real-time
+    function convertMemberTableToJSON() {
+        const table = document.getElementById('member-data-table');
+        let json = [];
+        for (let rowIndex = 1; rowIndex < table.rows.length; rowIndex++) { // Start from 1 to skip the header row
+            let row = table.rows[rowIndex];
+            let rowData = {};
+            rowData['nama'] = row.cells[1].textContent; // Assuming "Nama" is the 2nd column (index 1)
+            rowData['keterangan'] = row.cells[2].textContent; // Assuming "Keterangan" is the 3rd column (index 2)
+            json.push(rowData);
+        }
+        const jsonString = JSON.stringify(json);
+        const memberInput = document.getElementById('{{ form.member.id_for_label }}');
+        memberInput.value = jsonString;
+    }
+
+    // Trigger convertMemberTableToJSON on table cell input
+    document.addEventListener('input', function (event) {
+        if (event.target.closest('#member-data-table td[contenteditable="true"]')) {
+            convertMemberTableToJSON();
+        }
+    });
+
     // Trigger convertTableToCSV when submit button is clicked
     document.getElementById('submit-button').addEventListener('click', function (event) {
         convertTableToCSV();
@@ -508,7 +543,7 @@
                         const thead = tableBody.parentElement.querySelector('thead');
                         if (thead) {
                             const th = thead.querySelector('th:nth-child(' + (cellIndex + 1) + ')');
-                            if (th && ['MMI', 'disPGN', 'disPGR'].includes(th.textContent)) {
+                            if (th && ['MMI', 'Dis. PGN', 'Dis. PGR'].includes(th.textContent)) {
                                 td.contentEditable = true;
                             }
                         }
@@ -540,7 +575,7 @@
                         tr.innerHTML = `
                             <td>${index + 1}</td>
                             <td>${name}</td>
-                            <td contentEditable=true></td>
+                            <td contentEditable=true>Hadir</td>
                         `;
                         tableBody.appendChild(tr);
                     });
@@ -555,6 +590,9 @@
                             }
                         });
                     }
+
+                    // Trigger convertMemberTableToJSON after filling the column with "Hadir"
+                    convertMemberTableToJSON();
                 })
                 .catch(error => console.error('Error fetching members:', error));
         }
@@ -590,5 +628,75 @@
         result.push(currentField.trim()); // Add the last field
         return result;
     }
+
+    // Function to calculate the difference between Dis. PGN and OT (UTC)
+    function calculateSelisihPGN() {
+        const table = document.getElementById('fetched-data-table');
+        for (let rowIndex = 1; rowIndex < table.rows.length; rowIndex++) { // Start from 1 to skip the header row
+            let row = table.rows[rowIndex];
+            let otUTC = row.cells[2].textContent; // Assuming "OT (UTC)" is the 3rd column (index 2)
+            let disPGN = row.cells[10].textContent; // Assuming "Dis. PGN" is the 11th column (index 10)
+            let selisihPGNCell = row.cells[11]; // Assuming "Selisih PGN" is the 12th column (index 11)
+
+            if (otUTC && disPGN) {
+                let otUTCDate = new Date(`1970-01-01T${otUTC}Z`).getTime();
+                let disPGNTime = disPGN.includes(':') ? disPGN : `${disPGN}:00`; // Add seconds if not present
+                let disPGNDate = new Date(`1970-01-01T${disPGNTime}Z`).getTime();
+                let selisihPGN = (disPGNDate - otUTCDate) / 1000; // Difference in seconds
+
+                let hours = Math.floor(selisihPGN / 3600);
+                let minutes = Math.floor((selisihPGN % 3600) / 60);
+                let seconds = Math.floor(selisihPGN % 60);
+
+                selisihPGNCell.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+    }
+
+    // Function to calculate the difference between Dis. PGR and OT (UTC)
+    function calculateSelisihPGR() {
+        const table = document.getElementById('fetched-data-table');
+        for (let rowIndex = 1; rowIndex < table.rows.length; rowIndex++) { // Start from 1 to skip the header row
+            let row = table.rows[rowIndex];
+            let otUTC = row.cells[2].textContent; // Assuming "OT (UTC)" is the 3rd column (index 2)
+            let disPGR = row.cells[12].textContent; // Assuming "Dis. PGR" is the 13th column (index 12)
+            let selisihPGRCell = row.cells[13]; // Assuming "Selisih PGR" is the 14th column (index 13)
+
+            if (otUTC && disPGR) {
+                let otUTCDate = new Date(`1970-01-01T${otUTC}Z`).getTime();
+                let disPGRTime = disPGR.includes(':') ? disPGR : `${disPGR}:00`; // Add seconds if not present
+                let disPGRDate = new Date(`1970-01-01T${disPGRTime}Z`).getTime();
+                let selisihPGR = (disPGRDate - otUTCDate) / 1000; // Difference in seconds
+
+                let hours = Math.floor(selisihPGR / 3600);
+                let minutes = Math.floor((selisihPGR % 3600) / 60);
+                let seconds = Math.floor(selisihPGR % 60);
+
+                selisihPGRCell.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+    }
+
+    // Trigger calculateSelisihPGN when the table is populated
+    document.addEventListener('DOMContentLoaded', function () {
+        calculateSelisihPGN();
+        calculateSelisihPGR();
+    });
+
+    // Trigger calculateSelisihPGN and calculateSelisihPGR when the fetch button is clicked
+    document.getElementById('fetch_bast').addEventListener('click', function () {
+        setTimeout(function () {
+            calculateSelisihPGN();
+            calculateSelisihPGR();
+        }, 1000); // Delay to ensure data is populated
+    });
+
+    // Trigger calculateSelisihPGN and calculateSelisihPGR when the table cells are edited
+    document.addEventListener('input', function (event) {
+        if (event.target.closest('#fetched-data-table td[contenteditable="true"]')) {
+            calculateSelisihPGN();
+            calculateSelisihPGR();
+        }
+    });
 </script>
 {% endblock %}
