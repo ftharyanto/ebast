@@ -1,6 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import BastRecordModel
+from cl_seiscomp.models import CsRecordModel
 from core.models import Kelompok
 from .forms import BastRecordForm
 from django.shortcuts import render
@@ -324,3 +325,14 @@ def convert_to_indonesian(number):
         return indonesian_numbers[number]
     else:
         return str(number)
+
+def get_cs_data(request, cs_id):
+    try:
+        cs_record = CsRecordModel.objects.get(cs_id=cs_id)
+        return JsonResponse({
+            'count_gaps': cs_record.count_gaps,
+            'count_spikes': cs_record.count_spikes,
+            'count_blanks': cs_record.count_blanks
+        })
+    except CsRecordModel.DoesNotExist:
+        return JsonResponse({'error': 'CS record not found'}, status=404)
