@@ -65,17 +65,17 @@
                     </div>
                 </div>
                 <!-- create a table of members from "Kelompok" model -->
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-hover table-sm" id="member-data-table">
+                <div class="table-responsive container" style="padding-right: 5em; padding-left: 5em;">
+                    <table class="table table-bordered table-hover table-sm" id="member-data-table" style="width: auto;">
                         <thead class="thead-dark">
                             <tr>
-                                <th>No</th>
-                                <th>Nama</th>
-                                <th>Keterangan
+                                <th style="width: 1%;">No</th>
+                                <th style="width: 20%;">Nama</th>
+                                <th style="width: 20%;">Keterangan
                                     <span data-toggle="tooltip" data-placement="top" title="Isi keterangan dengan nama pengganti atau keterangan izin/cuti/SPT. Contoh: diganti Fajar">
                                         <i class="fas fa-info-circle"></i>
                                     </span>
-                                </th></span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -84,7 +84,7 @@
                     </table>
                 </div>
 
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-4" style="display: none;">
                     {{ form.member.label_tag }}
                     {{ form.member|add_class:"form-control" }}
                     <div class="invalid-feedback">
@@ -698,5 +698,48 @@
             calculateSelisihPGR();
         }
     });
+
+    // Autofill count_gaps, count_spikes, and count_blanks based on bast_id
+    document.addEventListener('DOMContentLoaded', function () {
+        const bastIdInput = document.getElementById('{{ form.bast_id.id_for_label }}');
+        const countGapsInput = document.getElementById('{{ form.count_gaps.id_for_label }}');
+        const countSpikesInput = document.getElementById('{{ form.count_spikes.id_for_label }}');
+        const countBlanksInput = document.getElementById('{{ form.count_blanks.id_for_label }}');
+        const shiftSelect = document.getElementById('{{ form.shift.id_for_label }}');
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+
+        function autofillCounts() {
+            const bastId = bastIdInput.value;
+            const csId = bastId.replace('BAST', 'CS');
+            fetch(`/bast/api/get_cs_data/${csId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.count_gaps !== undefined) {
+                countGapsInput.value = data.count_gaps;
+                }
+                if (data.count_spikes !== undefined) {
+                countSpikesInput.value = data.count_spikes;
+                }
+                if (data.count_blanks !== undefined) {
+                countBlanksInput.value = data.count_blanks;
+                }
+            })
+            .catch(error => console.error('Error fetching CS data:', error));
+        }
+
+        // Create a new event to trigger the change event
+        function triggerChangeEvent(element) {
+            const event = new Event('change', { bubbles: true });
+            element.dispatchEvent(event);
+        }
+
+        function handleDateOrShiftChange() {
+            triggerChangeEvent(bastIdInput);
+        }
+
+        shiftSelect.addEventListener('change', handleDateOrShiftChange);
+        dateInput.addEventListener('change', handleDateOrShiftChange);
+        bastIdInput.addEventListener('change', autofillCounts);
+        });
 </script>
 {% endblock %}
