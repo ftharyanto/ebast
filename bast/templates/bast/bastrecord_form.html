@@ -1,0 +1,745 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container">
+    <h1 class="mt-5">BAST Record Form</h1>
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {% load form_tags %}
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Please correct the errors below.
+            <ul>
+                {% for field in form %}
+                {% if field.errors %}
+                {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <div class="form-group row">
+            <div class="col-md-4">
+                {{ form.date.label_tag }}
+                {{ form.date|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid date.
+                </div>
+            </div>
+            <div class="col-md-4">
+                {{ form.shift.label_tag }}
+                {{ form.shift|add_class:"form-control" }}
+            </div>
+            <div class="col-md-4">
+                {{ form.bast_id.label_tag }}
+                {{ form.bast_id|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid BAST ID.
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="row">
+                <div class="form-group col-md-4">
+                    {{ form.kelompok.label_tag }}
+                    {{ form.kelompok|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please select a valid kelompok.
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="{{ form.kel_berikut.id_for_label }}">Kelompok Berikutnya</label>
+                    {{ form.kel_berikut|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please fill a valid kelompok berikutnya.
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    {{ form.waktu_pelaksanaan.label_tag }}
+                    {{ form.waktu_pelaksanaan }}
+                    <div class="invalid-feedback">
+                        Please select a valid waktu pelaksanaan.
+                    </div>
+                </div>
+                <!-- create a table of members from "Kelompok" model -->
+                <div class="table-responsive container" style="padding-right: 5em; padding-left: 5em;">
+                    <table class="table table-bordered table-hover table-sm" id="member-data-table" style="width: auto;">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th style="width: 1%;">No</th>
+                                <th style="width: 20%;">Nama</th>
+                                <th style="width: 20%;">Keterangan
+                                    <span data-toggle="tooltip" data-placement="top" title="Isi keterangan dengan nama pengganti atau keterangan izin/cuti/SPT. Contoh: diganti Fajar">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="form-group col-md-4" style="display: none;">
+                    {{ form.member.label_tag }}
+                    {{ form.member|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid member.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label for="datetime_bast_start">Start Date and Time (UTC)</label>
+                    <input type="datetime-local" id="datetime_bast_start" class="form-control"
+                        value="2024-12-14 00:00:00">
+                </div>
+                <div class="col-md-4">
+                    <label for="datetime_bast_end">End Date and Time (UTC)</label>
+                    <input type="datetime-local" id="datetime_bast_end" class="form-control"
+                        value="2024-12-14 07:00:00">
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="button" id="fetch_bast" class="btn btn-primary align-bottom">Fetch
+                        Data</button>
+                </div>
+            </div>
+            <!-- Accordion for fetched data and bast form -->
+            <div class="accordion" id="fetchedDataAccordion">
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link" type="button" data-toggle="collapse"
+                                data-target="#fetchedDataSection" aria-expanded="true"
+                                aria-controls="fetchedDataSection">
+                                Fetched Data
+                            </button>
+                        </h2>
+                    </div>
+
+                    <div id="fetchedDataSection" class="collapse" aria-labelledby="headingOne"
+                        data-parent="#fetchedDataAccordion">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover table-sm"
+                                    id="fetched-data-table">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Date</th>
+                                            <th>OT (UTC)</th>
+                                            <th>Lat</th>
+                                            <th>Long</th>
+                                            <th>D(Km)</th>
+                                            <th>Mag</th>
+                                            <th>TypeMag</th>
+                                            <th>Region</th>
+                                            <th>MMI</th>
+                                            <th>Dis. PGN</th>
+                                            <th>Selisih PGN</th>
+                                            <th>Dis. PGR</th>
+                                            <th>Selisih PGR</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            {{ form.events.label_tag }}
+                            {{ form.events|add_class:"form-control" }}
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row mt-3">
+                    <div class="col-md-3">
+                        {{ form.event_indonesia.label_tag }}
+                        {{ form.event_indonesia|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid event Indonesia.
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.event_luar.label_tag }}
+                        {{ form.event_luar|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid event luar.
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.event_dirasakan.label_tag }}
+                        {{ form.event_dirasakan|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid event dirasakan.
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.event_dikirim.label_tag }}
+                        {{ form.event_dikirim|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid event dikirim.
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row mt-3">
+                    <div class="col-md-3">
+                        {{ form.count_gaps.label_tag }}
+                        {{ form.count_gaps|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid count gaps.
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.count_spikes.label_tag }}
+                        {{ form.count_spikes|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid count spikes.
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.count_blanks.label_tag }}
+                        {{ form.count_blanks|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid count blanks.
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row mt-3">
+                    <div class="col-md-3">
+                        {{ form.pulsa_poco.label_tag }}
+                        {{ form.pulsa_poco|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid pulsa poco.
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.poco_exp.label_tag }}
+                        {{ form.poco_exp|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid poco exp.
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.pulsa_samsung.label_tag }}
+                        {{ form.pulsa_samsung|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid pulsa samsung.
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.samsung_exp.label_tag }}
+                        {{ form.samsung_exp|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid samsung exp.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-6">
+                {{ form.spv.label_tag }}
+                {{ form.spv|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please select a valid SPV.
+                </div>
+            </div>
+            <div class="col-md-6">
+                {{ form.NIP.label_tag }}
+                {{ form.NIP|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please provide a valid NIP.
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col">
+                {{ form.notes.label_tag }}
+                {{ form.notes|add_class:"form-control" }}
+                <div class="invalid-feedback">
+                    Please select a valid notes.
+                </div>
+            </div>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Please correct the errors below.
+            <ul>
+                {% for field in form %}
+                {% if field.errors %}
+                {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary" id="submit-button">Save</button>
+        <button type="button" class="btn btn-secondary"
+            onclick="window.location.href='{% url 'bast:bastrecord_list' %}'">Cancel</button>
+    </form>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // date picker initialization
+    document.addEventListener('DOMContentLoaded', function () {
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+        dateInput.type = 'date';
+    });
+
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // change bast_id value based on date_input and waktu_dinas
+    document.addEventListener('DOMContentLoaded', function () {
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+        const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
+        const bastIdInput = document.getElementById('{{ form.bast_id.id_for_label }}');
+        bastIdInput.value = "BAST-" + dateInput.value + "-" + waktuDinasSelect.value[0];
+
+        function updateBastId() {
+            const dateValue = dateInput.value;
+            const waktuDinasValue = waktuDinasSelect.value;
+            bastIdInput.value = "BAST-" + dateValue + "-" + waktuDinasValue[0];
+        }
+
+        dateInput.addEventListener('change', updateBastId);
+        waktuDinasSelect.addEventListener('change', updateBastId);
+    });
+
+    // Fetch data and fill events
+    document.getElementById('fetch_bast').addEventListener('click', function () {
+        const startDatetime = document.getElementById('datetime_bast_start').value.replace('T', ' ');
+        const endDatetime = document.getElementById('datetime_bast_end').value.replace('T', ' ');
+        const url = `{% url 'bast:fetch_data' 'start_datetime' 'end_datetime' %}`
+            .replace('start_datetime', encodeURIComponent(startDatetime))
+            .replace('end_datetime', encodeURIComponent(endDatetime));
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const bastInput = document.querySelector('[name="{{ form.events.name }}"]');
+                bastInput.value = data.csv;
+
+                // Populate the table with fetched data
+                const tableBody = document.getElementById('fetched-data-table').querySelector('tbody');
+                tableBody.innerHTML = '';
+                data.table_data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    Object.entries(row).forEach(([key, cell]) => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        if (['MMI', 'Dis. PGN', 'Dis. PGR'].includes(key)) {
+                            td.contentEditable = true;
+                        }
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    });
+
+    // populate the table with members from the selected kelompok
+    document.addEventListener('DOMContentLoaded', function () {
+        const kelompokSelect = document.getElementById('{{ form.kelompok.id_for_label }}');
+        const tableBody = document.getElementById('member-data-table').querySelector('tbody');
+
+        function updateMembers() {
+            const selectedKelompok = kelompokSelect.value;
+            fetch(`/bast/api/get_member_data/${selectedKelompok}/`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    tableBody.innerHTML = '';
+                    data.member_data.forEach((name, index) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${name}</td>
+                            <td contentEditable=true></td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error('Error fetching members:', error));
+        }
+
+        kelompokSelect.addEventListener('change', updateMembers);
+        updateMembers();
+    });
+
+    // set the datetime_bast_start and datetime_bast_end default value to be dependent on the waktu_dinas
+    document.addEventListener('DOMContentLoaded', function () {
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+        const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
+        const datetimeBastStart = document.getElementById('datetime_bast_start');
+        const datetimeBastEnd = document.getElementById('datetime_bast_end');
+
+        function updateDatetime() {
+            const dateValue = dateInput.value;
+            const waktuDinasValue = waktuDinasSelect.value;
+            let startDatetime, endDatetime;
+
+            const prevDay = new Date(dateValue);
+            prevDay.setDate(prevDay.getDate() - 1);
+            const prevDayValue = prevDay.toISOString().split('T')[0];
+
+            switch (waktuDinasValue[0]) {
+                case 'P':
+                    startDatetime = `${dateValue} 01:00:00`;
+                    endDatetime = `${dateValue} 07:00:00`;
+                    break;
+                case 'S':
+                    startDatetime = `${dateValue} 07:00:00`;
+                    endDatetime = `${dateValue} 13:00:00`;
+                    break;
+                case 'M':
+                    startDatetime = `${prevDayValue} 13:00:00`;
+                    endDatetime = `${prevDayValue} 19:00:00`;
+                    break;
+                case 'D':
+                    startDatetime = `${prevDayValue} 19:00:00`;
+                    endDatetime = `${dateValue} 01:30:00`;
+                    break;
+            }
+
+            datetimeBastStart.value = startDatetime;
+            datetimeBastEnd.value = endDatetime;
+        }
+
+        dateInput.addEventListener('change', updateDatetime);
+        waktuDinasSelect.addEventListener('change', updateDatetime);
+        updateDatetime()
+
+        function updateDatetimeBastStart() {
+            const dateValue = dateInput.value;
+            const waktuDinasValue = waktuDinasSelect.value;
+            bastIdInput.value = dateValue + "-" + waktuDinasValue;
+        }
+    });
+
+    // Set NIP's value based on the selected spv
+    document.addEventListener('DOMContentLoaded', function () {
+        const spvSelect = document.getElementById('{{ form.spv.id_for_label }}');
+        const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
+
+        function updateNip() {
+            const selectedSpv = spvSelect.value;
+            fetch(`/bast/api/get_nip/${selectedSpv}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.nip) {
+                        nipInput.value = data.nip;
+                    } else {
+                        nipInput.value = ''
+                    }
+                })
+                .catch(error => console.error('Error fetching NIP:', error));
+        }
+
+        spvSelect.addEventListener('change', updateNip);
+        updateNip();
+    });
+
+    // Convert table to CSV and put it in events form
+    function convertTableToCSV() {
+        const table = document.getElementById('fetched-data-table');
+        let csv = [];
+        for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
+            let row = table.rows[rowIndex];
+            let rowData = [];
+            for (let cell of row.cells) {
+                let cellText = cell.textContent;
+                if (rowIndex !== 0 && cell.cellIndex === 8 && !cellText.startsWith('"')) { // Assuming "Region" is the 9th column (index 8)
+                    cellText = `"${cellText}"`;
+                }
+                rowData.push(cellText);
+            }
+            csv.push(rowData.join(','));
+        }
+        const csvString = csv.join('\n');
+        const bastInput = document.querySelector('[name="{{ form.events.name }}"]');
+        bastInput.value = csvString;
+    }
+
+    // Convert member table to JSON and put it in member form in real-time
+    function convertMemberTableToJSON() {
+        const table = document.getElementById('member-data-table');
+        let json = [];
+        for (let rowIndex = 1; rowIndex < table.rows.length; rowIndex++) { // Start from 1 to skip the header row
+            let row = table.rows[rowIndex];
+            let rowData = {};
+            rowData['nama'] = row.cells[1].textContent; // Assuming "Nama" is the 2nd column (index 1)
+            rowData['keterangan'] = row.cells[2].textContent; // Assuming "Keterangan" is the 3rd column (index 2)
+            json.push(rowData);
+        }
+        const jsonString = JSON.stringify(json);
+        const memberInput = document.getElementById('{{ form.member.id_for_label }}');
+        memberInput.value = jsonString;
+    }
+
+    // Trigger convertMemberTableToJSON on table cell input
+    document.addEventListener('input', function (event) {
+        if (event.target.closest('#member-data-table td[contenteditable="true"]')) {
+            convertMemberTableToJSON();
+        }
+    });
+
+    // Trigger convertTableToCSV when submit button is clicked
+    document.getElementById('submit-button').addEventListener('click', function (event) {
+        convertTableToCSV();
+    });
+
+    // Populate table with existing data when editing the form
+    document.addEventListener('DOMContentLoaded', function () {
+        const existingDataCSV = `{{ existing_data|safe }}`;
+        if (existingDataCSV) {
+            const rows = existingDataCSV.split('\n');
+            const tableBody = document.getElementById('fetched-data-table').querySelector('tbody');
+            if (tableBody) {
+                tableBody.innerHTML = '';
+                rows.forEach((row, rowIndex) => {
+                    // Skip the header row (rowIndex === 0)
+                    if (rowIndex === 0) return; // or continue;
+
+                    const tr = document.createElement('tr');
+                    const cells = parseCSV(row);
+                    cells.forEach((cell, cellIndex) => {
+                        const td = document.createElement('td');
+                        if (cell) {
+                            td.textContent = cell;
+                        }
+
+                        const thead = tableBody.parentElement.querySelector('thead');
+                        if (thead) {
+                            const th = thead.querySelector('th:nth-child(' + (cellIndex + 1) + ')');
+                            if (th && ['MMI', 'Dis. PGN', 'Dis. PGR'].includes(th.textContent)) {
+                                td.contentEditable = true;
+                            }
+                        }
+
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+            } else {
+                console.error("Table body not found!");
+            }
+        }
+    });
+
+    // Populate members table with existing data when editing the form based on selected kelompok
+    document.addEventListener('DOMContentLoaded', function () {
+        const kelompokSelect = document.getElementById('{{ form.kelompok.id_for_label }}');
+        const tableBody = document.getElementById('member-data-table').querySelector('tbody');
+        const existingMembers = `{{ existing_members|safe }}`;
+
+        function updateMembers() {
+            const selectedKelompok = kelompokSelect.value;
+            fetch(`/bast/api/get_member_data/${selectedKelompok}/`)
+                .then(response => response.json())
+                .then(data => {
+                    tableBody.innerHTML = '';
+                    data.member_data.forEach((name, index) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${name}</td>
+                            <td contentEditable=true>Hadir</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+
+                    // Populate the table with existing members
+                    if (existingMembers) {
+                        const existingMembersArray = existingMembers.split(',');
+                        existingMembersArray.forEach((member, index) => {
+                            const tr = tableBody.querySelector(`tr:nth-child(${index + 1})`);
+                            if (tr) {
+                                tr.querySelector('td:nth-child(3)').textContent = member;
+                            }
+                        });
+                    }
+
+                    // Trigger convertMemberTableToJSON after filling the column with "Hadir"
+                    convertMemberTableToJSON();
+                })
+                .catch(error => console.error('Error fetching members:', error));
+        }
+
+        kelompokSelect.addEventListener('change', updateMembers);
+        updateMembers();
+    });
+
+    // Parse CSV string into an array of arrays
+    function parseCSV(csvString) {
+        const result = [];
+        let inQuotes = false;
+        let currentField = '';
+
+        for (let i = 0; i < csvString.length; i++) {
+            const char = csvString[i];
+
+            if (char === '"') {
+                if (inQuotes && i + 1 < csvString.length && csvString[i + 1] === '"') {
+                    // Escaped double quote
+                    currentField += '"';
+                    i++; // Skip the next quote
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (char === ',' && !inQuotes) {
+                result.push(currentField.trim());
+                currentField = '';
+            } else {
+                currentField += char;
+            }
+        }
+        result.push(currentField.trim()); // Add the last field
+        return result;
+    }
+
+    // Function to calculate the difference between Dis. PGN and OT (UTC)
+    function calculateSelisihPGN() {
+        const table = document.getElementById('fetched-data-table');
+        for (let rowIndex = 1; rowIndex < table.rows.length; rowIndex++) { // Start from 1 to skip the header row
+            let row = table.rows[rowIndex];
+            let otUTC = row.cells[2].textContent; // Assuming "OT (UTC)" is the 3rd column (index 2)
+            let disPGN = row.cells[10].textContent; // Assuming "Dis. PGN" is the 11th column (index 10)
+            let selisihPGNCell = row.cells[11]; // Assuming "Selisih PGN" is the 12th column (index 11)
+
+            if (otUTC && disPGN) {
+                let otUTCDate = new Date(`1970-01-01T${otUTC}Z`).getTime();
+                let disPGNTime = disPGN.includes(':') ? disPGN : `${disPGN}:00`; // Add seconds if not present
+                let disPGNDate = new Date(`1970-01-01T${disPGNTime}Z`).getTime();
+                let selisihPGN = (disPGNDate - otUTCDate) / 1000; // Difference in seconds
+
+                let hours = Math.floor(selisihPGN / 3600);
+                let minutes = Math.floor((selisihPGN % 3600) / 60);
+                let seconds = Math.floor(selisihPGN % 60);
+
+                selisihPGNCell.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+    }
+
+    // Function to calculate the difference between Dis. PGR and OT (UTC)
+    function calculateSelisihPGR() {
+        const table = document.getElementById('fetched-data-table');
+        for (let rowIndex = 1; rowIndex < table.rows.length; rowIndex++) { // Start from 1 to skip the header row
+            let row = table.rows[rowIndex];
+            let otUTC = row.cells[2].textContent; // Assuming "OT (UTC)" is the 3rd column (index 2)
+            let disPGR = row.cells[12].textContent; // Assuming "Dis. PGR" is the 13th column (index 12)
+            let selisihPGRCell = row.cells[13]; // Assuming "Selisih PGR" is the 14th column (index 13)
+
+            if (otUTC && disPGR) {
+                let otUTCDate = new Date(`1970-01-01T${otUTC}Z`).getTime();
+                let disPGRTime = disPGR.includes(':') ? disPGR : `${disPGR}:00`; // Add seconds if not present
+                let disPGRDate = new Date(`1970-01-01T${disPGRTime}Z`).getTime();
+                let selisihPGR = (disPGRDate - otUTCDate) / 1000; // Difference in seconds
+
+                let hours = Math.floor(selisihPGR / 3600);
+                let minutes = Math.floor((selisihPGR % 3600) / 60);
+                let seconds = Math.floor(selisihPGR % 60);
+
+                selisihPGRCell.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+    }
+
+    // Trigger calculateSelisihPGN when the table is populated
+    document.addEventListener('DOMContentLoaded', function () {
+        calculateSelisihPGN();
+        calculateSelisihPGR();
+    });
+
+    // Trigger calculateSelisihPGN and calculateSelisihPGR when the fetch button is clicked
+    document.getElementById('fetch_bast').addEventListener('click', function () {
+        setTimeout(function () {
+            calculateSelisihPGN();
+            calculateSelisihPGR();
+        }, 1000); // Delay to ensure data is populated
+    });
+
+    // Trigger calculateSelisihPGN and calculateSelisihPGR when the table cells are edited
+    document.addEventListener('input', function (event) {
+        if (event.target.closest('#fetched-data-table td[contenteditable="true"]')) {
+            calculateSelisihPGN();
+            calculateSelisihPGR();
+        }
+    });
+
+    // Autofill count_gaps, count_spikes, and count_blanks based on bast_id
+    document.addEventListener('DOMContentLoaded', function () {
+        const bastIdInput = document.getElementById('{{ form.bast_id.id_for_label }}');
+        const countGapsInput = document.getElementById('{{ form.count_gaps.id_for_label }}');
+        const countSpikesInput = document.getElementById('{{ form.count_spikes.id_for_label }}');
+        const countBlanksInput = document.getElementById('{{ form.count_blanks.id_for_label }}');
+        const shiftSelect = document.getElementById('{{ form.shift.id_for_label }}');
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+
+        function autofillCounts() {
+            const bastId = bastIdInput.value;
+            const csId = bastId.replace('BAST', 'CS');
+            fetch(`/bast/api/get_cs_data/${csId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.count_gaps !== undefined) {
+                countGapsInput.value = data.count_gaps;
+                }
+                if (data.count_spikes !== undefined) {
+                countSpikesInput.value = data.count_spikes;
+                }
+                if (data.count_blanks !== undefined) {
+                countBlanksInput.value = data.count_blanks;
+                }
+            })
+            .catch(error => console.error('Error fetching CS data:', error));
+        }
+
+        // Create a new event to trigger the change event
+        function triggerChangeEvent(element) {
+            const event = new Event('change', { bubbles: true });
+            element.dispatchEvent(event);
+        }
+
+        function handleDateOrShiftChange() {
+            triggerChangeEvent(bastIdInput);
+        }
+
+        shiftSelect.addEventListener('change', handleDateOrShiftChange);
+        dateInput.addEventListener('change', handleDateOrShiftChange);
+        bastIdInput.addEventListener('change', autofillCounts);
+        });
+</script>
+{% endblock %}
