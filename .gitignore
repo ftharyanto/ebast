@@ -2,7 +2,8 @@
 # It ignores common files and directories that should not be tracked by Git.
 
 # Python cache files
-__pycache__
+__pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 
