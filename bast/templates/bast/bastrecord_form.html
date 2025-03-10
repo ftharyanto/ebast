@@ -199,6 +199,13 @@
                 </div>
                 <div class="form-group row mt-3">
                     <div class="col-md-3">
+                        <label for="{{ form.waktu_cs.id_for_label }}">Jam ceklis seiscomp</label>
+                        {{ form.waktu_cs|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please provide a valid count waktu ceklis seiscomp.
+                        </div>
+                    </div>
+                    <div class="col-md-3">
                         {{ form.count_gaps.label_tag }}
                         {{ form.count_gaps|add_class:"form-control" }}
                         <div class="invalid-feedback">
@@ -725,7 +732,7 @@
         }
     });
 
-    // Autofill count_gaps, count_spikes, and count_blanks based on bast_id
+    // Autofill waktu_cs, count_gaps, count_spikes, and count_blanks based on bast_id
     document.addEventListener('DOMContentLoaded', function () {
         const bastIdInput = document.getElementById('{{ form.bast_id.id_for_label }}');
         const countGapsInput = document.getElementById('{{ form.count_gaps.id_for_label }}');
@@ -733,7 +740,8 @@
         const countBlanksInput = document.getElementById('{{ form.count_blanks.id_for_label }}');
         const shiftSelect = document.getElementById('{{ form.shift.id_for_label }}');
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
-
+        const waktuCsInput = document.getElementById('{{ form.waktu_cs.id_for_label }}');
+        
         function autofillCounts() {
             const bastId = bastIdInput.value;
             const csId = bastId.replace('BAST', 'CS');
@@ -748,6 +756,9 @@
                 }
                 if (data.count_blanks !== undefined) {
                 countBlanksInput.value = data.count_blanks;
+                }
+                if (data.waktu_cs !== undefined) {
+                waktuCsInput.value = data.waktu_cs;
                 }
             })
             .catch(error => console.error('Error fetching CS data:', error));

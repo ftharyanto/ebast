@@ -164,6 +164,7 @@ def export_to_excel(request, record_id):
     sheet['G22'] = f'{record.event_luar}'
     sheet['L21'] = f': {record.event_dirasakan} event'
     sheet['L22'] = f': {record.event_dikirim} event'
+    sheet['E32'] = f'Pukul: {record.waktu_cs}'
     sheet['E33'] = f'IA (505) : Gaps = {record.count_gaps} ; Spike = {record.count_spikes} ; Blank = {record.count_blanks}'
     sheet['E37'] = f'{record.pulsa_poco}'
     sheet['E39'] = f'{record.poco_exp.strftime("%d %b %Y")}'
@@ -237,6 +238,7 @@ def export_to_pdf(request, record_id):
     sheet['G22'] = f'{record.event_luar}'
     sheet['L21'] = f': {record.event_dirasakan} event'
     sheet['L22'] = f': {record.event_dikirim} event'
+    sheet['E32'] = f'Pukul: {record.waktu_cs}'
     sheet['E33'] = f'IA (505) : Gaps = {record.count_gaps} ; Spike = {record.count_spikes} ; Blank = {record.count_blanks}'
     sheet['E37'] = f'{record.pulsa_poco}'
     sheet['E39'] = f'{record.poco_exp.strftime("%d %b %Y")}'
@@ -338,7 +340,8 @@ def get_cs_data(request, cs_id):
         return JsonResponse({
             'count_gaps': cs_record.count_gaps,
             'count_spikes': cs_record.count_spikes,
-            'count_blanks': cs_record.count_blanks
+            'count_blanks': cs_record.count_blanks,
+            'waktu_cs': cs_record.jam_pelaksanaan,
         })
     except CsRecordModel.DoesNotExist:
         return JsonResponse({'error': 'CS record not found'}, status=404)
