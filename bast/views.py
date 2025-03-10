@@ -172,6 +172,7 @@ def export_to_excel(request, record_id):
     sheet['G39'] = f'{record.samsung_exp.strftime("%d %b %Y")}'
     sheet['C46'] = f'Jakarta, {tanggal}'
     sheet['C54'] = f'{record.spv}'
+    sheet['C55'] = f'NIP. {record.NIP}'
 
     # import the events from the record using pandas
     events = pd.read_csv(StringIO(record.events))
@@ -246,6 +247,7 @@ def export_to_pdf(request, record_id):
     sheet['G39'] = f'{record.samsung_exp.strftime("%d %b %Y")}'
     sheet['C46'] = f'Jakarta, {tanggal}'
     sheet['C54'] = f'{record.spv}'
+    sheet['C55'] = f'NIP. {record.NIP}'
 
     # import the events from the record using pandas
     events = pd.read_csv(StringIO(record.events))
