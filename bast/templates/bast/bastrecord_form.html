@@ -484,7 +484,15 @@
     function convertTableToCSV() {
         const table = document.getElementById('fetched-data-table');
         let csv = [];
-        for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
+        let headers = [];
+        const headerCells = table.querySelectorAll('thead th');
+        headerCells.forEach(th => {
+            const thText = th.childNodes[0].textContent.trim(); // Get the text content without the span and icons
+            headers.push(thText);
+        });
+        csv.push(headers.join(','));
+
+        for (let rowIndex = 1; rowIndex < table.rows.length; rowIndex++) { // Start from 1 to skip the header row
             let row = table.rows[rowIndex];
             let rowData = [];
             for (let cell of row.cells) {
