@@ -183,7 +183,7 @@ def export_to_excel(request, record_id):
             # set the border of the first column to the left and the last column to the right, to thick
             sheet.cell(row=r_idx+27, column=2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='medium'))
             sheet.cell(row=r_idx+27, column=17).border = openpyxl.styles.Border(right=openpyxl.styles.Side(style='medium'))
-            sheet.cell(row=r_idx+27, column=10).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
+            sheet.cell(row=r_idx+27, column=11).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
 
     # set the inserted cell border expanded to column 17 to thin
     for r_idx in range(rows_to_add):
