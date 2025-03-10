@@ -662,7 +662,11 @@
                 let minutes = Math.floor((selisihPGN % 3600) / 60);
                 let seconds = Math.floor(selisihPGN % 60);
 
-                selisihPGNCell.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
+                    selisihPGNCell.textContent = "";
+                } else {
+                    selisihPGNCell.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
             }
         }
     }
