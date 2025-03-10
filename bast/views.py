@@ -159,7 +159,7 @@ def export_to_excel(request, record_id):
     for idx, member_data in enumerate(member[:9]):  # Limit to 9 members to fit in the cells K9:K17 and L9:L17
         sheet[f'K{9 + idx}'] = member_data['nama']
         sheet[f'L{9 + idx}'] = member_data['keterangan']
-    sheet['N6'] = f': {record.waktu_pelaksaan}'
+    sheet['N6'] = f': {record.waktu_pelaksanaan}'
     sheet['G21'] = f'{record.event_indonesia}'
     sheet['G22'] = f'{record.event_luar}'
     sheet['L21'] = f': {record.event_dirasakan} event'
@@ -232,7 +232,7 @@ def export_to_pdf(request, record_id):
     for idx, member_data in enumerate(member[:9]):  # Limit to 9 members to fit in the cells K9:K17 and L9:L17
         sheet[f'K{9 + idx}'] = member_data['nama']
         sheet[f'L{9 + idx}'] = member_data['keterangan']
-    sheet['N6'] = f': {record.waktu_pelaksaan}'
+    sheet['N6'] = f': {record.waktu_pelaksanaan}'
     sheet['G21'] = f'{record.event_indonesia}'
     sheet['G22'] = f'{record.event_luar}'
     sheet['L21'] = f': {record.event_dirasakan} event'
