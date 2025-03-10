@@ -66,13 +66,15 @@
                 </div>
                 <!-- create a table of members from "Kelompok" model -->
                 <div class="table-responsive container" style="padding-right: 5em; padding-left: 5em;">
-                    <table class="table table-bordered table-hover table-sm" id="member-data-table" style="width: auto;">
+                    <table class="table table-bordered table-hover table-sm" id="member-data-table"
+                        style="width: auto;">
                         <thead class="thead-dark">
                             <tr>
                                 <th style="width: 1%;">No</th>
                                 <th style="width: 20%;">Nama</th>
                                 <th style="width: 20%;">Keterangan
-                                    <span data-toggle="tooltip" data-placement="top" title="Isi keterangan dengan nama pengganti atau keterangan izin/cuti/SPT. Contoh: diganti Fajar">
+                                    <span data-toggle="tooltip" data-placement="top"
+                                        title="Isi keterangan dengan nama pengganti atau keterangan izin/cuti/SPT. Contoh: diganti Fajar">
                                         <i class="fas fa-info-circle"></i>
                                     </span>
                                 </th>
@@ -142,16 +144,20 @@
                                             <th>TypeMag</th>
                                             <th>Region</th>
                                             <th>MMI
-                                                <span data-toggle="tooltip" data-placement="top" title="Contoh: dirasakan di Kolaka Timur III MMI">
+                                                <span data-toggle="tooltip" data-placement="top"
+                                                    title="Contoh: dirasakan di Kolaka Timur III MMI">
                                                     <i class="fas fa-info-circle"></i>
-                                            </span></th>
+                                                </span>
+                                            </th>
                                             <th>Dis. PGN
-                                                <span data-toggle="tooltip" data-placement="top" title="Waktu diseminasi oleh PGN. Contoh: 20:25:03">
+                                                <span data-toggle="tooltip" data-placement="top"
+                                                    title="Waktu diseminasi oleh PGN. Contoh: 20:25:03">
                                                     <i class="fas fa-info-circle"></i>
                                             </th>
                                             <th>Selisih PGN</th>
                                             <th>Dis. PGR
-                                                <span data-toggle="tooltip" data-placement="top" title="Waktu diseminasi oleh PGR. Contoh: 20:25:03">
+                                                <span data-toggle="tooltip" data-placement="top"
+                                                    title="Waktu diseminasi oleh PGR. Contoh: 20:25:03">
                                                     <i class="fas fa-info-circle"></i>
                                             </th>
                                             <th>Selisih PGR</th>
@@ -335,7 +341,7 @@
         }, false);
     })();
 
-    // change bast_id value based on date_input and waktu_dinas
+    // change bast_id and waktu_pelaksanaan value based on date_input and waktu_dinas
     document.addEventListener('DOMContentLoaded', function () {
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
         const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
@@ -346,6 +352,21 @@
             const dateValue = dateInput.value;
             const waktuDinasValue = waktuDinasSelect.value;
             bastIdInput.value = "BAST-" + dateValue + "-" + waktuDinasValue[0];
+            const waktuPelaksanaanSelect = document.getElementById('{{ form.waktu_pelaksanaan.id_for_label }}');
+            switch (waktuDinasValue) {
+                case 'Pagi':
+                    waktuPelaksanaanSelect.selectedIndex = 1;
+                    break;
+                case 'Siang':
+                    waktuPelaksanaanSelect.selectedIndex = 2;
+                    break;
+                case 'Malam':
+                    waktuPelaksanaanSelect.selectedIndex = 3;
+                    break;
+                case 'Dini Hari':
+                    waktuPelaksanaanSelect.selectedIndex = 4;
+                    break;
+            }
         }
 
         dateInput.addEventListener('change', updateBastId);
@@ -741,27 +762,27 @@
         const shiftSelect = document.getElementById('{{ form.shift.id_for_label }}');
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
         const waktuCsInput = document.getElementById('{{ form.waktu_cs.id_for_label }}');
-        
+
         function autofillCounts() {
             const bastId = bastIdInput.value;
             const csId = bastId.replace('BAST', 'CS');
             fetch(`/bast/api/get_cs_data/${csId}/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.count_gaps !== undefined) {
-                countGapsInput.value = data.count_gaps;
-                }
-                if (data.count_spikes !== undefined) {
-                countSpikesInput.value = data.count_spikes;
-                }
-                if (data.count_blanks !== undefined) {
-                countBlanksInput.value = data.count_blanks;
-                }
-                if (data.waktu_cs !== undefined) {
-                waktuCsInput.value = data.waktu_cs;
-                }
-            })
-            .catch(error => console.error('Error fetching CS data:', error));
+                .then(response => response.json())
+                .then(data => {
+                    if (data.count_gaps !== undefined) {
+                        countGapsInput.value = data.count_gaps;
+                    }
+                    if (data.count_spikes !== undefined) {
+                        countSpikesInput.value = data.count_spikes;
+                    }
+                    if (data.count_blanks !== undefined) {
+                        countBlanksInput.value = data.count_blanks;
+                    }
+                    if (data.waktu_cs !== undefined) {
+                        waktuCsInput.value = data.waktu_cs;
+                    }
+                })
+                .catch(error => console.error('Error fetching CS data:', error));
         }
 
         // Create a new event to trigger the change event
@@ -777,6 +798,6 @@
         shiftSelect.addEventListener('change', handleDateOrShiftChange);
         dateInput.addEventListener('change', handleDateOrShiftChange);
         bastIdInput.addEventListener('change', autofillCounts);
-        });
+    });
 </script>
 {% endblock %}
