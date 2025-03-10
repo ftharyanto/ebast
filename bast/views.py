@@ -137,7 +137,8 @@ def get_member_data(request, kelompok):
 
 def export_to_excel(request, record_id):
     from qc.views import format_date_indonesian, get_hari_indonesia
-
+    import json
+    
     try:
         record = BastRecordModel.objects.get(id=record_id)
     except BastRecordModel.DoesNotExist:
@@ -147,15 +148,18 @@ def export_to_excel(request, record_id):
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
     sheet.title = 'BAST'
-
+    member = json.loads(record.member)
     tanggal = format_date_indonesian(record.bast_id[5:-2])
     hari = get_hari_indonesia(record.bast_id[5:-2])
+
     sheet['J4'] = f'{convert_to_roman(record.kelompok)} ({convert_to_indonesian(record.kelompok)})'
     sheet['J6'] = f'{convert_to_roman(record.kel_berikut)} ({convert_to_indonesian(record.kel_berikut)})'
     sheet['N4'] = f': {tanggal}' 
     sheet['N5'] = f': {hari}'
+    for idx, member_data in enumerate(member[:9]):  # Limit to 9 members to fit in the cells K9:K17 and L9:L17
+        sheet[f'K{9 + idx}'] = member_data['nama']
+        sheet[f'L{9 + idx}'] = member_data['keterangan']
     sheet['N6'] = f': {record.waktu_pelaksaan}'
-    # sheet['m6'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
     sheet['G21'] = f'{record.event_indonesia}'
     sheet['G22'] = f'{record.event_luar}'
     sheet['L21'] = f': {record.event_dirasakan} event'
@@ -184,7 +188,7 @@ def export_to_excel(request, record_id):
             sheet.cell(row=r_idx+27, column=2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='medium'))
             sheet.cell(row=r_idx+27, column=17).border = openpyxl.styles.Border(right=openpyxl.styles.Side(style='medium'))
             sheet.cell(row=r_idx+27, column=11).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
-
+    
     # set the inserted cell border expanded to column 17 to thin
     for r_idx in range(rows_to_add):
         for c_idx in range(14):  # Iterate up to column 17 (index 14)
