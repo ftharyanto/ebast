@@ -492,7 +492,10 @@
                 if (rowIndex !== 0 && cell.cellIndex === 8 && !cellText.startsWith('"')) { // Assuming "Region" is the 9th column (index 8)
                     cellText = `"${cellText}"`;
                 }
-                rowData.push(cellText);
+                // Omit cells with tooltips
+                if (!cell.querySelector('.fas.fa-info-circle')) {
+                    rowData.push(cellText);
+                }
             }
             csv.push(rowData.join(','));
         }
@@ -524,9 +527,11 @@
         }
     });
 
-    // Trigger convertTableToCSV when submit button is clicked
-    document.getElementById('submit-button').addEventListener('click', function (event) {
-        convertTableToCSV();
+    // Trigger convertTableToCSV whenever the table is updated
+    document.addEventListener('input', function (event) {
+        if (event.target.closest('#fetched-data-table td[contenteditable="true"]')) {
+            convertTableToCSV();
+        }
     });
 
     // Populate table with existing data when editing the form
@@ -549,10 +554,10 @@
                             td.textContent = cell;
                         }
 
-                        const thead = tableBody.parentElement.querySelector('thead');
-                        if (thead) {
-                            const th = thead.querySelector('th:nth-child(' + (cellIndex + 1) + ')');
-                            if (th && ['MMI', 'Dis. PGN', 'Dis. PGR'].includes(th.textContent)) {
+                        const th = tableBody.parentElement.querySelector('thead').querySelector('th:nth-child(' + (cellIndex + 1) + ')');
+                        if (th) {
+                            const thText = th.childNodes[0].textContent.trim(); // Get the text content without the span and icons
+                            if (['MMI', 'Dis. PGN', 'Dis. PGR'].includes(thText)) {
                                 td.contentEditable = true;
                             }
                         }
