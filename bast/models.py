@@ -49,7 +49,6 @@ class BastRecordModel(models.Model):
     waktu_cs = models.CharField(max_length=20, default='00:00 WIB', blank=True, null=True)
     pulsa_poco = models.IntegerField(default=0)
     poco_exp = models.DateField(default=get_default_date)
-    pulsa_samsung = models.IntegerField(default=0)
     samsung_exp = models.DateField(default=get_default_date)
     notes = models.TextField(max_length=1000, default='', blank=True, null=True)
 

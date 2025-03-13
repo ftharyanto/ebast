@@ -166,9 +166,8 @@ def export_to_excel(request, record_id):
     sheet['L22'] = f': {record.event_dikirim} event'
     sheet['E32'] = f'Pukul: {record.waktu_cs}'
     sheet['E33'] = f'IA (505) : Gaps = {record.count_gaps} ; Spike = {record.count_spikes} ; Blank = {record.count_blanks}'
-    sheet['E37'] = f'{record.pulsa_poco}'
+    sheet['E37'] = f'Rp {record.pulsa_poco:,.0f}'.replace(',', '.')
     sheet['E39'] = f'{record.poco_exp.strftime("%d %b %Y")}'
-    sheet['G37'] = f'{record.pulsa_samsung}'
     sheet['G39'] = f'{record.samsung_exp.strftime("%d %b %Y")}'
     sheet['C46'] = f'Jakarta, {tanggal}'
     sheet['C54'] = f'{record.spv}'
@@ -241,9 +240,8 @@ def export_to_pdf(request, record_id):
     sheet['L22'] = f': {record.event_dikirim} event'
     sheet['E32'] = f'Pukul: {record.waktu_cs}'
     sheet['E33'] = f'IA (505) : Gaps = {record.count_gaps} ; Spike = {record.count_spikes} ; Blank = {record.count_blanks}'
-    sheet['E37'] = f'{record.pulsa_poco}'
+    sheet['E37'] = f'Rp {record.pulsa_poco:,.0f}'.replace(',', '.')
     sheet['E39'] = f'{record.poco_exp.strftime("%d %b %Y")}'
-    sheet['G37'] = f'{record.pulsa_samsung}'
     sheet['G39'] = f'{record.samsung_exp.strftime("%d %b %Y")}'
     sheet['C46'] = f'Jakarta, {tanggal}'
     sheet['C54'] = f'{record.spv}'
