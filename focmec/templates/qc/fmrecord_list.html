@@ -1,0 +1,238 @@
+{% extends 'core/base.html' %}
+{% block title %}QC Records{% endblock %}
+
+{% block content %}
+<h1 class="mt-5">QC Records</h1>
+<a href="{% url 'qc:qcrecord_create' %}" class="btn btn-primary mb-3">Create New Record</a>
+
+<div class="d-flex justify-content-between mb-3">
+    <div>
+        <label for="recordsPerPageTop">Records per page:</label>
+        <select id="recordsPerPageTop" class="form-control d-inline-block w-auto">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+    <div>
+        <button id="prevPageTop" class="btn btn-light">Previous</button>
+        <span id="pageInfoTop"></span>
+        <button id="nextPageTop" class="btn btn-light">Next</button>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-sm" id="qcRecordTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)" style="cursor: pointer; text-align: center;" width="15%">ID <span id="idSortArrow">↓</span></th>
+                <th onclick="sortTable(1)" style="cursor: pointer; text-align: center;" width="15%">Kelompok <span id="kelompokSortArrow"></span></th>
+                <th onclick="sortTable(2)" style="cursor: pointer; text-align: center;">Operator <span id="operatorSortArrow"></span></th>
+                <th style="text-align: center;">Actions</th>
+            </tr>
+            <tr>
+                <th><input type="text" id="idFilter" onkeyup="filterTable(0)" placeholder="Filter by ID" class="form-control"></th>
+                <th><input type="text" id="kelompokFilter" onkeyup="filterTable(1)" placeholder="Filter by Kelompok" class="form-control"></th>
+                <th><input type="text" id="operatorFilter" onkeyup="filterTable(2)" placeholder="Filter by Operator" class="form-control"></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="qcRecordTableBody">
+            {% for record in qcrecords|dictsortreversed:"qc_id" %}
+            <tr>
+                <td style="text-align: center;">{{ record.qc_id }}</td>
+                <td style="text-align: center;">{{ record.kelompok }}</td>
+                <td>{{ record.operator }}</td>
+                <td>
+                    <a href="{% url 'qc:qcrecord_update' record.pk %}" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <form action="{% url 'qc:qcrecord_delete_direct' record.pk %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-sm btn-danger delete-button" data-toggle="tooltip" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                    <a href="{% url 'qc:export_to_excel' record.pk %}" class="btn btn-sm btn-light text-success" data-toggle="tooltip" title="Export to Excel">
+                        <i class="fas fa-file-excel"></i>
+                    </a>
+                    <a href="{% url 'qc:export_to_pdf' record.pk %}" class="btn btn-sm btn-light text-danger" data-toggle="tooltip" title="Export to PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="d-flex justify-content-between">
+    <div>
+        <label for="recordsPerPage">Records per page:</label>
+        <select id="recordsPerPage" class="form-control d-inline-block w-auto">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+    <div>
+        <button id="prevPage" class="btn btn-light">Previous</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage" class="btn btn-light">Next</button>
+    </div>
+</div>
+
+
+<script>
+function filterTable(n) {
+    var input, filter, table, tr, td, i, txtValue;
+    if (n == 0) {
+        input = document.getElementById("idFilter");
+    } else if (n == 1) {
+        input = document.getElementById("kelompokFilter");
+    } else {
+        input = document.getElementById("operatorFilter");
+    }
+    filter = input.value.toLowerCase();
+    table = document.getElementById("qcRecordTable");
+    tr = table.getElementsByTagName("tr");
+    for (i = 2; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[n];
+        if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }       
+    }
+}
+
+function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("qcRecordTable");
+    switching = true;
+    dir = "asc"; 
+    resetArrows();
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 2; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount ++;      
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+    setArrow(n, dir);
+}
+
+function resetArrows() {
+    document.getElementById("idSortArrow").innerHTML = "";
+    document.getElementById("kelompokSortArrow").innerHTML = "";
+    document.getElementById("operatorSortArrow").innerHTML = "";
+}
+
+function setArrow(n, dir) {
+    var arrow = dir == "asc" ? "↑" : "↓";
+    if (n == 0) {
+        document.getElementById("idSortArrow").innerHTML = arrow;
+    } else if (n == 1) {
+        document.getElementById("kelompokSortArrow").innerHTML = arrow;
+    } else if (n == 2) {
+        document.getElementById("operatorSortArrow").innerHTML = arrow;
+    }
+}
+
+// Set initial sort arrow
+document.addEventListener("DOMContentLoaded", function() {
+    setArrow(0, "desc");
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    var currentPage = 1;
+    var recordsPerPage = parseInt(document.getElementById("recordsPerPage").value);
+    var table = document.getElementById("qcRecordTable");
+    var tbody = document.getElementById("qcRecordTableBody");
+    var rows = Array.from(tbody.getElementsByTagName("tr"));
+    var totalPages = Math.ceil(rows.length / recordsPerPage);
+
+    function displayPage(page) {
+        var start = (page - 1) * recordsPerPage;
+        var end = start + recordsPerPage;
+        rows.forEach((row, index) => {
+            row.style.display = (index >= start && index < end) ? "" : "none";
+        });
+        document.getElementById("pageInfo").textContent = `Page ${page} of ${totalPages}`;
+        document.getElementById("pageInfoTop").textContent = `Page ${page} of ${totalPages}`;
+        document.getElementById("prevPage").disabled = page === 1;
+        document.getElementById("prevPageTop").disabled = page === 1;
+        document.getElementById("nextPage").disabled = page === totalPages;
+        document.getElementById("nextPageTop").disabled = page === totalPages;
+    }
+
+    function updateRecordsPerPage() {
+        recordsPerPage = parseInt(this.value);
+        totalPages = Math.ceil(rows.length / recordsPerPage);
+        currentPage = 1;
+        displayPage(currentPage);
+    }
+
+    document.getElementById("recordsPerPage").addEventListener("change", updateRecordsPerPage);
+    document.getElementById("recordsPerPageTop").addEventListener("change", updateRecordsPerPage);
+
+    document.getElementById("prevPage").addEventListener("click", function() {
+        if (currentPage > 1) {
+            currentPage--;
+            displayPage(currentPage);
+        }
+    });
+
+    document.getElementById("nextPage").addEventListener("click", function() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayPage(currentPage);
+        }
+    });
+
+    document.getElementById("prevPageTop").addEventListener("click", function() {
+        if (currentPage > 1) {
+            currentPage--;
+            displayPage(currentPage);
+        }
+    });
+
+    document.getElementById("nextPageTop").addEventListener("click", function() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayPage(currentPage);
+        }
+    });
+
+    displayPage(currentPage);
+});
+</script>
+{% endblock %}
