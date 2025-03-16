@@ -1,7 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from .models import QcRecord
-from .forms import QcRecordForm
+from .models import QcFmRecord
+from .forms import QcFmRecordForm
 from django.shortcuts import render
 import requests, openpyxl, datetime, os
 import pandas as pd
@@ -12,33 +12,33 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from django.views import View
 from django.shortcuts import redirect
 
-class QcRecordListView(ListView):
-    model = QcRecord
-    template_name = 'qc/qcrecord_list.html'
-    context_object_name = 'qcrecords'
+class QcFmRecordListView(ListView):
+    model = QcFmRecord
+    template_name = 'qcfm/qcfmrecord_list.html'
+    context_object_name = 'qcfmrecords'
 
-class QcRecordCreateView(CreateView):
-    model = QcRecord
-    form_class = QcRecordForm
-    template_name = 'qc/qcrecord_form.html'
-    success_url = reverse_lazy('qc:qcrecord_list')
+class QcFmRecordCreateView(CreateView):
+    model = QcFmRecord
+    form_class = QcFmRecordForm
+    template_name = 'qcfm/qcfmrecord_form.html'
+    success_url = reverse_lazy('qcfm:qcfmrecord_list')
 
-class QcRecordUpdateView(UpdateView):
-    model = QcRecord
-    form_class = QcRecordForm
-    template_name = 'qc/qcrecord_form.html'
-    success_url = reverse_lazy('qc:qcrecord_list')
+class QcFmRecordUpdateView(UpdateView):
+    model = QcFmRecord
+    form_class = QcFmRecordForm
+    template_name = 'qcfm/qcfmrecord_form.html'
+    success_url = reverse_lazy('qcfm:qcfmrecord_list')
 
     def form_valid(self, form):
         return super().form_valid(form)
 
-class QcRecordDeleteDirectView(View):
+class QcFmRecordDeleteDirectView(View):
     def post(self, request, pk, *args, **kwargs):
         try:
-            record = QcRecord.objects.get(pk=pk)
+            record = QcFmRecord.objects.get(pk=pk)
             record.delete()
-            return redirect('qc:qcrecord_list')
-        except QcRecord.DoesNotExist:
+            return redirect('qcfm:qcfmrecord_list')
+        except QcFmRecord.DoesNotExist:
             return HttpResponse(status=404)
 
 
@@ -81,7 +81,7 @@ def clean_fm_data(data, start_datetime='2025-03-12 00:00:00', end_datetime='2025
     
     return df_selected
 
-def fetch_data(start_datetime='2025-03-12 00:00:00', end_datetime='2025-03-13 00:00:00'):
+def fetch_data(request, start_datetime='2025-03-12 00:00:00', end_datetime='2025-03-13 00:00:00'):
     url = "http://202.90.198.41/qc_focal.txt"
     response = requests.get(url)
 
@@ -103,17 +103,17 @@ def get_nip(request, operator_id):
 
 def export_to_excel(request, record_id):
     try:
-        record = QcRecord.objects.get(id=record_id)
-    except QcRecord.DoesNotExist:
+        record = QcFmRecord.objects.get(id=record_id)
+    except QcFmRecord.DoesNotExist:
         return HttpResponse(status=404)
 
-    file_path = os.path.join(os.path.dirname(__file__), 'static/qc/QC Seiscomp.xlsx')
+    file_path = os.path.join(os.path.dirname(__file__), 'static/qcfm/QC_FM.xlsx')
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
-    sheet.title = 'QC Records'
+    sheet.title = 'QC FM Records'
 
-    tanggal = format_date_indonesian(record.qc_id[3:-2])
-    hari = get_hari_indonesia(record.qc_id[3:-2])
+    tanggal = format_date_indonesian(record.qcfm_id[3:-2])
+    hari = get_hari_indonesia(record.qcfm_id[3:-2])
     sheet['G2'] = ': ' + tanggal
     sheet['G3'] = ': ' + hari
     sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
@@ -122,25 +122,25 @@ def export_to_excel(request, record_id):
     sheet['G6'] = f'Event di Luar Negeri: {record.event_luar}'
 
 
-    # import the qc_prev and qc values from the record using pandas and fill the C8 to M8 row with the qc_prev and qc values alternatingly, add rows as needed
-    qc_prev = pd.read_csv(StringIO(record.qc_prev))
+    # import the qcfm_prev and qc values from the record using pandas and fill the C8 to M8 row with the qcfm_prev and qc values alternatingly, add rows as needed
+    qcfm_prev = pd.read_csv(StringIO(record.qcfm_prev))
     
     # add prev columns with 'prev' values to the last column
-    qc_prev['prev'] = f'Kel. {record.kel_sebelum}'
+    qcfm_prev['prev'] = f'Kel. {record.kel_sebelum}'
 
     # add rows to the sheet
-    rows_to_add = len(qc_prev)
+    rows_to_add = len(qcfm_prev)
     sheet.insert_rows(8, amount=rows_to_add*2)
-    qc_prev = dataframe_to_rows(qc_prev, index=False, header=False)
+    qcfm_prev = dataframe_to_rows(qcfm_prev, index=False, header=False)
 
-    qc = pd.read_csv(StringIO(record.qc))
+    qcfm = pd.read_csv(StringIO(record.qcfm))
 
-    # add qc columns with 'QC' values to the last column
-    qc['QC'] = 'QC'
-    qc = dataframe_to_rows(qc, index=False, header=False)
+    # add qcfm columns with 'QCFM' values to the last column
+    qcfm['QC'] = 'QC'
+    qcfm = dataframe_to_rows(qcfm, index=False, header=False)
     
-    # Iterate over the rows of the qc_prev DataFrame
-    for r_idx, row in enumerate(qc_prev, 1):
+    # Iterate over the rows of the qcfm_prev DataFrame
+    for r_idx, row in enumerate(qcfm_prev, 1):
         # Iterate over the columns of the current row
         for c_idx, value in enumerate(row, 1):
             # Set the value and alignment for the first column (row number)
@@ -153,7 +153,7 @@ def export_to_excel(request, record_id):
         sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
             
     # Iterate over the rows of the qc DataFrame
-    for r_idx, row in enumerate(qc, 1):
+    for r_idx, row in enumerate(qcfm, 1):
         # Iterate over the columns of the current row
         for c_idx, value in enumerate(row, 1):
             # Set the value and alignment for the current cell
@@ -182,24 +182,24 @@ def export_to_excel(request, record_id):
 
     # Save the workbook to a BytesIO object
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename=QC_{record.qc_id}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename=QCFM_{record.qcfm_id}.xlsx'
     workbook.save(response)
 
     return response
 
 def export_to_pdf(request, record_id):
     try:
-        record = QcRecord.objects.get(id=record_id)
-    except QcRecord.DoesNotExist:
+        record = QcFmRecord.objects.get(id=record_id)
+    except QcFmRecord.DoesNotExist:
         return HttpResponse(status=404)
 
-    file_path = os.path.join(os.path.dirname(__file__), 'static/qc/QC Seiscomp.xlsx')
+    file_path = os.path.join(os.path.dirname(__file__), 'static/qcfm/QC_FM.xlsx')
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
     sheet.title = 'QC Records'
 
-    tanggal = format_date_indonesian(record.qc_id[3:-2])
-    hari = get_hari_indonesia(record.qc_id[3:-2])
+    tanggal = format_date_indonesian(record.qcfm_id[5:-2])
+    hari = get_hari_indonesia(record.qcfm_id[5:-2])
     sheet['G2'] = ': ' + tanggal
     sheet['G3'] = ': ' + hari
     sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
@@ -208,25 +208,25 @@ def export_to_pdf(request, record_id):
     sheet['G6'] = f'Event di Luar Negeri: {record.event_luar}'
 
 
-    # import the qc_prev and qc values from the record using pandas and fill the C8 to M8 row with the qc_prev and qc values alternatingly, add rows as needed
-    qc_prev = pd.read_csv(StringIO(record.qc_prev))
+    # import the qcfm_prev and qc values from the record using pandas and fill the C8 to M8 row with the qcfm_prev and qc values alternatingly, add rows as needed
+    qcfm_prev = pd.read_csv(StringIO(record.qcfm_prev))
     
     # add prev columns with 'prev' values to the last column
-    qc_prev['prev'] = f'Kel. {record.kel_sebelum}'
+    qcfm_prev['prev'] = f'Kel. {record.kel_sebelum}'
 
     # add rows to the sheet
-    rows_to_add = len(qc_prev)
+    rows_to_add = len(qcfm_prev)
     sheet.insert_rows(8, amount=rows_to_add*2)
-    qc_prev = dataframe_to_rows(qc_prev, index=False, header=False)
+    qcfm_prev = dataframe_to_rows(qcfm_prev, index=False, header=False)
 
-    qc = pd.read_csv(StringIO(record.qc))
+    qcfm = pd.read_csv(StringIO(record.qcfm))
 
-    # add qc columns with 'QC' values to the last column
-    qc['QC'] = 'QC'
-    qc = dataframe_to_rows(qc, index=False, header=False)
-    
-    # Iterate over the rows of the qc_prev DataFrame
-    for r_idx, row in enumerate(qc_prev, 1):
+    # add qcfm columns with 'QCFM' values to the last column
+    qcfm['QCFM'] = 'QCFM'
+    qcfm = dataframe_to_rows(qcfm, index=False, header=False)
+
+    # Iterate over the rows of the qcfm_prev DataFrame
+    for r_idx, row in enumerate(qcfm_prev, 1):
         # Iterate over the columns of the current row
         for c_idx, value in enumerate(row, 1):
             # Set the value and alignment for the first column (row number)
@@ -237,21 +237,21 @@ def export_to_pdf(request, record_id):
             sheet.cell(row=r_idx*2+6, column=c_idx+2).fill = openpyxl.styles.PatternFill(start_color='FFD3D3D3', end_color='FFD3D3D3', fill_type='solid')
         # Merge cells for the row number column
         sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
-            
-    # Iterate over the rows of the qc DataFrame
-    for r_idx, row in enumerate(qc, 1):
+
+    # Iterate over the rows of the qcfm DataFrame
+    for r_idx, row in enumerate(qcfm, 1):
         # Iterate over the columns of the current row
         for c_idx, value in enumerate(row, 1):
             # Set the value and alignment for the current cell
             sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
     
-    # set the M8 column to align left horizontally
-    for r_idx in range(rows_to_add*2):
-        sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
+    # # set the M8 column to align left horizontally
+    # for r_idx in range(rows_to_add*2):
+    #     sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
 
     # add borders to the cell in the data
     for r_idx in range(rows_to_add*2):
-        for c_idx in range(13):
+        for c_idx in range(17):
             sheet.cell(row=r_idx+8, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
 
     # set the height of the rows in the data to 15
@@ -259,7 +259,7 @@ def export_to_pdf(request, record_id):
         sheet.row_dimensions[r_idx+8].height = 15
 
     # Dynamically set the value of 'M' column based on the number of rows added
-    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=tanggal)
+    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=f'Jakarta, {tanggal}')
     sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
     sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
     sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(name='Calibri', underline='single', size=18, bold=True)
@@ -267,10 +267,10 @@ def export_to_pdf(request, record_id):
     sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
 
     # temporarily save the workbook to a file
-    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/qc/{record.qc_id}.xlsx')
+    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/qcfm/{record.qcfm_id}.xlsx')
     workbook.save(temp_xlsx)
-    temp_pdf_dir = os.path.join(os.path.dirname(__file__), 'static/qc')
-    temp_pdf = os.path.join(temp_pdf_dir, f'{record.qc_id}.pdf')
+    temp_pdf_dir = os.path.join(os.path.dirname(__file__), 'static/qcfm')
+    temp_pdf = os.path.join(temp_pdf_dir, f'{record.qcfm_id}.pdf')
 
     import subprocess
     try:
@@ -286,7 +286,7 @@ def export_to_pdf(request, record_id):
     # Read the generated PDF file and return it in the response
     with open(temp_pdf, 'rb') as pdf_file:
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'inline; filename={record.qc_id}.pdf'
+        response['Content-Disposition'] = f'inline; filename={record.qcfm_id}.pdf'
 
     if os.path.exists(temp_pdf):
         os.remove(temp_pdf)
@@ -320,7 +320,6 @@ def get_hari_indonesia(date_string):
     """
 
     import datetime
-    import calendar
     date_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d")
     day_of_week_num = date_obj.weekday()  # Monday is 0, Sunday is 6
 

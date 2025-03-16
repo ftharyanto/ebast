@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import FmRecord
+from .models import QcFmRecord
 
 # Register your models here.
-admin.site.register(FmRecord)
+admin.site.register(QcFmRecord)
