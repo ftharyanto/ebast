@@ -29,12 +29,10 @@
         <thead>
             <tr>
                 <th onclick="sortTable(0)" style="cursor: pointer;">Name <span id="nameSortArrow">↑</span></th>
-                <th onclick="sortTable(1)" style="cursor: pointer;">Code <span id="codeSortArrow"></span></th>
                 <th>Actions</th>
             </tr>
             <tr>
                 <th><input type="text" id="nameFilter" onkeyup="filterTable(0)" placeholder="Filter by Name" class="form-control"></th>
-                <th><input type="text" id="codeFilter" onkeyup="filterTable(1)" placeholder="Filter by Code" class="form-control"></th>
                 <th></th>
             </tr>
         </thead>
@@ -42,7 +40,6 @@
             {% for record in kelompok %}
             <tr>
                 <td>{{ record.name }}</td>
-                <td>{{ record.code }}</td>
                 <td>
                     <a href="{% url 'core:kelompok_update' record.pk %}" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Edit">
                         <i class="fas fa-edit"></i>
