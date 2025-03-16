@@ -197,6 +197,17 @@ def export_to_excel(request, record_id):
         for c_idx in range(14):  # Iterate up to column 17 (index 14)
             cell = sheet.cell(row=r_idx + 28, column=c_idx + 3) # Get the cell object
 
+            # Check the length of the value in index 12
+            MMI_value = sheet.cell(row=r_idx + 28, column=12).value
+            if pd.notna(MMI_value):
+                print(MMI_value)
+                if len(MMI_value) > 23:
+                    # Calculate the new row height
+                    new_height = 15.75 * ((len(MMI_value) // 23) + 1)
+                    sheet.row_dimensions[r_idx + 28].height = new_height
+                # Set the cell format to wrap text and center horizontally
+                sheet.cell(row=r_idx + 28, column=12).alignment = openpyxl.styles.Alignment(wrap_text=True, vertical='center')
+
             cell.border = openpyxl.styles.Border(
                 left=openpyxl.styles.Side(style='thin'),
                 right=openpyxl.styles.Side(style='thin'),
@@ -271,6 +282,17 @@ def export_to_pdf(request, record_id):
     for r_idx in range(rows_to_add):
         for c_idx in range(14):  # Iterate up to column 17 (index 14)
             cell = sheet.cell(row=r_idx + 28, column=c_idx + 3) # Get the cell object
+
+            # Check the length of the value in index 12
+            MMI_value = sheet.cell(row=r_idx + 28, column=12).value
+            if pd.notna(MMI_value):
+                print(MMI_value)
+                if len(MMI_value) > 23:
+                    # Calculate the new row height
+                    new_height = 15.75 * ((len(MMI_value) // 23) + 1)
+                    sheet.row_dimensions[r_idx + 28].height = new_height
+                # Set the cell format to wrap text and center horizontally
+                sheet.cell(row=r_idx + 28, column=12).alignment = openpyxl.styles.Alignment(wrap_text=True, vertical='center')
 
             cell.border = openpyxl.styles.Border(
                 left=openpyxl.styles.Side(style='thin'),
