@@ -28,6 +28,7 @@ urlpatterns = [
     path('cl_seiscomp/', include('cl_seiscomp.urls')),
     path('text_formatter/', include('text_formatter.urls')),
     path('bast/', include('bast.urls')),
+    path('qcfm/', include('qcfm.urls')),
 ]
 
 if settings.DEBUG:  # Only for development

@@ -1,0 +1,41 @@
+from django.db import models
+from django.utils import timezone
+from core.models import Operator
+import pytz
+
+KELOMPOK = (
+    ('1', '1'),
+    ('2', '2'),
+    ('3', '3'),
+    ('4', '4'),
+    ('5', '5'),
+    ('6', '6'),
+)
+
+SHIFT = (
+    ('Pagi', 'Pagi'),
+    ('Siang', 'Siang'),
+    ('Malam', 'Malam'),
+    ('Dini Hari', 'Dini Hari'),
+)
+
+def get_default_date():
+    return timezone.now().astimezone(pytz.timezone('Asia/Jakarta')).date()
+
+class QcFmRecord(models.Model):
+    date = models.DateField(default=get_default_date)
+    qcfm_id = models.CharField(max_length=17, default='0')
+
+    shift = models.CharField(max_length=15, choices=SHIFT, default='P')
+    kelompok = models.CharField(max_length=1, choices=KELOMPOK, default='1')
+    jam_pelaksanaan = models.TimeField(default=(timezone.now() + timezone.timedelta(hours=7)).replace(second=0, microsecond=0))
+    qcfm_prev = models.TextField(default='0')
+    qcfm = models.TextField(default='0')
+    operator = models.ForeignKey(Operator, on_delete=models.CASCADE)
+    NIP = models.CharField(max_length=18, default='0', blank=True, null=True)
+    event_indonesia = models.IntegerField(default=0)
+    event_luar = models.IntegerField(default=0)
+    kel_sebelum = models.CharField(max_length=1, choices=KELOMPOK, default='1')
+
+    def __str__(self):
+        return self.qcfm_id
