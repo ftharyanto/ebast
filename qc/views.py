@@ -173,7 +173,7 @@ def export_to_excel(request, record_id):
         sheet.row_dimensions[r_idx+8].height = 15
 
     # Dynamically set the value of 'M' column based on the number of rows added
-    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=tanggal)
+    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=f'Jakarta, {tanggal}')
     sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
     sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
     sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(name='Calibri', underline='single', size=18, bold=True)
@@ -259,7 +259,7 @@ def export_to_pdf(request, record_id):
         sheet.row_dimensions[r_idx+8].height = 15
 
     # Dynamically set the value of 'M' column based on the number of rows added
-    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=tanggal)
+    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=f'Jakarta, {tanggal}')
     sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
     sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
     sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(name='Calibri', underline='single', size=18, bold=True)

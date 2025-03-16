@@ -110,10 +110,10 @@ def export_to_excel(request, record_id):
     file_path = os.path.join(os.path.dirname(__file__), 'static/qcfm/QC_FM.xlsx')
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
-    sheet.title = 'QC FM Records'
+    sheet.title = 'QC Records'
 
-    tanggal = format_date_indonesian(record.qcfm_id[3:-2])
-    hari = get_hari_indonesia(record.qcfm_id[3:-2])
+    tanggal = format_date_indonesian(record.qcfm_id[5:-2])
+    hari = get_hari_indonesia(record.qcfm_id[5:-2])
     sheet['G2'] = ': ' + tanggal
     sheet['G3'] = ': ' + hari
     sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
@@ -136,9 +136,9 @@ def export_to_excel(request, record_id):
     qcfm = pd.read_csv(StringIO(record.qcfm))
 
     # add qcfm columns with 'QCFM' values to the last column
-    qcfm['QC'] = 'QC'
+    qcfm['QCFM'] = 'QCFM'
     qcfm = dataframe_to_rows(qcfm, index=False, header=False)
-    
+
     # Iterate over the rows of the qcfm_prev DataFrame
     for r_idx, row in enumerate(qcfm_prev, 1):
         # Iterate over the columns of the current row
@@ -151,21 +151,21 @@ def export_to_excel(request, record_id):
             sheet.cell(row=r_idx*2+6, column=c_idx+2).fill = openpyxl.styles.PatternFill(start_color='FFD3D3D3', end_color='FFD3D3D3', fill_type='solid')
         # Merge cells for the row number column
         sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
-            
-    # Iterate over the rows of the qc DataFrame
+
+    # Iterate over the rows of the qcfm DataFrame
     for r_idx, row in enumerate(qcfm, 1):
         # Iterate over the columns of the current row
         for c_idx, value in enumerate(row, 1):
             # Set the value and alignment for the current cell
             sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
     
-    # set the M8 column to align left horizontally
-    for r_idx in range(rows_to_add*2):
-        sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
+    # # set the M8 column to align left horizontally
+    # for r_idx in range(rows_to_add*2):
+    #     sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
 
     # add borders to the cell in the data
     for r_idx in range(rows_to_add*2):
-        for c_idx in range(13):
+        for c_idx in range(17):
             sheet.cell(row=r_idx+8, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
 
     # set the height of the rows in the data to 15
@@ -173,7 +173,7 @@ def export_to_excel(request, record_id):
         sheet.row_dimensions[r_idx+8].height = 15
 
     # Dynamically set the value of 'M' column based on the number of rows added
-    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=tanggal)
+    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=f'Jakarta, {tanggal}')
     sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
     sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
     sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(name='Calibri', underline='single', size=18, bold=True)
