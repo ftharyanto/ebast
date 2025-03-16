@@ -38,6 +38,7 @@ class BastRecordUpdateView(UpdateView):
         context = super().get_context_data(**kwargs)
         record = self.get_object()
         context['existing_data'] = record.events
+        context['existing_member_data'] = record.member
         return context
 
     def get_member_data(self, **kwargs):
@@ -255,10 +256,10 @@ def export_to_pdf(request, record_id):
     # add rows to the sheet
     rows_to_add = len(events)
     sheet.insert_rows(28, amount=rows_to_add)
-    events = dataframe_to_rows(events, index=False, header=False)
+    events = dataframe_to_rows(events, index=True, header=False)
     
     # insert the events to the sheet
-    for r_idx, row in enumerate(events, 1):
+    for r_idx, row in enumerate(events, 0):
         for c_idx, value in enumerate(row, 1):
             sheet.cell(row=r_idx+27, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
             # set the border of the first column to the left and the last column to the right, to thick
