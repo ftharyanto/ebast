@@ -404,8 +404,6 @@
         const kelompokSelect = document.getElementById('{{ form.kelompok.id_for_label }}');
         const tableBody = document.getElementById('member-data-table').querySelector('tbody');
         const existingMembers = `{{ existing_member_data|safe }}`;
-        const existingMembersArray = JSON.parse(existingMembers);
-        console.log(existingMembers)
 
         function updateMembers() {
             const selectedKelompok = kelompokSelect.value;
@@ -417,8 +415,8 @@
                         const tr = document.createElement('tr');
                         let keterangan = 'Hadir';
                         if (existingMembers) {
+                            const existingMembersArray = JSON.parse(existingMembers);
                             keterangan = existingMembersArray[index].keterangan;
-                            console.log(keterangan)
                         }
                         tr.innerHTML = `
                             <td>${index + 1}</td>

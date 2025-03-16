@@ -48,8 +48,8 @@ class BastRecordModel(models.Model):
     count_blanks = models.IntegerField(default=0)
     waktu_cs = models.CharField(max_length=20, default='00:00 WIB', blank=True, null=True)
     pulsa_poco = models.IntegerField(default=0)
-    poco_exp = models.DateField(default=get_default_date)
-    samsung_exp = models.DateField(default=get_default_date)
+    poco_exp = models.DateField(default=lambda: timezone.datetime(2026, 1, 17, tzinfo=pytz.timezone('Asia/Jakarta')).date())
+    samsung_exp = models.DateField(default=lambda: timezone.datetime(2037, 12, 31, tzinfo=pytz.timezone('Asia/Jakarta')).date())
     notes = models.TextField(max_length=1000, default='', blank=True, null=True)
 
     def __str__(self):
