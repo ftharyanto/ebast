@@ -33,8 +33,6 @@ class QcFmRecord(models.Model):
     qcfm = models.TextField(default='0')
     operator = models.ForeignKey(Operator, on_delete=models.CASCADE)
     NIP = models.CharField(max_length=18, default='0', blank=True, null=True)
-    event_indonesia = models.IntegerField(default=0)
-    event_luar = models.IntegerField(default=0)
     kel_sebelum = models.CharField(max_length=1, choices=KELOMPOK, default='1')
 
     def __str__(self):
