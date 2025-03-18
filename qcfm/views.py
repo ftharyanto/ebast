@@ -118,8 +118,6 @@ def export_to_excel(request, record_id):
     sheet['G3'] = ': ' + hari
     sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
     sheet['G5'] = f': Kel. {record.kelompok}'
-    sheet['B6'] = f'Event di Indonesia: {record.event_indonesia}'
-    sheet['G6'] = f'Event di Luar Negeri: {record.event_luar}'
 
 
     # import the qcfm_prev and qc values from the record using pandas and fill the C8 to M8 row with the qcfm_prev and qc values alternatingly, add rows as needed
@@ -204,8 +202,6 @@ def export_to_pdf(request, record_id):
     sheet['G3'] = ': ' + hari
     sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
     sheet['G5'] = f': Kel. {record.kelompok}'
-    sheet['B6'] = f'Event di Indonesia: {record.event_indonesia}'
-    sheet['G6'] = f'Event di Luar Negeri: {record.event_luar}'
 
 
     # import the qcfm_prev and qc values from the record using pandas and fill the C8 to M8 row with the qcfm_prev and qc values alternatingly, add rows as needed
