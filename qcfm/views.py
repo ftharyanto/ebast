@@ -101,12 +101,7 @@ def get_nip(request, operator_id):
     except Operator.DoesNotExist:
         return JsonResponse({'error': 'Operator not found'}, status=404)
 
-def export_to_excel(request, record_id):
-    try:
-        record = QcFmRecord.objects.get(id=record_id)
-    except QcFmRecord.DoesNotExist:
-        return HttpResponse(status=404)
-
+def prepare_workbook(record):
     file_path = os.path.join(os.path.dirname(__file__), 'static/qcfm/QC_FM.xlsx')
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
@@ -119,58 +114,32 @@ def export_to_excel(request, record_id):
     sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
     sheet['G5'] = f': Kel. {record.kelompok}'
 
-
-    # import the qcfm_prev and qc values from the record using pandas and fill the C8 to M8 row with the qcfm_prev and qc values alternatingly, add rows as needed
     qcfm_prev = pd.read_csv(StringIO(record.qcfm_prev))
-    
-    # add prev columns with 'prev' values to the last column
     qcfm_prev['prev'] = f'Kel. {record.kel_sebelum}'
-
-    # add rows to the sheet
     rows_to_add = len(qcfm_prev)
-    sheet.insert_rows(8, amount=rows_to_add*2)
+    sheet.insert_rows(8, amount=rows_to_add * 2)
     qcfm_prev = dataframe_to_rows(qcfm_prev, index=False, header=False)
 
     qcfm = pd.read_csv(StringIO(record.qcfm))
-
-    # add qcfm columns with 'QCFM' values to the last column
     qcfm['QCFM'] = 'QCFM'
     qcfm = dataframe_to_rows(qcfm, index=False, header=False)
 
-    # Iterate over the rows of the qcfm_prev DataFrame
     for r_idx, row in enumerate(qcfm_prev, 1):
-        # Iterate over the columns of the current row
         for c_idx, value in enumerate(row, 1):
-            # Set the value and alignment for the first column (row number)
-            sheet.cell(row=r_idx*2+6, column=2, value=r_idx).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            # Set the value and alignment for the current cell
-            sheet.cell(row=r_idx*2+6, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            # Change the background color of the cell to light grey
-            sheet.cell(row=r_idx*2+6, column=c_idx+2).fill = openpyxl.styles.PatternFill(start_color='FFD3D3D3', end_color='FFD3D3D3', fill_type='solid')
-        # Merge cells for the row number column
-        sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
+            sheet.cell(row=r_idx * 2 + 6, column=2, value=r_idx).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            sheet.cell(row=r_idx * 2 + 6, column=c_idx + 2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            sheet.cell(row=r_idx * 2 + 6, column=c_idx + 2).fill = openpyxl.styles.PatternFill(start_color='FFD3D3D3', end_color='FFD3D3D3', fill_type='solid')
+        sheet.merge_cells(start_row=r_idx * 2 + 6, start_column=2, end_row=r_idx * 2 + 7, end_column=2)
 
-    # Iterate over the rows of the qcfm DataFrame
     for r_idx, row in enumerate(qcfm, 1):
-        # Iterate over the columns of the current row
         for c_idx, value in enumerate(row, 1):
-            # Set the value and alignment for the current cell
-            sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-    
-    # # set the M8 column to align left horizontally
-    # for r_idx in range(rows_to_add*2):
-    #     sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
+            sheet.cell(row=r_idx * 2 + 7, column=c_idx + 2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
 
-    # add borders to the cell in the data
-    for r_idx in range(rows_to_add*2):
+    for r_idx in range(rows_to_add * 2):
         for c_idx in range(17):
-            sheet.cell(row=r_idx+8, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
+            sheet.cell(row=r_idx + 8, column=c_idx + 2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
+        sheet.row_dimensions[r_idx + 8].height = 15
 
-    # set the height of the rows in the data to 15
-    for r_idx in range(rows_to_add*2):
-        sheet.row_dimensions[r_idx+8].height = 15
-
-    # Dynamically set the value of 'M' column based on the number of rows added
     sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=f'Jakarta, {tanggal}')
     sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
     sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
@@ -178,11 +147,18 @@ def export_to_excel(request, record_id):
     sheet.row_dimensions[8 + rows_to_add * 2 + 8].height = 23.5
     sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
 
-    # Save the workbook to a BytesIO object
+    return workbook
+
+def export_to_excel(request, record_id):
+    try:
+        record = QcFmRecord.objects.get(id=record_id)
+    except QcFmRecord.DoesNotExist:
+        return HttpResponse(status=404)
+
+    workbook = prepare_workbook(record)
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = f'attachment; filename=QCFM_{record.qcfm_id}.xlsx'
     workbook.save(response)
-
     return response
 
 def export_to_pdf(request, record_id):
@@ -191,95 +167,23 @@ def export_to_pdf(request, record_id):
     except QcFmRecord.DoesNotExist:
         return HttpResponse(status=404)
 
-    file_path = os.path.join(os.path.dirname(__file__), 'static/qcfm/QC_FM.xlsx')
-    workbook = openpyxl.load_workbook(file_path)
-    sheet = workbook.active
-    sheet.title = 'QC Records'
-
-    tanggal = format_date_indonesian(record.qcfm_id[5:-2])
-    hari = get_hari_indonesia(record.qcfm_id[5:-2])
-    sheet['G2'] = ': ' + tanggal
-    sheet['G3'] = ': ' + hari
-    sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
-    sheet['G5'] = f': Kel. {record.kelompok}'
-
-
-    # import the qcfm_prev and qc values from the record using pandas and fill the C8 to M8 row with the qcfm_prev and qc values alternatingly, add rows as needed
-    qcfm_prev = pd.read_csv(StringIO(record.qcfm_prev))
-    
-    # add prev columns with 'prev' values to the last column
-    qcfm_prev['prev'] = f'Kel. {record.kel_sebelum}'
-
-    # add rows to the sheet
-    rows_to_add = len(qcfm_prev)
-    sheet.insert_rows(8, amount=rows_to_add*2)
-    qcfm_prev = dataframe_to_rows(qcfm_prev, index=False, header=False)
-
-    qcfm = pd.read_csv(StringIO(record.qcfm))
-
-    # add qcfm columns with 'QCFM' values to the last column
-    qcfm['QCFM'] = 'QCFM'
-    qcfm = dataframe_to_rows(qcfm, index=False, header=False)
-
-    # Iterate over the rows of the qcfm_prev DataFrame
-    for r_idx, row in enumerate(qcfm_prev, 1):
-        # Iterate over the columns of the current row
-        for c_idx, value in enumerate(row, 1):
-            # Set the value and alignment for the first column (row number)
-            sheet.cell(row=r_idx*2+6, column=2, value=r_idx).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            # Set the value and alignment for the current cell
-            sheet.cell(row=r_idx*2+6, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            # Change the background color of the cell to light grey
-            sheet.cell(row=r_idx*2+6, column=c_idx+2).fill = openpyxl.styles.PatternFill(start_color='FFD3D3D3', end_color='FFD3D3D3', fill_type='solid')
-        # Merge cells for the row number column
-        sheet.merge_cells(start_row=r_idx*2+6, start_column=2, end_row=r_idx*2+7, end_column=2)
-
-    # Iterate over the rows of the qcfm DataFrame
-    for r_idx, row in enumerate(qcfm, 1):
-        # Iterate over the columns of the current row
-        for c_idx, value in enumerate(row, 1):
-            # Set the value and alignment for the current cell
-            sheet.cell(row=r_idx*2+7, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-    
-    # # set the M8 column to align left horizontally
-    # for r_idx in range(rows_to_add*2):
-    #     sheet.cell(row=r_idx+8, column=13).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
-
-    # add borders to the cell in the data
-    for r_idx in range(rows_to_add*2):
-        for c_idx in range(17):
-            sheet.cell(row=r_idx+8, column=c_idx+2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='thin'), right=openpyxl.styles.Side(style='thin'), top=openpyxl.styles.Side(style='thin'), bottom=openpyxl.styles.Side(style='thin'))
-
-    # set the height of the rows in the data to 15
-    for r_idx in range(rows_to_add*2):
-        sheet.row_dimensions[r_idx+8].height = 15
-
-    # Dynamically set the value of 'M' column based on the number of rows added
-    sheet.cell(row=8 + rows_to_add * 2 + 2, column=13, value=f'Jakarta, {tanggal}')
-    sheet.row_dimensions[8 + rows_to_add * 2 + 2].height = 23.5
-    sheet.row_dimensions[8 + rows_to_add * 2 + 3].height = 23.5
-    sheet.cell(row=8 + rows_to_add * 2 + 8, column=13, value=record.operator.name).font = openpyxl.styles.Font(name='Calibri', underline='single', size=18, bold=True)
-    sheet.row_dimensions[8 + rows_to_add * 2 + 8].height = 23.5
-    sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
-
-    # temporarily save the workbook to a file
+    workbook = prepare_workbook(record)
     temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/qcfm/{record.qcfm_id}.xlsx')
-    workbook.save(temp_xlsx)
     temp_pdf_dir = os.path.join(os.path.dirname(__file__), 'static/qcfm')
     temp_pdf = os.path.join(temp_pdf_dir, f'{record.qcfm_id}.pdf')
+
+    workbook.save(temp_xlsx)
 
     import subprocess
     try:
         command = ['soffice', '--headless', '--convert-to', 'pdf:calc_pdf_Export', temp_xlsx, '--outdir', temp_pdf_dir]
         subprocess.run(command, check=True)
-        print(temp_xlsx)
     except subprocess.CalledProcessError as e:
         print(f"Error converting {temp_xlsx} to PDF: {e}")
     finally:
         if os.path.exists(temp_xlsx):
             os.remove(temp_xlsx)
 
-    # Read the generated PDF file and return it in the response
     with open(temp_pdf, 'rb') as pdf_file:
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
         response['Content-Disposition'] = f'inline; filename={record.qcfm_id}.pdf'

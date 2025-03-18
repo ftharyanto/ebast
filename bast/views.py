@@ -149,71 +149,8 @@ def export_to_excel(request, record_id):
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
     sheet.title = 'BAST'
-    member = json.loads(record.member)
-    tanggal = format_date_indonesian(record.bast_id[5:-2])
-    hari = get_hari_indonesia(record.bast_id[5:-2])
 
-    sheet['J4'] = f'{convert_to_roman(record.kelompok)} ({convert_to_indonesian(record.kelompok)})'
-    sheet['J6'] = f'{convert_to_roman(record.kel_berikut)} ({convert_to_indonesian(record.kel_berikut)})'
-    sheet['N4'] = f': {tanggal}' 
-    sheet['N5'] = f': {hari}'
-    for idx, member_data in enumerate(member[:9]):  # Limit to 9 members to fit in the cells K9:K17 and L9:L17
-        sheet[f'K{9 + idx}'] = member_data['nama']
-        sheet[f'L{9 + idx}'] = member_data['keterangan']
-    sheet['N6'] = f': {record.waktu_pelaksanaan}'
-    sheet['G21'] = f'{record.event_indonesia}'
-    sheet['G22'] = f'{record.event_luar}'
-    sheet['G23'] = f'{record.event_indonesia + record.event_luar}'
-    sheet['L21'] = f': {record.event_dirasakan} event'
-    sheet['L22'] = f': {record.event_dikirim} event'
-    sheet['E32'] = f'Pukul: {record.waktu_cs}'
-    sheet['E33'] = f'IA (505) : Gaps = {record.count_gaps} ; Spike = {record.count_spikes} ; Blank = {record.count_blanks}'
-    sheet['E37'] = f'Rp {record.pulsa_poco:,.0f}'.replace(',', '.')
-    sheet['E39'] = f'{record.poco_exp.strftime("%d %b %Y")}'
-    sheet['G39'] = f'{record.samsung_exp.strftime("%d %b %Y")}'
-    sheet['C46'] = f'Jakarta, {tanggal}'
-    sheet['C54'] = f'{record.spv}'
-    sheet['C55'] = f'NIP. {record.NIP}'
-
-    # import the events from the record using pandas
-    events = pd.read_csv(StringIO(record.events))
-
-    # add rows to the sheet
-    rows_to_add = len(events)
-    sheet.insert_rows(28, amount=rows_to_add)
-    events = dataframe_to_rows(events, index=False, header=False)
-    
-    # insert the events to the sheet
-    for r_idx, row in enumerate(events, 1):
-        for c_idx, value in enumerate(row, 1):
-            sheet.cell(row=r_idx+27, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            # set the border of the first column to the left and the last column to the right, to thick
-            sheet.cell(row=r_idx+27, column=2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='medium'))
-            sheet.cell(row=r_idx+27, column=17).border = openpyxl.styles.Border(right=openpyxl.styles.Side(style='medium'))
-            sheet.cell(row=r_idx+27, column=11).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
-    
-    # set the inserted cell border expanded to column 17 to thin
-    for r_idx in range(rows_to_add):
-        for c_idx in range(14):  # Iterate up to column 17 (index 14)
-            cell = sheet.cell(row=r_idx + 28, column=c_idx + 3) # Get the cell object
-
-            # Check the length of the value in index 12
-            MMI_value = sheet.cell(row=r_idx + 28, column=12).value
-            if pd.notna(MMI_value):
-                print(MMI_value)
-                if len(MMI_value) > 23:
-                    # Calculate the new row height
-                    new_height = 15.75 * ((len(MMI_value) // 23) + 1)
-                    sheet.row_dimensions[r_idx + 28].height = new_height
-                # Set the cell format to wrap text and center horizontally
-                sheet.cell(row=r_idx + 28, column=12).alignment = openpyxl.styles.Alignment(wrap_text=True, vertical='center')
-
-            cell.border = openpyxl.styles.Border(
-                left=openpyxl.styles.Side(style='thin'),
-                right=openpyxl.styles.Side(style='thin'),
-                top=openpyxl.styles.Side(style='thin'),
-                bottom=openpyxl.styles.Side(style='thin')
-            )
+    populate_bast_sheet(sheet, record)
 
     # Save the workbook to a BytesIO object
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -235,71 +172,8 @@ def export_to_pdf(request, record_id):
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
     sheet.title = 'BAST'
-    member = json.loads(record.member)
-    tanggal = format_date_indonesian(record.bast_id[5:-2])
-    hari = get_hari_indonesia(record.bast_id[5:-2])
 
-    sheet['J4'] = f'{convert_to_roman(record.kelompok)} ({convert_to_indonesian(record.kelompok)})'
-    sheet['J6'] = f'{convert_to_roman(record.kel_berikut)} ({convert_to_indonesian(record.kel_berikut)})'
-    sheet['N4'] = f': {tanggal}' 
-    sheet['N5'] = f': {hari}'
-    for idx, member_data in enumerate(member[:9]):  # Limit to 9 members to fit in the cells K9:K17 and L9:L17
-        sheet[f'K{9 + idx}'] = member_data['nama']
-        sheet[f'L{9 + idx}'] = member_data['keterangan']
-    sheet['N6'] = f': {record.waktu_pelaksanaan}'
-    sheet['G21'] = f'{record.event_indonesia}'
-    sheet['G22'] = f'{record.event_luar}'
-    sheet['G23'] = f'{record.event_indonesia + record.event_luar}'
-    sheet['L21'] = f': {record.event_dirasakan} event'
-    sheet['L22'] = f': {record.event_dikirim} event'
-    sheet['E32'] = f'Pukul: {record.waktu_cs}'
-    sheet['E33'] = f'IA (505) : Gaps = {record.count_gaps} ; Spike = {record.count_spikes} ; Blank = {record.count_blanks}'
-    sheet['E37'] = f'Rp {record.pulsa_poco:,.0f}'.replace(',', '.')
-    sheet['E39'] = f'{record.poco_exp.strftime("%d %b %Y")}'
-    sheet['G39'] = f'{record.samsung_exp.strftime("%d %b %Y")}'
-    sheet['C46'] = f'Jakarta, {tanggal}'
-    sheet['C54'] = f'{record.spv}'
-    sheet['C55'] = f'NIP. {record.NIP}'
-
-    # import the events from the record using pandas
-    events = pd.read_csv(StringIO(record.events))
-
-    # add rows to the sheet
-    rows_to_add = len(events)
-    sheet.insert_rows(28, amount=rows_to_add)
-    events = dataframe_to_rows(events, index=False, header=False)
-    
-    # insert the events to the sheet
-    for r_idx, row in enumerate(events, 1):
-        for c_idx, value in enumerate(row, 1):
-            sheet.cell(row=r_idx+27, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            # set the border of the first column to the left and the last column to the right, to thick
-            sheet.cell(row=r_idx+27, column=2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='medium'))
-            sheet.cell(row=r_idx+27, column=17).border = openpyxl.styles.Border(right=openpyxl.styles.Side(style='medium'))
-            sheet.cell(row=r_idx+27, column=11).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
-    
-    # set the inserted cell border expanded to column 17 to thin
-    for r_idx in range(rows_to_add):
-        for c_idx in range(14):  # Iterate up to column 17 (index 14)
-            cell = sheet.cell(row=r_idx + 28, column=c_idx + 3) # Get the cell object
-
-            # Check the length of the value in index 12
-            MMI_value = sheet.cell(row=r_idx + 28, column=12).value
-            if pd.notna(MMI_value):
-                print(MMI_value)
-                if len(MMI_value) > 23:
-                    # Calculate the new row height
-                    new_height = 15.75 * ((len(MMI_value) // 23) + 1)
-                    sheet.row_dimensions[r_idx + 28].height = new_height
-                # Set the cell format to wrap text and center horizontally
-                sheet.cell(row=r_idx + 28, column=12).alignment = openpyxl.styles.Alignment(wrap_text=True, vertical='center')
-
-            cell.border = openpyxl.styles.Border(
-                left=openpyxl.styles.Side(style='thin'),
-                right=openpyxl.styles.Side(style='thin'),
-                top=openpyxl.styles.Side(style='thin'),
-                bottom=openpyxl.styles.Side(style='thin')
-            )
+    populate_bast_sheet(sheet, record)
 
     # temporarily save the workbook to a file
     temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/bast/{record.bast_id}.xlsx')
@@ -311,7 +185,6 @@ def export_to_pdf(request, record_id):
     try:
         command = ['soffice', '--headless', '--convert-to', 'pdf:calc_pdf_Export', temp_xlsx, '--outdir', temp_pdf_dir]
         subprocess.run(command, check=True)
-        print(temp_xlsx)
     except subprocess.CalledProcessError as e:
         print(f"Error converting {temp_xlsx} to PDF: {e}")
     finally:
@@ -370,3 +243,72 @@ def get_cs_data(request, cs_id):
         })
     except CsRecordModel.DoesNotExist:
         return JsonResponse({'error': 'CS record not found'}, status=404)
+
+def populate_bast_sheet(sheet, record):
+    from qc.views import format_date_indonesian, get_hari_indonesia
+    import json
+
+    member = json.loads(record.member)
+    tanggal = format_date_indonesian(record.bast_id[5:-2])
+    hari = get_hari_indonesia(record.bast_id[5:-2])
+
+    sheet['J4'] = f'{convert_to_roman(record.kelompok)} ({convert_to_indonesian(record.kelompok)})'
+    sheet['J6'] = f'{convert_to_roman(record.kel_berikut)} ({convert_to_indonesian(record.kel_berikut)})'
+    sheet['N4'] = f': {tanggal}' 
+    sheet['N5'] = f': {hari}'
+    for idx, member_data in enumerate(member[:9]):  # Limit to 9 members to fit in the cells K9:K17 and L9:L17
+        sheet[f'K{9 + idx}'] = member_data['nama']
+        sheet[f'L{9 + idx}'] = member_data['keterangan']
+    sheet['N6'] = f': {record.waktu_pelaksanaan}'
+    sheet['G21'] = f'{record.event_indonesia}'
+    sheet['G22'] = f'{record.event_luar}'
+    sheet['G23'] = f'{record.event_indonesia + record.event_luar}'
+    sheet['L21'] = f': {record.event_dirasakan} event'
+    sheet['L22'] = f': {record.event_dikirim} event'
+    sheet['E32'] = f'Pukul: {record.waktu_cs}'
+    sheet['E33'] = f'IA (505) : Gaps = {record.count_gaps} ; Spike = {record.count_spikes} ; Blank = {record.count_blanks}'
+    sheet['E37'] = f'Rp {record.pulsa_poco:,.0f}'.replace(',', '.')
+    sheet['E39'] = f'{record.poco_exp.strftime("%d %b %Y")}'
+    sheet['G39'] = f'{record.samsung_exp.strftime("%d %b %Y")}'
+    sheet['C46'] = f'Jakarta, {tanggal}'
+    sheet['C54'] = f'{record.spv}'
+    sheet['C55'] = f'NIP. {record.NIP}'
+
+        # import the events from the record using pandas
+    events = pd.read_csv(StringIO(record.events))
+
+    # add rows to the sheet
+    rows_to_add = len(events)
+    sheet.insert_rows(28, amount=rows_to_add)
+    events = dataframe_to_rows(events, index=False, header=False)
+    
+    # insert the events to the sheet
+    for r_idx, row in enumerate(events, 1):
+        for c_idx, value in enumerate(row, 1):
+            sheet.cell(row=r_idx+27, column=c_idx+2, value=value).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            # set the border of the first column to the left and the last column to the right, to thick
+            sheet.cell(row=r_idx+27, column=2).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='medium'))
+            sheet.cell(row=r_idx+27, column=17).border = openpyxl.styles.Border(right=openpyxl.styles.Side(style='medium'))
+            sheet.cell(row=r_idx+27, column=11).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
+    
+    # set the inserted cell border expanded to column 17 to thin
+    for r_idx in range(rows_to_add):
+        for c_idx in range(14):  # Iterate up to column 17 (index 14)
+            cell = sheet.cell(row=r_idx + 28, column=c_idx + 3) # Get the cell object
+
+            # Check the length of the value in index 12
+            MMI_value = sheet.cell(row=r_idx + 28, column=12).value
+            if pd.notna(MMI_value):
+                if len(MMI_value) > 23:
+                    # Calculate the new row height
+                    new_height = 15.75 * ((len(MMI_value) // 23) + 1)
+                    sheet.row_dimensions[r_idx + 28].height = new_height
+                # Set the cell format to wrap text and center horizontally
+                sheet.cell(row=r_idx + 28, column=12).alignment = openpyxl.styles.Alignment(wrap_text=True, vertical='center')
+
+            cell.border = openpyxl.styles.Border(
+                left=openpyxl.styles.Side(style='thin'),
+                right=openpyxl.styles.Side(style='thin'),
+                top=openpyxl.styles.Side(style='thin'),
+                bottom=openpyxl.styles.Side(style='thin')
+            )
