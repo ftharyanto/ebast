@@ -3,7 +3,6 @@
 
 # Python cache files
 __pycache__/
-**/__pycache__/
 *.pyc
 *.pyo
 
@@ -20,6 +19,12 @@ db.sqlite3 # Default SQLite database file
 media/ # Media files (images, documents, etc.)
 static/ # Static files (CSS, JavaScript, images, etc.) - if generated locally
 *.log # Log files
+
+# Django migrations
+*/migrations/
+
+# Python cache files
+*/__pycache__/
 
 # Virtual environment files
 venv/
@@ -41,3 +46,9 @@ build/
 
 # secrets
 local_settings.py
+
+# Django media files
+media/
+
+# SQLite database file
+db.sqlite3
