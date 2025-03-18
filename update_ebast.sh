@@ -1,5 +1,5 @@
 mv db.sqlite3 ..
 git pull
 mv ../db.sqlite3 .
-dmigrate
+python manage.py makemigrations && python manage.py migrate
 sudo systemctl restart ebast.service
