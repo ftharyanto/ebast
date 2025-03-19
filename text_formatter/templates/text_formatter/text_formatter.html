@@ -57,6 +57,13 @@
         // Replace *bold* with <strong></strong>
         let web = input.replace(/\*(.+?)\*/g, '<strong>$1</strong>');
 
+        // Add a new line after the second line
+        web = web.replace(/^((?:.*\n){1}.*)/, '$1<br>');
+
+        // Make all paragraphs justify-aligned and the first line center-aligned
+        web = web.replace(/^(.*?)(\n|$)/, '<p style="text-align: center;">$1</p>');
+        web = web.replace(/(.+?)(\n|$)/g, '<p style="text-align: justify;">$1</p>');
+
         // Replace _italic_ with <em></em> (if you need italics)
         web = web.replace(/\_(.+?)\_/g, '<em>$1</em>');
 
