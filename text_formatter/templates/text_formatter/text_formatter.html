@@ -50,19 +50,25 @@
     // replace the * in the input text to ** when the input changes, use vanilla js
     document.getElementById('input').addEventListener('input', function () {
         let input = document.getElementById('input').value;
+
+        // Clean newlines that contain only spaces
+        input = input.replace(/^\s*[\r\n]/gm, '\n');
+
         let telegram = input.replace(/\*/g, '**').replace(/\_/g, '__').replace('infobmkg.**', 'infobmkg.*');
         document.getElementById('telegram').value = telegram;
 
-        // change the input text format to html format
+        // Change the input text format to HTML format
         // Replace *bold* with <strong></strong>
         let web = input.replace(/\*(.+?)\*/g, '<strong>$1</strong>');
 
-        // Add a new line after the second line
-        web = web.replace(/^((?:.*\n){1}.*)/, '$1<br>');
+        // Add two new lines after the second line
+        web = web.replace(/^((?:.*\n){2})/, '$1<br><br>');
 
-        // Make all paragraphs justify-aligned and the first line center-aligned
-        web = web.replace(/^(.*?)(\n|$)/, '<p style="text-align: center;">$1</p>');
-        web = web.replace(/(.+?)(\n|$)/g, '<p style="text-align: justify;">$1</p>');
+        // Make the first line center-aligned
+        web = web.replace(/^(.*?)(\n|$)/, '<p style="text-align: center;  margin-bottom: 0;">$1</p>');
+
+        // Make all paragraphs justify-aligned except the subtitle (bold text)
+        web = web.replace(/^(?!<strong>)(.+?)(\n|$)/gm, '<p style="text-align: justify; margin-bottom: 0;">$1</p>');
 
         // Replace _italic_ with <em></em> (if you need italics)
         web = web.replace(/\_(.+?)\_/g, '<em>$1</em>');
