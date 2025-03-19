@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'text_formatter',
     'bast',
     'qcfm',
+    'seismap',
 ]
 
 MIDDLEWARE = [

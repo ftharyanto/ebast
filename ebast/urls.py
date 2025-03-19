@@ -30,6 +30,7 @@ urlpatterns = [
     path('text_formatter/', include('text_formatter.urls')),
     path('bast/', include('bast.urls')),
     path('qcfm/', include('qcfm.urls')),
+    path('seismap/', include('seismap.urls')),
 ]
 
 if settings.DEBUG:  # Only for development

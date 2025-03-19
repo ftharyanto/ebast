@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet Esri Ocean Basemap</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        #form-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="form-container">
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#constraints-form" aria-expanded="false" aria-controls="constraints-form">
+            Toggle Constraints
+        </button>
+        <div class="collapse" id="constraints-form">
+            <div class="card card-body">
+                <form>
+                    <label for="start-date">Start Date:</label>
+                    <input type="date" id="start-date" name="start-date" class="form-control">
+
+                    <label for="end-date">End Date:</label>
+                    <input type="date" id="end-date" name="end-date" class="form-control">
+
+                    <label for="latitude">Latitude:</label>
+                    <input type="number" id="latitude" name="latitude" step="0.01" class="form-control">
+
+                    <label for="longitude">Longitude:</label>
+                    <input type="number" id="longitude" name="longitude" step="0.01" class="form-control">
+
+                    <label for="magnitude">Magnitude:</label>
+                    <input type="number" id="magnitude" name="magnitude" step="0.1" class="form-control">
+
+                    <label for="depth">Depth:</label>
+                    <input type="number" id="depth" name="depth" step="0.1" class="form-control">
+
+                    <button type="submit" class="btn btn-success mt-2">Apply</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="map" style="width: 100%; height: 100vh;"></div>
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([0, 0], 2); // Center map at latitude 0, longitude 0, zoom level 2
+
+        // Add Esri Ocean basemap as tile layer
+        const esriOceanBasemap = L.tileLayer(
+            'https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
+            {
+                attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
+                maxZoom: 13 // Max zoom for Esri Ocean basemap
+            }
+        );
+
+        esriOceanBasemap.addTo(map); // Add the basemap to the map
+    </script>
+</body>
+</html>
