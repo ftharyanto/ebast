@@ -1,24 +1,33 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <title>Homepage</title>
-</head>
-
 <body>
     {% extends "core/base.html" %}
 
-    {% block title %}Homepage{% endblock %}
+    {% block title %}eBAST Homepage{% endblock %}
 
     {% block content %}
-    <h1>Welcome to the Homepage</h1>
-    <ul></ul>
-    <li><a href="{% url 'qc:qcrecord_list' %}">QC App</a></li>
-    <li><a href="{% url 'cl_seiscomp:cs_list' %}">Ceklis Seiscomp</a></li>
-    <li><a href="{% url 'text_formatter:text_formatter_view' %}">Text Formatter</a></li>
-    <li><a href="{% url 'bast:bastrecord_list' %}">BAST</a></li>
-    <li><a href="{% url 'qcfm:qcfmrecord_list' %}">QC Focal Mechanism</a></li>
-    </ul>
+    <div class="container mt-5">
+        <div class="text-center">
+            <h1 class="mt-3">Welcome to the <span class="btn btn-primary disabled" style="pointer-events: none;"><b>eBAST</b></span> Homepage</h1>
+            <p class="mt-3 text-muted">Your one-stop solution for BAST and QC management.</p>
+        </div>
+        <div class="mt-5">
+            <h2>BAST</h2>
+            <ul class="list-group">
+                <li class="list-group-item"><a href="{% url 'bast:bastrecord_list' %}">BAST</a></li>
+                <li class="list-group-item"><a href="{% url 'qc:qcrecord_list' %}">QC App</a></li>
+                <li class="list-group-item"><a href="{% url 'qcfm:qcfmrecord_list' %}">QC Focal Mechanism</a></li>
+                <li class="list-group-item"><a href="{% url 'cl_seiscomp:cs_list' %}">Ceklis Seiscomp</a></li>
+            </ul>
+        </div>
+        <div class="mt-5">
+            <h2>Utilities</h2>
+            <ul class="list-group">
+                <li class="list-group-item"><a href="{% url 'text_formatter:text_formatter_view' %}">Text Formatter untuk Narasi</a></li>
+            </ul>
+        </div>
+    </div>
     {% endblock %}
 </body>
 
