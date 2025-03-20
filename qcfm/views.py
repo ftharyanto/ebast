@@ -73,7 +73,7 @@ def clean_fm_data(data, start_datetime='2025-03-12 00:00:00', end_datetime='2025
 
     # sort the columns to be 'Date', 'OT (UTC)', 'Lat', 'Long', 'Mag', 'D(Km)', 'Phase', 'RMS', 'Az.Gap', 'Region', but first turn the respective column names into the desired ones
     df_selected = df_selected.rename(columns={'D': 'D(Km)', 'Type M': 'TypeMag'})
-    df_selected = df_selected[['Date', 'OT (UTC)', 'Lat', 'Long', 'Mag', 'TypeMag', 'D(Km)', 'S1', 'D1', 'R1', 'S2', 'D2', 'R2', 'Fit(%)', 'CLVD (%)']]
+    df_selected = df_selected[['Date', 'OT (UTC)', 'Lat', 'Long', 'Mag', 'TypeMag', 'D(Km)', 'S1', 'D1', 'R1', 'S2', 'D2', 'R2', 'Fit(%)', 'CLVD(%)']]
     df_selected = df_selected.reset_index(drop=True)
 
     # Check for duplicate columns
