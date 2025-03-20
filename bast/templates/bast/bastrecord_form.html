@@ -395,6 +395,12 @@
                     });
                     tableBody.appendChild(tr);
                 });
+
+                // Simulate a click on the accordion button if not already expanded
+                const fetchedDataSection = document.getElementById('fetchedDataSection');
+                if (!fetchedDataSection.classList.contains('show')) {
+                    document.querySelector('[data-target="#fetchedDataSection"]').click();
+                }
             })
             .catch(error => console.error('Error fetching data:', error));
     });
