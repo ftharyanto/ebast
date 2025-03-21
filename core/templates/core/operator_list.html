@@ -86,7 +86,13 @@
 <script>
 function filterTable(n) {
     var input, filter, table, tr, td, i, txtValue;
-    input = document.getElementById(n == 0 ? "nameFilter" : "nipFilter");
+    if (n == 0) {
+        input = document.getElementById("nameFilter");
+    } else if (n == 1) {
+        input = document.getElementById("nipFilter");
+    } else if (n == 2) {
+        input = document.getElementById("nicknameFilter");
+    }
     filter = input.value.toLowerCase();
     table = document.getElementById("operatorTable");
     tr = table.getElementsByTagName("tr");
