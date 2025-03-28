@@ -247,6 +247,7 @@ def get_cs_data(request, cs_id):
 def populate_bast_sheet(sheet, record):
     from qc.views import format_date_indonesian, get_hari_indonesia
     import json
+    import re
 
     member = json.loads(record.member)
     tanggal = format_date_indonesian(record.bast_id[5:-2])
@@ -256,9 +257,14 @@ def populate_bast_sheet(sheet, record):
     sheet['J6'] = f'{convert_to_roman(record.kel_berikut)} ({convert_to_indonesian(record.kel_berikut)})'
     sheet['N4'] = f': {tanggal}' 
     sheet['N5'] = f': {hari}'
+    count_member = 0
     for idx, member_data in enumerate(member[:9]):  # Limit to 9 members to fit in the cells K9:K17 and L9:L17
         sheet[f'K{9 + idx}'] = member_data['nama']
         sheet[f'L{9 + idx}'] = member_data['keterangan']
+        if re.match(r'^\s*hadir\s*$', member_data['keterangan'], re.IGNORECASE) or re.match(r'^\s*diganti\b.*$', member_data['keterangan'], re.IGNORECASE):
+            count_member += 1
+
+    sheet['L18'] = f'{count_member}'
     sheet['N6'] = f': {record.waktu_pelaksanaan}'
     sheet['G21'] = f'{record.event_indonesia}'
     sheet['G22'] = f'{record.event_luar}'
