@@ -216,14 +216,41 @@
                     Please select a valid operator.
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6" id="nip-container">
                 {{ form.NIP.label_tag }}
                 {{ form.NIP|add_class:"form-control" }}
                 <div class="invalid-feedback">
                     Please provide a valid NIP.
                 </div>
             </div>
+            <div class="col-md-2 d-flex align-items-end align-items-bottom">
+                <button id="save-nip-button" type="button" class="btn btn-success ml-2" style="display: none;">Save NIP</button>
+                <div class="invalid-feedback">
+                    Please provide a valid NIP.
+                </div>
+            </div>
         </div>
+
+        <!-- Modal for NIP notification -->
+        <div class="modal fade" id="nipModal" tabindex="-1" role="dialog" aria-labelledby="nipModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="nipModalLabel">NIP Notification</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Data NIP belum ada di database, silakan isi NIP Anda dan klik tombol "Save NIP".
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="form-group">
             <div class="invalid-feedback">
                 Please provide a valid date.
@@ -420,10 +447,12 @@
         }
     });
 
-    // Set NIP's value based on the selected operator
+    // Set NIP's value based on the selected operator and handle "Save NIP" button
     document.addEventListener('DOMContentLoaded', function () {
         const operatorSelect = document.getElementById('{{ form.operator.id_for_label }}');
         const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
+        const saveButton = document.getElementById('save-nip-button');
+        const nipContainer = document.getElementById('nip-container');
 
         function updateNip() {
             const selectedOperator = operatorSelect.value;
@@ -432,8 +461,18 @@
                 .then(data => {
                     if (data.nip) {
                         nipInput.value = data.nip;
+                        saveButton.style.display = 'none'; // Hide the button
+                        nipContainer.classList.remove('col-md-4');
+                        nipContainer.classList.add('col-md-6');
                     } else {
-                        nipInput.value = ''
+                        nipInput.value = '';
+                        saveButton.style.display = 'inline-block'; // Show the button
+                        nipContainer.classList.remove('col-md-6');
+                        nipContainer.classList.add('col-md-4');
+
+                        // Show modal when NIP is empty
+                        const nipModal = new bootstrap.Modal(document.getElementById('nipModal'));
+                        nipModal.show();
                     }
                 })
                 .catch(error => console.error('Error fetching NIP:', error));
@@ -441,6 +480,50 @@
 
         operatorSelect.addEventListener('change', updateNip);
         updateNip();
+    });
+
+    // Handle "Save NIP" button click
+    document.addEventListener('DOMContentLoaded', function () {
+        const saveButton = document.getElementById('save-nip-button');
+        const operatorSelect = document.getElementById('{{ form.operator.id_for_label }}');
+        const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
+
+        saveButton.addEventListener('click', function () {
+            const operatorId = operatorSelect.value;
+            const nip = nipInput.value;
+
+            if (!operatorId || !nip) {
+                alert('Please select an operator and provide a valid NIP.');
+                return;
+            }
+
+            fetch("{% url 'qc:save_nip' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({ operator_id: operatorId, nip: nip })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.success);
+                    saveButton.style.display = 'none';
+                } else {
+                    alert(data.error || 'Failed to save NIP.');
+                }
+            })
+            .catch(error => console.error('Error saving NIP:', error));
+        });
+    });
+
+    // Show modal when NIP is empty
+    document.addEventListener('DOMContentLoaded', function () {
+        const operatorSelect = document.getElementById('{{ form.operator.id_for_label }}');
+        const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
+        const nipModalElement = document.getElementById('nipModal');
+        const nipModal = new bootstrap.Modal(nipModalElement);
     });
 </script>
 {% endblock %}

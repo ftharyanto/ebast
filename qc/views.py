@@ -11,6 +11,9 @@ from io import StringIO
 from openpyxl.utils.dataframe import dataframe_to_rows
 from django.views import View
 from django.shortcuts import redirect
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+import json
 
 class QcRecordListView(ListView):
     model = QcRecord
@@ -100,6 +103,28 @@ def get_nip(request, operator_id):
         return JsonResponse({'nip': operator.NIP})
     except Operator.DoesNotExist:
         return JsonResponse({'error': 'Operator not found'}, status=404)
+
+@csrf_exempt
+def save_nip(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            operator_id = data.get('operator_id')
+            nip = data.get('nip')
+
+            if not operator_id or not nip:
+                return JsonResponse({'error': 'Operator ID and NIP are required'}, status=400)
+
+            operator = Operator.objects.get(id=operator_id)
+            operator.NIP = nip
+            operator.save()
+
+            return JsonResponse({'success': 'NIP saved successfully'})
+        except Operator.DoesNotExist:
+            return JsonResponse({'error': 'Operator not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 def populate_sheet_with_record(sheet, record):
     """
