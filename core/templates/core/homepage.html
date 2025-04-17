@@ -1,35 +1,28 @@
-<!DOCTYPE html>
-<html>
+{% extends "core/base.html" %}
 
-<body>
-    {% extends "core/base.html" %}
+{% block title %}eBAST Homepage{% endblock %}
 
-    {% block title %}eBAST Homepage{% endblock %}
-
-    {% block content %}
-    <div class="container mt-5">
-        <div class="text-center">
-            <h1 class="mt-3">Welcome to the <span class="btn btn-primary disabled" style="pointer-events: none;"><b>eBAST</b></span> Homepage</h1>
-            <p class="mt-3 text-muted">Your one-stop solution for BAST management and others.</p>
-            <p class="mt-3 text-muted">Silakan isi NIP anda di <a href="{% url 'core:operator_list' %}">sini</a></p>
-        </div>
-        <div class="mt-5">
-            <h2>BAST</h2>
-            <ul class="list-group">
-                <li class="list-group-item"><a href="{% url 'bast:bastrecord_list' %}">BAST</a></li>
-                <li class="list-group-item"><a href="{% url 'qc:qcrecord_list' %}">QC Waveform</a></li>
-                <li class="list-group-item"><a href="{% url 'qcfm:qcfmrecord_list' %}">QC Focal Mechanism</a></li>
-                <li class="list-group-item"><a href="{% url 'cl_seiscomp:cs_list' %}">Ceklis Seiscomp</a></li>
-            </ul>
-        </div>
-        <div class="mt-5">
-            <h2>Utilities</h2>
-            <ul class="list-group">
-                <li class="list-group-item"><a href="{% url 'text_formatter:text_formatter_view' %}">Text Formatter untuk Narasi</a></li>
-            </ul>
-        </div>
+{% block content %}
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="mt-3">Welcome to the <span class="btn btn-primary disabled" style="pointer-events: none;"><b>eBAST</b></span> Homepage</h1>
+        <p class="mt-3 text-muted">Your one-stop solution for BAST management and others.</p>
+        <p class="mt-3 text-muted">Silakan isi NIP anda di <a href="{% url 'core:operator_list' %}" class="text-decoration-none">sini</a></p>
     </div>
-    {% endblock %}
-</body>
-
-</html>
+    <div class="mt-5">
+        <h2>BAST</h2>
+        <ul class="list-group">
+            <li class="list-group-item"><a href="{% url 'bast:bastrecord_list' %}" class="text-decoration-none">BAST</a></li>
+            <li class="list-group-item"><a href="{% url 'qc:qcrecord_list' %}" class="text-decoration-none">QC Waveform</a></li>
+            <li class="list-group-item"><a href="{% url 'qcfm:qcfmrecord_list' %}" class="text-decoration-none">QC Focal Mechanism</a></li>
+            <li class="list-group-item"><a href="{% url 'cl_seiscomp:cs_list' %}" class="text-decoration-none">Ceklis Seiscomp</a></li>
+        </ul>
+    </div>
+    <div class="mt-5">
+        <h2>Utilities</h2>
+        <ul class="list-group">
+            <li class="list-group-item"><a href="{% url 'text_formatter:text_formatter_view' %}" class="text-decoration-none">Text Formatter untuk Narasi</a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
