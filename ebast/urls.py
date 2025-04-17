@@ -19,6 +19,7 @@ from django.urls import path, include
 from core.views import HomeView, OperatorListView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
@@ -32,4 +33,5 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:  # Only for development
+    urlpatterns += staticfiles_urlpatterns()
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
