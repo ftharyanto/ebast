@@ -35,6 +35,7 @@ env/
 .vscode/
 *.suo # Visual Studio
 *.user # Visual Studio
+mcp.json # Visual Studio Code
 
 # Build files
 dist/
