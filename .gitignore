@@ -17,7 +17,7 @@ __pycache__/
 local_settings.py # Local settings file
 db.sqlite3 # Default SQLite database file
 media/ # Media files (images, documents, etc.)
-/static/ # Root static directory (collected files)
+static/ # Root static directory (collected files)
 *.log # Log files
 
 # Django migrations
