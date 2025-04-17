@@ -3,7 +3,7 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'core/css/kelompok_form.css' %}">
 
-<div class="container">
+<div class="form-container">
     <h1 class="page-header">Create Kelompok Form</h1>
     <form method="post" class="needs-validation" novalidate>
         {% csrf_token %}
@@ -26,7 +26,7 @@
 
         <div class="form-group row">
             <div class="col-md-4">
-                {{ form.name.label_tag }}
+                <label for="{{ form.name.id_for_label }}">Nama Kelompok:</label>
                 {{ form.name|add_class:"form-control" }}
                 <div class="invalid-feedback">
                     Please provide a valid name.
