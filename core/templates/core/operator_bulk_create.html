@@ -1,35 +1,37 @@
 {% extends 'core/base.html' %}
 {% block content %}
-<div class="container">
-    <h1 class="mt-5">Bulk Add Operators</h1>
-    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-        {% csrf_token %}
-        <div class="form-group">
-            <label>CSV Format Guide:</label>
-            <p>CSV file atau data harus dalam format sebagai berikut, gunakan tanda petik untuk nama seperti berikut: <strong>"Nama Operator", NIP</strong></p>
-            <p></p>
-            <p>Contoh:</p>
-            <pre>"J. R. R. Tolkien, S. Tr, MDM", 189201031912111001</pre>
-            <pre>"Dr. William Minerva", 189201031912111001</pre>
-            <pre>"Dr. William Shakespeare", 156404231912111001</pre>
-        </div>
-        <div class="form-group">
-            <label for="file" class="mt-3"><h4>Upload CSV file</h4></label>
-            <input type="file" class="form-control" id="file" name="file">
-            <div class="invalid-feedback">
-                Please upload a CSV file.
+<div class="form-container">
+    <div class="container">
+        <h1 class="mt-5">Bulk Add Operators</h1>
+        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="form-group">
+                <label>CSV Format Guide:</label>
+                <p>CSV file atau data harus dalam format sebagai berikut, gunakan tanda petik untuk nama seperti berikut: <strong>"Nama Operator", NIP</strong></p>
+                <p></p>
+                <p>Contoh:</p>
+                <pre>"J. R. R. Tolkien, S. Tr, MDM", 189201031912111001</pre>
+                <pre>"Dr. William Minerva", 189201031912111001</pre>
+                <pre>"Dr. William Shakespeare", 156404231912111001</pre>
             </div>
-        </div>
-        <div class="form-group">
-            <label for="csv_data" class="mt-2"><h4>Or paste CSV data</h4></label>
-            <textarea class="form-control" id="csv_data" name="csv_data" rows="5"></textarea>
-            <div class="invalid-feedback">
-                Please provide valid CSV data.
+            <div class="form-group">
+                <label for="file" class="mt-3"><h4>Upload CSV file</h4></label>
+                <input type="file" class="form-control" id="file" name="file">
+                <div class="invalid-feedback">
+                    Please upload a CSV file.
+                </div>
             </div>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-        <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'core:operator_list' %}'">Cancel</button>
-    </form>
+            <div class="form-group">
+                <label for="csv_data" class="mt-2"><h4>Or paste CSV data</h4></label>
+                <textarea class="form-control" id="csv_data" name="csv_data" rows="5"></textarea>
+                <div class="invalid-feedback">
+                    Please provide valid CSV data.
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'core:operator_list' %}'">Cancel</button>
+        </form>
+    </div>
 </div>
 <script>
     // Example starter JavaScript for disabling form submissions if there are invalid fields

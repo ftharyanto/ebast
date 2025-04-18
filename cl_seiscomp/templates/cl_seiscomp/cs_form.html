@@ -2,204 +2,240 @@
 {% block title %}Ceklis Seiscomp Form{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mt-5">Ceklis Seiscomp Form</h1>
-    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-        {% csrf_token %}
-        {% load form_tags %}
-        {% if form.errors %}
-        <div class="alert alert-danger">
-            Please correct the errors below.
-            <ul>
-                {% for field in form %}
-                {% if field.errors %}
-                {% for error in field.errors %}
-                <li>{{ field.label }}: {{ error }}</li>
-                {% endfor %}
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-
-        <div class="form-group row">
-            <div class="form-group col-md-4">
-                {{ form.kelompok.label_tag }}
-                {{ form.kelompok|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid kelompok.
-                </div>
+<div class="form-container">
+    <div class="container">
+        <h1 class="mt-5">Ceklis Seiscomp Form</h1>
+        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+            {% load form_tags %}
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                Please correct the errors below.
+                <ul>
+                    {% for field in form %}
+                    {% if field.errors %}
+                    {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                </ul>
             </div>
-            <div class="form-group col-md-4">
-                {{ form.date.label_tag }}
-                {{ form.date|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid date.
-                </div>
-            </div>
-            <div class="form-group col-md-4">
-                {{ form.shift.label_tag }}
-                {{ form.shift|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid Shift.
-                </div>
-            </div>
-            <div class="form-group col-md-4">
-                {{ form.jam_pelaksanaan.label_tag }}
-                {{ form.jam_pelaksanaan|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid jam pelaksanaan.
-                </div>
-            </div>
-            <div class="form-group col-md-4" style="display: none;">
-                {{ form.cs_id.label_tag }}
-                {{ form.cs_id|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid CS ID.
-                </div>
-            </div>
-            <div class="form-group col-md-4">
-                {{ form.operator.label_tag }}
-                {{ form.operator|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid operator.
-                </div>
-            </div>
-        </div>
-        <div class="form-group row">
-            <div class="form-group col-md-12">
-                <button type="button" class="btn btn-primary" id="fetchDataButton">Fetch gaps and blanks</button>
-            </div>
-            <div class="form-group col-md-12">
-                <p id="last_update">Last Update: </p>
-            </div>
-            <script>
-                document.getElementById('fetchDataButton').addEventListener('click', function() {
-                    fetch(`{% url 'cl_seiscomp:fetch_gaps_blanks' %}`)
-                        .then(response => response.text())
-                        .then(data => {
-                            const gapsField = document.getElementById('{{ form.gaps.id_for_label }}');
-                            const blanksField = document.getElementById('{{ form.blanks.id_for_label }}');
-                            const lastUpdate = document.getElementById('last_update');
-                            data = JSON.parse(data);
-                            lastUpdate.innerHTML = `Last Update: <strong>${data.last_update}</strong>`;
-                            gapsField.value = data.gaps;
-                            blanksField.value = data.blanks;
-                        })
-                        .catch(error => console.error('Error fetching data:', error));
-                });
-            </script>
-        </div>
-        <div class="form-group row">
-            <div class="form-group col-md-4">
-                {{ form.gaps.label_tag }}
-                {{ form.gaps|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid gaps.
-                </div>
-            </div>
-            <div class="form-group col-md-4">
-                {{ form.spikes.label_tag }}
-                {{ form.spikes|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid spikes.
-                </div>
-            </div>
-            <div class="form-group col-md-4">
-                {{ form.blanks.label_tag }}
-                {{ form.blanks|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid blanks.
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <div class="form-group col-md-4">
-                {{ form.slmon.label_tag }}
-                {{ form.slmon|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid slmon.
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="slmon_image">Upload SLMon Image:</label>
-            <input type="file" name="slmon_image" id="slmon_image" class="form-control">
-            {% if form.instance.slmon_image %}
-            <div class="mt-2">
-                <a href="{{ form.instance.slmon_image.url }}" target="_blank">View current image</a>
-            </div>
-            <img id="pasted_image" src="{{ form.instance.slmon_image.url }}" style="max-width: 100%; margin-top: 10px;">
-            <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" name="clear_image" id="clear_image">
-                <label class="form-check-label" for="clear_image">
-                    Clear current image
-                </label>
-            </div>
-            {% else %}
-            <div id="drop_zone" class="border border-primary border-4 p-3 mt-2 text-center rounded" style="background-color: #f8f9fa;">
-                <p class="mb-0">Drag and drop an image here or press <strong>Ctrl+V</strong> to paste</p>
-            </div>
-            <img id="pasted_image" style="display:none; max-width: 100%; margin-top: 10px;">
             {% endif %}
-        </div>
 
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a href="{% url 'cl_seiscomp:cs_list' %}" class="btn btn-secondary">Cancel</a>
-    </form>
+            <div class="form-group row">
+                <div class="form-group col-md-4">
+                    {{ form.kelompok.label_tag }}
+                    {{ form.kelompok|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid kelompok.
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    {{ form.date.label_tag }}
+                    {{ form.date|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid date.
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    {{ form.shift.label_tag }}
+                    {{ form.shift|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid Shift.
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    {{ form.jam_pelaksanaan.label_tag }}
+                    {{ form.jam_pelaksanaan|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid jam pelaksanaan.
+                    </div>
+                </div>
+                <div class="form-group col-md-4" style="display: none;">
+                    {{ form.cs_id.label_tag }}
+                    {{ form.cs_id|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid CS ID.
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    {{ form.operator.label_tag }}
+                    {{ form.operator|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid operator.
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="form-group col-md-12">
+                    <button type="button" class="btn btn-primary" id="fetchDataButton">Fetch gaps and blanks</button>
+                </div>
+                <div class="form-group col-md-12">
+                    <p id="last_update">Last Update: </p>
+                </div>
+                <script>
+                    document.getElementById('fetchDataButton').addEventListener('click', function() {
+                        fetch(`{% url 'cl_seiscomp:fetch_gaps_blanks' %}`)
+                            .then(response => response.text())
+                            .then(data => {
+                                const gapsField = document.getElementById('{{ form.gaps.id_for_label }}');
+                                const blanksField = document.getElementById('{{ form.blanks.id_for_label }}');
+                                const lastUpdate = document.getElementById('last_update');
+                                data = JSON.parse(data);
+                                lastUpdate.innerHTML = `Last Update: <strong>${data.last_update}</strong>`;
+                                gapsField.value = data.gaps;
+                                blanksField.value = data.blanks;
+                            })
+                            .catch(error => console.error('Error fetching data:', error));
+                    });
+                </script>
+            </div>
+            <div class="form-group row">
+                <div class="form-group col-md-4">
+                    {{ form.gaps.label_tag }}
+                    {{ form.gaps|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid gaps.
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    {{ form.spikes.label_tag }}
+                    {{ form.spikes|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid spikes.
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    {{ form.blanks.label_tag }}
+                    {{ form.blanks|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid blanks.
+                    </div>
+                </div>
+            </div>
 
-    <script>
+            <div class="form-group row">
+                <div class="form-group col-md-4">
+                    {{ form.slmon.label_tag }}
+                    {{ form.slmon|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid slmon.
+                    </div>
+                </div>
+            </div>
 
-        // date picker initialization
-        (function() {
-            const dateInput = document.getElementById('{{ form.date.id_for_label }}');
-            dateInput.type = 'date';
+            <div class="form-group">
+                <label for="slmon_image">Upload SLMon Image:</label>
+                <input type="file" name="slmon_image" id="slmon_image" class="form-control">
+                {% if form.instance.slmon_image %}
+                <div class="mt-2">
+                    <a href="{{ form.instance.slmon_image.url }}" target="_blank">View current image</a>
+                </div>
+                <img id="pasted_image" src="{{ form.instance.slmon_image.url }}" style="max-width: 100%; margin-top: 10px;">
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="clear_image" id="clear_image">
+                    <label class="form-check-label" for="clear_image">
+                        Clear current image
+                    </label>
+                </div>
+                {% else %}
+                <div id="drop_zone" class="border border-primary border-4 p-3 mt-2 text-center rounded" style="background-color: #f8f9fa;">
+                    <p class="mb-0">Drag and drop an image here or press <strong>Ctrl+V</strong> to paste</p>
+                </div>
+                <img id="pasted_image" style="display:none; max-width: 100%; margin-top: 10px;">
+                {% endif %}
+            </div>
 
-            // change cs_id value based on date_input and waktu_dinas
-            const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
-            const qcIdInput = document.getElementById('{{ form.cs_id.id_for_label }}');
-            const jamPelaksanaanSelect = document.getElementById('{{ form.jam_pelaksanaan.id_for_label }}');
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="{% url 'cl_seiscomp:cs_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
 
-            function updateQcId() {
-                const dateValue = dateInput.value;
-                const waktuDinasValue = waktuDinasSelect.value;
-                qcIdInput.value = "CS-" + dateValue + "-" + waktuDinasValue[0];
-            }
+        <script>
 
-            function updateJamPelaksanaan() {
-                const shiftValue = waktuDinasSelect.value;
-                let jamPelaksanaanValue = "";
-                if (shiftValue === "Pagi") {
-                    jamPelaksanaanValue = "12:00 WIB";
-                } else if (shiftValue === "Siang") {
-                    jamPelaksanaanValue = "18:00 WIB";
-                } else if (shiftValue === "Malam") {
-                    jamPelaksanaanValue = "00:00 WIB";
-                } else {
-                    jamPelaksanaanValue = "06:00 WIB";
+            // date picker initialization
+            (function() {
+                const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+                dateInput.type = 'date';
+
+                // change cs_id value based on date_input and waktu_dinas
+                const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
+                const qcIdInput = document.getElementById('{{ form.cs_id.id_for_label }}');
+                const jamPelaksanaanSelect = document.getElementById('{{ form.jam_pelaksanaan.id_for_label }}');
+
+                function updateQcId() {
+                    const dateValue = dateInput.value;
+                    const waktuDinasValue = waktuDinasSelect.value;
+                    qcIdInput.value = "CS-" + dateValue + "-" + waktuDinasValue[0];
                 }
-                jamPelaksanaanSelect.value = jamPelaksanaanValue;
-            }
 
-            dateInput.addEventListener('change', updateQcId);
-            waktuDinasSelect.addEventListener('change', function() {
+                function updateJamPelaksanaan() {
+                    const shiftValue = waktuDinasSelect.value;
+                    let jamPelaksanaanValue = "";
+                    if (shiftValue === "Pagi") {
+                        jamPelaksanaanValue = "12:00 WIB";
+                    } else if (shiftValue === "Siang") {
+                        jamPelaksanaanValue = "18:00 WIB";
+                    } else if (shiftValue === "Malam") {
+                        jamPelaksanaanValue = "00:00 WIB";
+                    } else {
+                        jamPelaksanaanValue = "06:00 WIB";
+                    }
+                    jamPelaksanaanSelect.value = jamPelaksanaanValue;
+                }
+
+                dateInput.addEventListener('change', updateQcId);
+                waktuDinasSelect.addEventListener('change', function() {
+                    updateQcId();
+                    updateJamPelaksanaan();
+                });
+
+                // Initialize cs_id and jam_pelaksanaan based on the default values
                 updateQcId();
                 updateJamPelaksanaan();
+            })();
+
+            // Paste functionality
+            document.addEventListener('paste', function (event) {
+                const items = event.clipboardData.items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        const file = items[i].getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = function (event) {
+                            const imgElement = document.getElementById('pasted_image');
+                            imgElement.src = event.target.result;
+                            imgElement.style.display = 'block';
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(file);
+                            document.getElementById('slmon_image').files = dataTransfer.files;
+                            document.getElementById('drop_zone').style.display = 'none';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
             });
 
-            // Initialize cs_id and jam_pelaksanaan based on the default values
-            updateQcId();
-            updateJamPelaksanaan();
-        })();
+            // Drag and drop functionality
+            const dropZone = document.getElementById('drop_zone');
+            dropZone.addEventListener('dragover', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                dropZone.classList.add('bg-light');
+            });
 
-        // Paste functionality
-        document.addEventListener('paste', function (event) {
-            const items = event.clipboardData.items;
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].type.indexOf('image') !== -1) {
-                    const file = items[i].getAsFile();
+            dropZone.addEventListener('dragleave', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                dropZone.classList.remove('bg-light');
+            });
+
+            dropZone.addEventListener('drop', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                dropZone.classList.remove('bg-light');
+                const file = event.dataTransfer.files[0];
+                if (file && file.type.indexOf('image') !== -1) {
                     const reader = new FileReader();
                     reader.onload = function (event) {
                         const imgElement = document.getElementById('pasted_image');
@@ -208,45 +244,12 @@
                         const dataTransfer = new DataTransfer();
                         dataTransfer.items.add(file);
                         document.getElementById('slmon_image').files = dataTransfer.files;
-                        document.getElementById('drop_zone').style.display = 'none';
+                        dropZone.style.display = 'none';
                     };
                     reader.readAsDataURL(file);
                 }
-            }
-        });
-
-        // Drag and drop functionality
-        const dropZone = document.getElementById('drop_zone');
-        dropZone.addEventListener('dragover', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            dropZone.classList.add('bg-light');
-        });
-
-        dropZone.addEventListener('dragleave', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            dropZone.classList.remove('bg-light');
-        });
-
-        dropZone.addEventListener('drop', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            dropZone.classList.remove('bg-light');
-            const file = event.dataTransfer.files[0];
-            if (file && file.type.indexOf('image') !== -1) {
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    const imgElement = document.getElementById('pasted_image');
-                    imgElement.src = event.target.result;
-                    imgElement.style.display = 'block';
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    document.getElementById('slmon_image').files = dataTransfer.files;
-                    dropZone.style.display = 'none';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    </script>
-    {% endblock %}
+            });
+        </script>
+    </div>
+</div>
+{% endblock %}

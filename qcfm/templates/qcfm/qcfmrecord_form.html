@@ -1,250 +1,252 @@
 {% extends 'core/base.html' %}
 {% block content %}
-<div class="container">
-    <h1 class="mt-5">QC FM Record Form</h1>
-    <p>Sumber data: <a href="http://202.90.198.41/qc_focal.txt" target="_blank">http://202.90.198.41/qc_focal.txt</a></p>
-    <form method="post" class="needs-validation" novalidate>
-        {% csrf_token %}
-        {% load form_tags %}
+<div class="form-container">
+    <div class="container">
+        <h1 class="mt-5">QC FM Record Form</h1>
+        <p>Sumber data: <a href="http://202.90.198.41/qc_focal.txt" target="_blank">http://202.90.198.41/qc_focal.txt</a></p>
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            {% load form_tags %}
 
-        {% if form.errors %}
-        <div class="alert alert-danger">
-            Please correct the errors below.
-            <ul>
-                {% for field in form %}
-                {% if field.errors %}
-                {% for error in field.errors %}
-                <li>{{ field.label }}: {{ error }}</li>
-                {% endfor %}
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-        <div class="form-group row">
-            <div class="col-md-4">
-                {{ form.date.label_tag }}
-                {{ form.date|add_class:"form-control" }}
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                Please correct the errors below.
+                <ul>
+                    {% for field in form %}
+                    {% if field.errors %}
+                    {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            <div class="form-group row">
+                <div class="col-md-4">
+                    {{ form.date.label_tag }}
+                    {{ form.date|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid date.
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    {{ form.shift.label_tag }}
+                    {{ form.shift|add_class:"form-control" }}
+                </div>
+                <div class="col-md-4" style="display: none;">
+                    {{ form.qcfm_id.label_tag }}
+                    {{ form.qcfm_id|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid QC FM ID.
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        {{ form.kelompok.label_tag }}
+                        {{ form.kelompok|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please select a valid kelompok.
+                        </div>
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form.jam_pelaksanaan.label_tag }}
+                        {{ form.jam_pelaksanaan|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please fill a valid jam pelaksanaan.
+                        </div>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="{{ form.kel_sebelum.id_for_label }}">Kelompok Sebelumnya</label>
+                        {{ form.kel_sebelum|add_class:"form-control" }}
+                        <div class="invalid-feedback">
+                            Please fill a valid kelompok sebelumnya.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <label for="datetime_qcfm_prev_start">Start Date and Time (UTC)</label>
+                        <input type="datetime" id="datetime_qcfm_prev_start" class="form-control"
+                            value="2024-12-14 00:00:00">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="datetime_qcfm_prev_end">End Date and Time (UTC)</label>
+                        <input type="datetime" id="datetime_qcfm_prev_end" class="form-control"
+                            value="2024-12-14 07:00:00">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button" id="fetch_qcfm_prev" class="btn btn-primary align-bottom">Fetch
+                            Data</button>
+                    </div>
+                </div>
+                <!-- Accordion for fetched data and qcfm_prev form -->
+                <div class="accordion" id="fetchedDataAccordion">
+                    <div class="card">
+                        <div class="card-header" id="headingOne">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse"
+                                    data-target="#fetchedDataSection" aria-expanded="true"
+                                    aria-controls="fetchedDataSection">
+                                    Fetched Data
+                                </button>
+                            </h2>
+                        </div>
+
+                        <div id="fetchedDataSection" class="collapse" aria-labelledby="headingOne"
+                            data-parent="#fetchedDataAccordion">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped table-hover table-sm" id="fetched-data-table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Date</th>
+                                                <th>OT (UTC)</th>
+                                                <th>Lat</th>
+                                                <th>Long</th>
+                                                <th>Mag</th>
+                                                <th>TypeMag</th>
+                                                <th>D(Km)</th>
+                                                <th>S1</th>
+                                                <th>D1</th>
+                                                <th>R1</th>
+                                                <th>S2</th>
+                                                <th>D2</th>
+                                                <th>R2</th>
+                                                <th>Fit (%)</th>
+                                                <th>CLVD (%)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {{ form.qcfm_prev.label_tag }}
+                                {{ form.qcfm_prev|add_class:"form-control" }}
+                                <div class="invalid-feedback">
+                                    Please provide a valid previous QC FM.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <label for="datetime_qcfm_start">Start Date and Time (UTC)</label>
+                        <input type="datetime" id="datetime_qcfm_start" class="form-control"
+                            value="2024-12-14 00:00:00">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="datetime_qcfm_end">End Date and Time (UTC)</label>
+                        <input type="datetime" id="datetime_qcfm_end" class="form-control" value="2024-12-14 07:00:00">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button" id="fetch_qcfm" class="btn btn-primary align-bottom">Fetch Data</button>
+                    </div>
+                </div>
+                <!-- Accordion for fetched data and qc form -->
+                <div class="accordion" id="qcFmDataAccordion">
+                    <div class="card">
+                        <div class="card-header" id="headingTwo">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse"
+                                    data-target="#qcFmDataSection" aria-expanded="true" aria-controls="qcFmDataSection">
+                                    Fetched QC Data
+                                </button>
+                            </h2>
+                        </div>
+
+                        <div id="qcFmDataSection" class="collapse" aria-labelledby="headingTwo"
+                            data-parent="#qcFmDataAccordion">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped table-hover table-sm" id="qc-fm-data-table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Date</th>
+                                                <th>OT (UTC)</th>
+                                                <th>Lat</th>
+                                                <th>Long</th>
+                                                <th>Mag</th>
+                                                <th>TypeMag</th>
+                                                <th>D(Km)</th>
+                                                <th>S1</th>
+                                                <th>D1</th>
+                                                <th>R1</th>
+                                                <th>S2</th>
+                                                <th>D2</th>
+                                                <th>R2</th>
+                                                <th>Fit (%)</th>
+                                                <th>CLVD (%)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {{ form.qcfm.label_tag }}
+                                {{ form.qcfm|add_class:"form-control" }}
+                                <div class="invalid-feedback">
+                                    Please provide a valid QC.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-6">
+                    {{ form.operator.label_tag }}
+                    {{ form.operator|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please select a valid operator.
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    {{ form.NIP.label_tag }}
+                    {{ form.NIP|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        Please provide a valid NIP.
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
                 <div class="invalid-feedback">
                     Please provide a valid date.
                 </div>
             </div>
-            <div class="col-md-4">
-                {{ form.shift.label_tag }}
-                {{ form.shift|add_class:"form-control" }}
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                Please correct the errors below.
+                <ul>
+                    {% for field in form %}
+                    {% if field.errors %}
+                    {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                </ul>
             </div>
-            <div class="col-md-4" style="display: none;">
-                {{ form.qcfm_id.label_tag }}
-                {{ form.qcfm_id|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid QC FM ID.
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="row">
-                <div class="form-group col-md-4">
-                    {{ form.kelompok.label_tag }}
-                    {{ form.kelompok|add_class:"form-control" }}
-                    <div class="invalid-feedback">
-                        Please select a valid kelompok.
-                    </div>
-                </div>
-                <div class="form-group col-md-4">
-                    {{ form.jam_pelaksanaan.label_tag }}
-                    {{ form.jam_pelaksanaan|add_class:"form-control" }}
-                    <div class="invalid-feedback">
-                        Please fill a valid jam pelaksanaan.
-                    </div>
-                </div>
-                <div class="form-group col-md-4">
-                    <label for="{{ form.kel_sebelum.id_for_label }}">Kelompok Sebelumnya</label>
-                    {{ form.kel_sebelum|add_class:"form-control" }}
-                    <div class="invalid-feedback">
-                        Please fill a valid kelompok sebelumnya.
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="form-group row">
-                <div class="col-md-4">
-                    <label for="datetime_qcfm_prev_start">Start Date and Time (UTC)</label>
-                    <input type="datetime" id="datetime_qcfm_prev_start" class="form-control"
-                        value="2024-12-14 00:00:00">
-                </div>
-                <div class="col-md-4">
-                    <label for="datetime_qcfm_prev_end">End Date and Time (UTC)</label>
-                    <input type="datetime" id="datetime_qcfm_prev_end" class="form-control"
-                        value="2024-12-14 07:00:00">
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button type="button" id="fetch_qcfm_prev" class="btn btn-primary align-bottom">Fetch
-                        Data</button>
-                </div>
-            </div>
-            <!-- Accordion for fetched data and qcfm_prev form -->
-            <div class="accordion" id="fetchedDataAccordion">
-                <div class="card">
-                    <div class="card-header" id="headingOne">
-                        <h2 class="mb-0">
-                            <button class="btn btn-link" type="button" data-toggle="collapse"
-                                data-target="#fetchedDataSection" aria-expanded="true"
-                                aria-controls="fetchedDataSection">
-                                Fetched Data
-                            </button>
-                        </h2>
-                    </div>
-
-                    <div id="fetchedDataSection" class="collapse" aria-labelledby="headingOne"
-                        data-parent="#fetchedDataAccordion">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-hover table-sm" id="fetched-data-table">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th>No</th>
-                                            <th>Date</th>
-                                            <th>OT (UTC)</th>
-                                            <th>Lat</th>
-                                            <th>Long</th>
-                                            <th>Mag</th>
-                                            <th>TypeMag</th>
-                                            <th>D(Km)</th>
-                                            <th>S1</th>
-                                            <th>D1</th>
-                                            <th>R1</th>
-                                            <th>S2</th>
-                                            <th>D2</th>
-                                            <th>R2</th>
-                                            <th>Fit (%)</th>
-                                            <th>CLVD (%)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Data will be populated here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            {{ form.qcfm_prev.label_tag }}
-                            {{ form.qcfm_prev|add_class:"form-control" }}
-                            <div class="invalid-feedback">
-                                Please provide a valid previous QC FM.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="form-group row">
-                <div class="col-md-4">
-                    <label for="datetime_qcfm_start">Start Date and Time (UTC)</label>
-                    <input type="datetime" id="datetime_qcfm_start" class="form-control"
-                        value="2024-12-14 00:00:00">
-                </div>
-                <div class="col-md-4">
-                    <label for="datetime_qcfm_end">End Date and Time (UTC)</label>
-                    <input type="datetime" id="datetime_qcfm_end" class="form-control" value="2024-12-14 07:00:00">
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button type="button" id="fetch_qcfm" class="btn btn-primary align-bottom">Fetch Data</button>
-                </div>
-            </div>
-            <!-- Accordion for fetched data and qc form -->
-            <div class="accordion" id="qcFmDataAccordion">
-                <div class="card">
-                    <div class="card-header" id="headingTwo">
-                        <h2 class="mb-0">
-                            <button class="btn btn-link" type="button" data-toggle="collapse"
-                                data-target="#qcFmDataSection" aria-expanded="true" aria-controls="qcFmDataSection">
-                                Fetched QC Data
-                            </button>
-                        </h2>
-                    </div>
-
-                    <div id="qcFmDataSection" class="collapse" aria-labelledby="headingTwo"
-                        data-parent="#qcFmDataAccordion">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-hover table-sm" id="qc-fm-data-table">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th>No</th>
-                                            <th>Date</th>
-                                            <th>OT (UTC)</th>
-                                            <th>Lat</th>
-                                            <th>Long</th>
-                                            <th>Mag</th>
-                                            <th>TypeMag</th>
-                                            <th>D(Km)</th>
-                                            <th>S1</th>
-                                            <th>D1</th>
-                                            <th>R1</th>
-                                            <th>S2</th>
-                                            <th>D2</th>
-                                            <th>R2</th>
-                                            <th>Fit (%)</th>
-                                            <th>CLVD (%)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Data will be populated here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            {{ form.qcfm.label_tag }}
-                            {{ form.qcfm|add_class:"form-control" }}
-                            <div class="invalid-feedback">
-                                Please provide a valid QC.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="form-group row">
-            <div class="col-md-6">
-                {{ form.operator.label_tag }}
-                {{ form.operator|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please select a valid operator.
-                </div>
-            </div>
-            <div class="col-md-6">
-                {{ form.NIP.label_tag }}
-                {{ form.NIP|add_class:"form-control" }}
-                <div class="invalid-feedback">
-                    Please provide a valid NIP.
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="invalid-feedback">
-                Please provide a valid date.
-            </div>
-        </div>
-        {% if form.errors %}
-        <div class="alert alert-danger">
-            Please correct the errors below.
-            <ul>
-                {% for field in form %}
-                {% if field.errors %}
-                {% for error in field.errors %}
-                <li>{{ field.label }}: {{ error }}</li>
-                {% endfor %}
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-        <button type="submit" class="btn btn-primary">Save</button>
-        <button type="button" class="btn btn-secondary"
-            onclick="window.location.href='{% url 'qcfm:qcfmrecord_list' %}'">Cancel</button>
-    </form>
+            {% endif %}
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-secondary"
+                onclick="window.location.href='{% url 'qcfm:qcfmrecord_list' %}'">Cancel</button>
+        </form>
+    </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
