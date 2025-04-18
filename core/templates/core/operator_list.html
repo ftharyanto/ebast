@@ -3,7 +3,8 @@
 {% block title %}Operator List{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+<div class="form-container mt-4">
     <div class="row justify-content-center">
         <div class="col-xl-12"> {# Make table wider #}
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -37,21 +38,20 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover mb-0 table-layout-fixed" id="operatorTable"> {# Add table-layout-fixed #}
+                        <table class="table table-striped table-hover mb-0 table-layout-fixed table-center" id="operatorTable">
                             <thead class="table-light">
                                 <tr>
-                                    {# Add text-align: center; to each th #}
-                                    <th onclick="sortTable(0)" style="cursor: pointer; width: 30%; text-align: center;">Name <span id="nameSortArrow"></span></th>
-                                    <th onclick="sortTable(1)" style="cursor: pointer; width: 25%; text-align: center;">NIP <span id="nipSortArrow"></span></th>
-                                    <th onclick="sortTable(2)" style="cursor: pointer; width: 25%; text-align: center;">Nickname <span id="nicknameSortArrow"></span></th>
-                                    <th style="width: 20%; text-align: center;">Actions</th>
+                                    <th onclick="sortTable(0)" class="table-pointer table-col-30">Name <span id="nameSortArrow"></span></th>
+                                    <th onclick="sortTable(1)" class="table-pointer table-col-25">NIP <span id="nipSortArrow"></span></th>
+                                    <th onclick="sortTable(2)" class="table-pointer table-col-25">Nickname <span id="nicknameSortArrow"></span></th>
+                                    <th class="table-col-20">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="operatorTableBody">
                                 {% for record in operator %}
                                 <tr>
-                                    <td>{{ record.name }}</td>
-                                    <td style="text-align: center;">{{ record.NIP }}</td>
+                                    <td style="text-align: start;">{{ record.name }}</td>
+                                    <td>{{ record.NIP }}</td>
                                     <td>{{ record.nickname }}</td>
                                     <td>
                                         <a href="{% url 'core:operator_update' record.pk %}" class="btn btn-sm btn-warning me-1" data-bs-toggle="tooltip" title="Edit">

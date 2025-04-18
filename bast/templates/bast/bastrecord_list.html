@@ -35,10 +35,9 @@
                         <table class="table table-striped table-hover mb-0 table-layout-fixed" id="bastRecordTable"> {# Add table-layout-fixed #}
                             <thead class="table-light">
                                 <tr>
-                                    {# Add explicit widths #}
-                                    <th onclick="sortTable(0)" style="cursor: pointer; width: 20%;">ID <span id="idSortArrow"></span></th>
-                                    <th onclick="sortTable(1)" style="cursor: pointer; width: 45%;">SPV <span id="spvSortArrow"></span></th>
-                                    <th style="width: 35%;">Actions</th> {# Width for Actions column #}
+                                    <th onclick="sortTable(0)" class="table-pointer table-col-20">ID <span id="idSortArrow"></span></th>
+                                    <th onclick="sortTable(1)" class="table-pointer table-col-40">SPV <span id="spvSortArrow"></span></th>
+                                    <th class="table-col-20">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="bastRecordTableBody">
@@ -50,7 +49,7 @@
                                         <a href="{% url 'bast:bastrecord_update' record.pk %}" class="btn btn-sm btn-warning me-1" data-bs-toggle="tooltip" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{% url 'bast:bastrecord_delete_direct' record.pk %}" method="post" style="display:inline;" class="delete-form">
+                                        <form action="{% url 'bast:bastrecord_delete_direct' record.pk %}" method="post" class="delete-form d-inline">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-sm btn-danger delete-button me-1" data-bs-toggle="tooltip" title="Delete">
                                                 <i class="fas fa-trash"></i>

@@ -3,6 +3,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const oprInput = document.getElementById('oprInput');
     const suggestionsBox = document.getElementById('suggestions');
     const oprTableBody = document.getElementById('oprTableBody');
+    // Use modal and button IDs from base.html
+    const confirmationModalElement = document.getElementById('deleteConfirmationModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteButton');
+    let rowToDelete = null; // Variable to store the row targeted for deletion
+    let confirmationModal = null;
+    if (confirmationModalElement && window.bootstrap) {
+        confirmationModal = new bootstrap.Modal(confirmationModalElement);
+    }
     let oprCount = 0;
     let operators = [];
 
@@ -79,25 +87,57 @@ document.addEventListener('DOMContentLoaded', function() {
         const row = document.createElement('tr');
         row.setAttribute('draggable', 'true');
         row.innerHTML = `
-        <td class="drag-handle">☰</td>
-        <td>${oprCount}</td>
-        <td>${operatorData.pk}</td>
+        <td class="drag-handle;" style="text-align: center;">☰</td>
+        <td style="text-align: center;">${oprCount}</td>
+        <td style="text-align: center;">${operatorData.pk}</td>
         <td>${operatorData.name}</td>
         <td>
-          <button class="btn btn-danger btn-sm delete"><i class="fas fa-trash"></i></button>
+          <button class="btn btn-danger btn-sm delete" data-toggle="tooltip" title="Delete Operator" data-pk="${operatorData.pk}"><i class="fas fa-trash"></i></button>
         </td>
       `;
 
-        // Add delete functionality
-        row.querySelector('.delete').addEventListener('click', () => {
-            row.remove();
-            updateRowNumbers();
-            updateMemberInput();
+        // Add event listener for the delete button to show the modal
+        const deleteButton = row.querySelector('.delete');
+        deleteButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            rowToDelete = row; // Store the row to be deleted
+            if (confirmationModal) {
+                confirmationModal.show(); // Show the confirmation modal
+            } else {
+                // fallback: delete directly if modal not found
+                rowToDelete.remove();
+                updateRowNumbers();
+                updateMemberInput();
+                rowToDelete = null;
+            }
         });
+
+        // Initialize tooltip for the new button
+        $(deleteButton).tooltip();
 
         // Append row to table
         oprTableBody.appendChild(row);
         updateMemberInput();
+    }
+
+    // Add event listener for the modal's confirm delete button
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (rowToDelete) {
+                rowToDelete.remove(); // Remove the stored row
+                updateRowNumbers();
+                updateMemberInput();
+                rowToDelete = null; // Reset the variable
+                if (confirmationModal) {
+                    confirmationModal.hide(); // Hide the modal
+                }
+                // Re-initialize tooltips in case any were removed/re-added implicitly
+                $('[data-toggle="tooltip"]').tooltip('dispose'); // Remove old tooltips
+                $('[data-toggle="tooltip"]').tooltip(); // Initialize new ones
+            }
+        });
+    } else {
+        console.error("Confirm delete button with ID 'confirmDeleteButton' not found in base.html");
     }
 
     // Update row numbers after deletion

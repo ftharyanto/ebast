@@ -35,10 +35,10 @@
                         <table class="table table-striped table-hover mb-0 table-layout-fixed" id="qcFmRecordTable">
                             <thead class="table-light">
                                 <tr>
-                                    <th onclick="sortTable(0)" style="cursor: pointer; width: 20%; text-align: center;">ID <span id="idSortArrow"></span></th>
-                                    <th onclick="sortTable(1)" style="cursor: pointer; width: 15%; text-align: center;">Kelompok <span id="kelompokSortArrow"></span></th>
-                                    <th onclick="sortTable(2)" style="cursor: pointer; width: 30%; text-align: center;">Operator <span id="operatorSortArrow"></span></th>
-                                    <th style="width: 35%; text-align: center;">Actions</th>
+                                    <th onclick="sortTable(0)" class="table-pointer table-col-10">ID <span id="idSortArrow"></span></th>
+                                    <th onclick="sortTable(1)" class="table-pointer table-col-10">Kelompok <span id="kelompokSortArrow"></span></th>
+                                    <th onclick="sortTable(2)" class="table-pointer table-col-25">Operator <span id="operatorSortArrow"></span></th>
+                                    <th class="table-col-10">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="qcFmRecordTableBody">
@@ -51,7 +51,7 @@
                                         <a href="{% url 'qcfm:qcfmrecord_update' record.pk %}" class="btn btn-sm btn-warning me-1" data-bs-toggle="tooltip" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{% url 'qcfm:qcfmrecord_delete_direct' record.pk %}" method="post" style="display:inline;" class="delete-form">
+                                        <form action="{% url 'qcfm:qcfmrecord_delete_direct' record.pk %}" method="post" class="delete-form d-inline">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-sm btn-danger delete-button me-1" data-bs-toggle="tooltip" title="Delete">
                                                 <i class="fas fa-trash"></i>
