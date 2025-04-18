@@ -64,7 +64,7 @@
             let web = input.replace(/\*(.+?)\*/g, '<strong>$1</strong>');
 
             // Add two new lines after the second line
-            web = web.replace(/^((?:.*\n){2})/, '$1<br><br>');
+            web = web.replace(/^((?:.*\n){1})/, '$1<br><br>');
 
             // Make the first line center-aligned
             web = web.replace(/^(.*?)(\n|$)/, '<p style="text-align: center;  margin-bottom: 0;">$1</p>');
