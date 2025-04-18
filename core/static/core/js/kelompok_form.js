@@ -87,10 +87,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const row = document.createElement('tr');
         row.setAttribute('draggable', 'true');
         row.innerHTML = `
-        <td class="drag-handle;" style="text-align: center;">☰</td>
-        <td style="text-align: center;">${oprCount}</td>
-        <td style="text-align: center;">${operatorData.pk}</td>
-        <td>${operatorData.name}</td>
+        <td class="drag-handle;">☰</td>
+        <td>${oprCount}</td>
+        <td>${operatorData.pk}</td>
+        <td class="nama-column">${operatorData.name}</td>
         <td>
           <button class="btn btn-danger btn-sm delete" data-toggle="tooltip" title="Delete Operator" data-pk="${operatorData.pk}"><i class="fas fa-trash"></i></button>
         </td>

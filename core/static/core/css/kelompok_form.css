@@ -14,9 +14,14 @@
 .table th, .table td {
     padding: 0.5rem;
     vertical-align: middle;
+    text-align: center;
 }
 
 .table th {
     background-color: #f1f1f1;
     font-weight: bold;
+}
+
+.table td.nama-column {
+    text-align: left;
 }
