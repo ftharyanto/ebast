@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,6 +15,18 @@
             top: 10px;
             left: 10px;
             z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px;
+            border-radius: 5px;
+            max-width: 90%;
+        }
+        #constraints-form .card-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .leaflet-popup-content {
+            font-size: 0.8rem;
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -25,30 +38,69 @@
         <div class="collapse" id="constraints-form">
             <div class="card card-body">
                 <form>
-                    <label for="start-date">Start Date:</label>
-                    <input type="date" id="start-date" name="start-date" class="form-control">
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label for="start-date">Start Date:</label>
+                            <input type="date" id="start-date" name="start-date" class="form-control" value="2024-01-01">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="end-date">End Date:</label>
+                            <input type="date" id="end-date" name="end-date" class="form-control" value="2025-01-01">
+                        </div>
+                    </div>
 
-                    <label for="end-date">End Date:</label>
-                    <input type="date" id="end-date" name="end-date" class="form-control">
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label for="min-latitude">Min Latitude:</label>
+                            <input type="number" id="min-latitude" name="min-latitude" step="any" placeholder="-90" class="form-control" value="-11">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="max-latitude">Max Latitude:</label>
+                            <input type="number" id="max-latitude" name="max-latitude" step="any" placeholder="90" class="form-control" value="6">
+                        </div>
+                    </div>
 
-                    <label for="latitude">Latitude:</label>
-                    <input type="number" id="latitude" name="latitude" step="0.01" class="form-control">
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label for="min-longitude">Min Longitude:</label>
+                            <input type="number" id="min-longitude" name="min-longitude" step="any" placeholder="-180" class="form-control" value="95">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="max-longitude">Max Longitude:</label>
+                            <input type="number" id="max-longitude" name="max-longitude" step="any" placeholder="180" class="form-control" value="141">
+                        </div>
+                    </div>
 
-                    <label for="longitude">Longitude:</label>
-                    <input type="number" id="longitude" name="longitude" step="0.01" class="form-control">
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label for="min-magnitude">Min Magnitude (Mw):</label>
+                            <input type="number" id="min-magnitude" name="min-magnitude" step="0.1" placeholder="0" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="max-magnitude">Max Magnitude (Mw):</label>
+                            <input type="number" id="max-magnitude" name="max-magnitude" step="0.1" placeholder="10" class="form-control">
+                        </div>
+                    </div>
 
-                    <label for="magnitude">Magnitude:</label>
-                    <input type="number" id="magnitude" name="magnitude" step="0.1" class="form-control">
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label for="min-depth">Min Depth (km):</label>
+                            <input type="number" id="min-depth" name="min-depth" step="any" placeholder="0" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="max-depth">Max Depth (km):</label>
+                            <input type="number" id="max-depth" name="max-depth" step="any" placeholder="1000" class="form-control">
+                        </div>
+                    </div>
 
-                    <label for="depth">Depth:</label>
-                    <input type="number" id="depth" name="depth" step="0.1" class="form-control">
-
-                    <button type="submit" class="btn btn-success mt-2">Apply</button>
+                    <button type="submit" class="btn btn-success mt-2">Search</button>
+                    <button type="reset" class="btn btn-secondary mt-2">Reset</button>
                 </form>
             </div>
         </div>
     </div>
     <div id="map" style="width: 100%; height: 100vh;"></div>
+    
     <script>
         // Initialize the map
         const map = L.map('map').setView([0, 0], 2); // Center map at latitude 0, longitude 0, zoom level 2
@@ -63,6 +115,148 @@
         );
 
         esriOceanBasemap.addTo(map); // Add the basemap to the map
+
+        // Layer group to hold focal mechanism markers
+        const fmLayer = L.layerGroup().addTo(map);
+
+        // Function to fetch and plot data
+        async function fetchAndPlotFocalMechanisms(params) {
+            fmLayer.clearLayers(); // Clear previous markers
+            console.log("Fetching with params:", params);
+
+            // Prepare parameters for our backend proxy
+            const queryParams = new URLSearchParams({
+                // Pass all necessary parameters from the form
+                yr: params.startDate.split('-')[0],
+                mo: params.startDate.split('-')[1],
+                day: params.startDate.split('-')[2],
+                oyr: params.endDate.split('-')[0],
+                omo: params.endDate.split('-')[1],
+                oday: params.endDate.split('-')[2],
+                // Pass optional params only if they have a value
+                ...(params.minMagnitude !== null && { lmw: params.minMagnitude }),
+                ...(params.maxMagnitude !== null && { umw: params.maxMagnitude }),
+                ...(params.minLatitude !== null && { llat: params.minLatitude }),
+                ...(params.maxLatitude !== null && { ulat: params.maxLatitude }),
+                ...(params.minLongitude !== null && { llon: params.minLongitude }),
+                ...(params.maxLongitude !== null && { ulon: params.maxLongitude }),
+                ...(params.minDepth !== null && { lhd: params.minDepth }),
+                ...(params.maxDepth !== null && { uhd: params.maxDepth }),
+            });
+
+            // Construct URL to our Django proxy view
+            // Make sure the path matches your seismap urls.py
+            const proxyUrl = `/seismap/fetch_cmt/?${queryParams.toString()}`;
+            console.log("Fetching from proxy URL:", proxyUrl);
+
+            try {
+                const response = await fetch(proxyUrl);
+                const result = await response.json(); // Expecting JSON from our proxy
+
+                if (!response.ok) {
+                    // Handle errors reported by our proxy view
+                    const errorMsg = result.error || `HTTP error! status: ${response.status}`;
+                    throw new Error(errorMsg);
+                }
+
+                const events = result.data; // Extract the events data from the JSON
+                console.log(`Received ${events.length} events from backend.`);
+
+                if (events.length === 0) {
+                    alert("No events found matching the criteria.");
+                    return;
+                }
+
+                // Plot using L.marker with custom icons
+                events.forEach(event => {
+                    if (event.lat && event.lon && event.beachball_img) { // Check for image data
+                        try {
+                            const iconSize = 30; // Adjust size as needed
+                            const beachballIcon = L.icon({
+                                iconUrl: `data:image/png;base64,${event.beachball_img}`,
+                                iconSize: [iconSize, iconSize],
+                                iconAnchor: [iconSize / 2, iconSize / 2], // Center the icon
+                                popupAnchor: [0, -iconSize / 2] // Position popup above icon
+                            });
+
+                            const marker = L.marker([event.lat, event.lon], { icon: beachballIcon });
+
+                            // Update popup content
+                            marker.bindPopup(`
+                                <b>Event:</b> ${event.cmtEventName || 'N/A'}<br>
+                                <b>Region:</b> ${event.region || 'N/A'}<br>
+                                <b>Date:</b> ${event.date || 'N/A'} ${event.time || ''}<br>
+                                <b>Lat:</b> ${event.lat.toFixed(3)}, <b>Lon:</b> ${event.lon.toFixed(3)}<br>
+                                <b>Depth:</b> ${event.depth?.toFixed(1) || 'N/A'} km<br>
+                                <b>Mw:</b> ${event.mw || 'N/A'}
+                                (mb: ${event.mb || 'N/A'}, Ms: ${event.ms || 'N/A'})
+                            `);
+                            marker.addTo(fmLayer);
+                        } catch (e) {
+                            console.error("Error creating marker for event:", event, e);
+                        }
+                    } else if (event.lat && event.lon) {
+                        // Optional: Add a default marker if beachball generation failed
+                        console.warn("Event missing beachball image, adding default marker:", event.cmtEventName);
+                        const defaultMarker = L.circleMarker([event.lat, event.lon], { radius: 5, color: 'red' });
+                        defaultMarker.bindPopup(`<b>Event:</b> ${event.cmtEventName || 'N/A'} (No beachball)`);
+                        defaultMarker.addTo(fmLayer);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error fetching or plotting focal mechanisms:', error);
+                alert(`Failed to fetch or plot data: ${error.message}. Check console for details.`);
+            }
+        }
+
+        // Wrap the execution logic in DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listener to the form
+            const form = document.querySelector('#constraints-form form');
+            form.addEventListener('submit', (event) => {
+                event.preventDefault(); // Prevent default page reload
+
+                // Helper function to get float value or null
+                const getFloatOrNull = (id) => {
+                    const value = document.getElementById(id).value;
+                    return value === '' ? null : parseFloat(value);
+                };
+
+                const params = {
+                    startDate: document.getElementById('start-date').value || '1976-01-01', // Default start date
+                    endDate: document.getElementById('end-date').value || new Date().toISOString().split('T')[0], // Default to today
+                    minLatitude: getFloatOrNull('min-latitude'),
+                    maxLatitude: getFloatOrNull('max-latitude'),
+                    minLongitude: getFloatOrNull('min-longitude'),
+                    maxLongitude: getFloatOrNull('max-longitude'),
+                    minMagnitude: getFloatOrNull('min-magnitude'),
+                    maxMagnitude: getFloatOrNull('max-magnitude'),
+                    minDepth: getFloatOrNull('min-depth'),
+                    maxDepth: getFloatOrNull('max-depth'),
+                };
+
+                // Basic validation for dates
+                if (!params.startDate || !params.endDate || new Date(params.startDate) > new Date(params.endDate)) {
+                    alert("Please select valid start and end dates.");
+                    return;
+                }
+                // Optional: Add validation for min/max ranges (e.g., minLat <= maxLat)
+
+                fetchAndPlotFocalMechanisms(params);
+            });
+
+            // Load some default data on initial load
+            fetchAndPlotFocalMechanisms({ 
+                startDate: '2024-01-01', 
+                endDate: '2025-01-01',
+                minLatitude: -11, maxLatitude: 6, 
+                minLongitude: 95, maxLongitude: 141,
+                minMagnitude: null, maxMagnitude: null, // Use defaults (0-10)
+                minDepth: null, maxDepth: null // Use defaults (0-1000)
+            });
+        }); // End of DOMContentLoaded listener
+
     </script>
 </body>
 </html>
