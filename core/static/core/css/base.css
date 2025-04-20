@@ -58,14 +58,6 @@ tr.drag-over {
     display: none;
 }
 
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: #f9f9f9;
-}
-
-.table-striped tbody tr:nth-of-type(even) {
-    background-color: #ffffff;
-}
-
 /* Reusable table styling */
 /* Center text in all table headers by default */
 th {

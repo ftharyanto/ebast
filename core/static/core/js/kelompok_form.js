@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const row = document.createElement('tr');
         row.setAttribute('draggable', 'true');
         row.innerHTML = `
-        <td class="drag-handle;">☰</td>
+        <td class="drag-handle">☰</td>
         <td>${oprCount}</td>
         <td>${operatorData.pk}</td>
         <td class="nama-column">${operatorData.name}</td>
