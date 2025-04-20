@@ -117,14 +117,10 @@
                 <!-- Accordion for fetched data and bast form -->
                 <div class="accordion" id="fetchedDataAccordion">
                     <div class="card">
-                        <div class="card-header" id="headingOne">
-                            <h2 class="mb-0">
-                                <button class="btn btn-link" type="button" data-toggle="collapse"
-                                    data-target="#fetchedDataSection" aria-expanded="true"
-                                    aria-controls="fetchedDataSection">
-                                    Fetched Data
-                                </button>
-                            </h2>
+                        <div class="card-header clickable" id="headingOne" data-toggle="collapse" data-target="#fetchedDataSection" aria-expanded="true" aria-controls="fetchedDataSection" style="cursor:pointer;">
+                            <h5 class="mb-2 mt-2">
+                                <span class="font-weight-bold">Fetched Data</span>
+                            </h5>
                         </div>
 
                         <div id="fetchedDataSection" class="collapse" aria-labelledby="headingOne"
@@ -307,6 +303,15 @@
         </form>
     </div>
 </div>
+<style>
+/* Accordion clickable header hover effect */
+.card-header.clickable {
+    transition: background-color 0.2s;
+}
+.card-header.clickable:hover {
+    background-color: #e9ecef;
+}
+</style>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -572,9 +577,11 @@
         }
     });
 
-    // Trigger convertTableToCSV whenever the table is updated
+    // Trigger calculateSelisihPGN, calculateSelisihPGR, and convertTableToCSV on input in fetched-data-table
     document.addEventListener('input', function (event) {
         if (event.target.closest('#fetched-data-table td[contenteditable="true"]')) {
+            calculateSelisihPGN();
+            calculateSelisihPGR();
             convertTableToCSV();
         }
     });
@@ -701,25 +708,12 @@
         }
     }
 
-    // Trigger calculateSelisihPGN when the table is populated
-    document.addEventListener('DOMContentLoaded', function () {
-        calculateSelisihPGN();
-        calculateSelisihPGR();
-    });
-
-    // Trigger calculateSelisihPGN and calculateSelisihPGR when the fetch button is clicked
-    document.getElementById('fetch_bast').addEventListener('click', function () {
-        setTimeout(function () {
-            calculateSelisihPGN();
-            calculateSelisihPGR();
-        }, 1000); // Delay to ensure data is populated
-    });
-
     // Trigger calculateSelisihPGN and calculateSelisihPGR when the table cells are edited
-    document.addEventListener('input', function (event) {
+    document.addEventListener('blur', function (event) {
         if (event.target.closest('#fetched-data-table td[contenteditable="true"]')) {
             calculateSelisihPGN();
             calculateSelisihPGR();
+            convertTableToCSV();
         }
     });
 
