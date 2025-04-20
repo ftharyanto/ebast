@@ -78,3 +78,11 @@ th {
 .table-col-35 { width: 35%; } /* Added for flexibility */
 .table-col-40 { width: 40%; }
 .table-col-50 { width: 50%; }
+
+/* Utility class to truncate long table cell content with ellipsis */
+.ellipsis-cell {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -36,10 +36,11 @@
                             <table class="table table-striped table-hover mb-0 table-layout-fixed" id="csRecordTable">
                                 <thead class="table-light">
                                     <tr>
-                                        <th onclick="sortTable(0)" class="table-pointer table-col-10">ID <span id="idSortArrow"></span></th>
+                                        <th onclick="sortTable(0)" class="table-pointer table-col-15">ID <span id="idSortArrow"></span></th>
                                         <th onclick="sortTable(1)" class="table-pointer table-col-10">Jam Pelaksanaan <span id="jampelSortArrow"></span></th>
                                         <th onclick="sortTable(2)" class="table-pointer table-col-10">Kelompok <span id="kelompokSortArrow"></span></th>
-                                        <th onclick="sortTable(3)" class="table-pointer table-col-25">Operator <span id="operatorSortArrow"></span></th>
+                                        <th onclick="sortTable(3)" class="table-pointer table-col-10">Blank <span id="blankSortArrow"></span></th>
+                                        <th onclick="sortTable(4)" class="table-pointer table-col-25">Operator <span id="operatorSortArrow"></span></th>
                                         <th class="table-col-15">Actions</th>
                                     </tr>
                                 </thead>
@@ -49,7 +50,8 @@
                                         <td>{{ record.cs_id }}</td>
                                         <td style="text-align: center;">{{ record.jam_pelaksanaan }}</td>
                                         <td style="text-align: center;">{{ record.kelompok }}</td>
-                                        <td>{{ record.operator }}</td>
+                                        <td style="text-align: center;">{{ record.count_blanks }}</td>
+                                        <td class="ellipsis-cell">{{ record.operator }}</td>
                                         <td>
                                             <a href="{% url 'cl_seiscomp:cs_update' record.pk %}" class="btn btn-sm btn-warning me-1" data-bs-toggle="tooltip" title="Edit">
                                                 <i class="fas fa-edit"></i>
@@ -70,7 +72,7 @@
                                     </tr>
                                     {% empty %}
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted py-3">No Ceklis Seiscomp records found.</td>
+                                        <td colspan="6" class="text-center text-muted py-3">No Ceklis Seiscomp records found.</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -116,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let recordsPerPage = parseInt(document.getElementById("recordsPerPageTop").value);
     const table = document.getElementById("csRecordTable");
     const tbody = document.getElementById("csRecordTableBody");
-    const originalRows = Array.from(tbody.querySelectorAll("tr:not(:has(td[colspan='5']))"));
+    const originalRows = Array.from(tbody.querySelectorAll("tr:not(:has(td[colspan='6']))"));
     let currentRows = [...originalRows];
     let totalPages = Math.ceil(currentRows.length / recordsPerPage);
     let sortDirection = { 0: 'desc' };
@@ -153,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function() {
      function handleEmptyTable() {
         const emptyRow = tbody.querySelector('.empty-row');
         const hasDataRows = currentRows.length > 0;
-        const colspanValue = 5;
+        const colspanValue = 6;
 
         if (!hasDataRows && !emptyRow) {
             const tr = document.createElement('tr');
@@ -195,7 +197,8 @@ document.addEventListener("DOMContentLoaded", function() {
             return (cells[0] && cells[0].textContent.toLowerCase().includes(filter)) ||
                    (cells[1] && cells[1].textContent.toLowerCase().includes(filter)) ||
                    (cells[2] && cells[2].textContent.toLowerCase().includes(filter)) ||
-                   (cells[3] && cells[3].textContent.toLowerCase().includes(filter));
+                   (cells[3] && cells[3].textContent.toLowerCase().includes(filter)) ||
+                   (cells[4] && cells[4].textContent.toLowerCase().includes(filter));
         });
         totalPages = Math.ceil(currentRows.length / recordsPerPage);
          if (totalPages === 0) totalPages = 1;
@@ -256,6 +259,7 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("jampelSortArrow").innerHTML = "";
         document.getElementById("kelompokSortArrow").innerHTML = "";
         document.getElementById("operatorSortArrow").innerHTML = "";
+        document.getElementById("blankSortArrow").innerHTML = "";
     }
 
     function setArrow(n, dir) {
@@ -268,6 +272,8 @@ document.addEventListener("DOMContentLoaded", function() {
         } else if (n === 2) {
             document.getElementById("kelompokSortArrow").innerHTML = arrow;
         } else if (n === 3) {
+            document.getElementById("blankSortArrow").innerHTML = arrow;
+        } else if (n === 4) {
             document.getElementById("operatorSortArrow").innerHTML = arrow;
         }
     }
