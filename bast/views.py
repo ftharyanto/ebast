@@ -258,7 +258,10 @@ def populate_bast_sheet(sheet, record):
     sheet['N4'] = f': {tanggal}' 
     sheet['N5'] = f': {hari}'
     count_member = 0
+    member_number = 1
     for idx, member_data in enumerate(member[:9]):  # Limit to 9 members to fit in the cells K9:K17 and L9:L17
+        sheet[f'J{9 + idx}'] = member_number
+        member_number += 1
         sheet[f'K{9 + idx}'] = member_data['nama']
         sheet[f'L{9 + idx}'] = member_data['keterangan']
         if re.match(r'^\s*hadir\s*$', member_data['keterangan'], re.IGNORECASE) or re.match(r'^\s*diganti\b.*$', member_data['keterangan'], re.IGNORECASE):
