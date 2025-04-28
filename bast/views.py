@@ -310,11 +310,14 @@ def populate_bast_sheet(sheet, record):
             if pd.notna(MMI_value):
                 if len(MMI_value) > 23:
                     # Calculate the new row height
-                    new_height = 15.75 * ((len(MMI_value) // 23) + 1)
+                    default_row_height = 15.75
+                    new_height = default_row_height * ((len(MMI_value) // 23) + 1)
                     sheet.row_dimensions[r_idx + 28].height = new_height
                 # Set the cell format to wrap text and center horizontally
                 sheet.cell(row=r_idx + 28, column=12).alignment = openpyxl.styles.Alignment(wrap_text=True, vertical='center')
-
+            else:
+                sheet.row_dimensions[r_idx + 28].height = default_row_height
+                
             cell.border = openpyxl.styles.Border(
                 left=openpyxl.styles.Side(style='thin'),
                 right=openpyxl.styles.Side(style='thin'),
