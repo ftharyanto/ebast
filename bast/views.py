@@ -301,6 +301,7 @@ def populate_bast_sheet(sheet, record):
             sheet.cell(row=r_idx+27, column=11).alignment = openpyxl.styles.Alignment(horizontal='left', vertical='center')
     
     # set the inserted cell border expanded to column 17 to thin
+    default_row_height = 15.75
     for r_idx in range(rows_to_add):
         for c_idx in range(14):  # Iterate up to column 17 (index 14)
             cell = sheet.cell(row=r_idx + 28, column=c_idx + 3) # Get the cell object
@@ -310,7 +311,6 @@ def populate_bast_sheet(sheet, record):
             if pd.notna(MMI_value):
                 if len(MMI_value) > 23:
                     # Calculate the new row height
-                    default_row_height = 15.75
                     new_height = default_row_height * ((len(MMI_value) // 23) + 1)
                     sheet.row_dimensions[r_idx + 28].height = new_height
                 # Set the cell format to wrap text and center horizontally
