@@ -744,9 +744,15 @@
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
         const waktuCsInput = document.getElementById('{{ form.waktu_cs.id_for_label }}');
 
+        function simplifyCsId(csId) {
+            // Replace -1D, -2P, -3S, -4M with -D, -P, -S, -M
+            return csId.replace(/-(\\d)([DPSM])$/, '-$2');
+        }
+
         function autofillCounts() {
             const bastId = bastIdInput.value;
-            const csId = bastId.replace('BAST', 'CS');
+            let csId = bastId.replace('BAST', 'CS');
+            csId = simplifyCsId(csId);
             fetch(`/bast/api/get_cs_data/${csId}/`)
                 .then(response => response.json())
                 .then(data => {
