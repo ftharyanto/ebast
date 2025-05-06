@@ -161,7 +161,7 @@ def export_to_excel(request, record_id):
         return re.sub(r'-(\d)([DPSM])$', r'-\2', qcfm_id)
     simple_qcfm_id = simplify_qcfm_id(record.qcfm_id)
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename=QCFM_{simple_qcfm_id}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename={simple_qcfm_id}.xlsx'
     workbook.save(response)
     return response
 
