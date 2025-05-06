@@ -163,10 +163,26 @@
                 const qcIdInput = document.getElementById('{{ form.cs_id.id_for_label }}');
                 const jamPelaksanaanSelect = document.getElementById('{{ form.jam_pelaksanaan.id_for_label }}');
 
+                // Helper for CS ID suffix
+                function getCsSuffix(waktuDinasValue) {
+                    switch (waktuDinasValue) {
+                        case 'Dini Hari':
+                            return '1D';
+                        case 'Pagi':
+                            return '2P';
+                        case 'Siang':
+                            return '3S';
+                        case 'Malam':
+                            return '4M';
+                        default:
+                            return '';
+                    }
+                }
+
                 function updateQcId() {
                     const dateValue = dateInput.value;
                     const waktuDinasValue = waktuDinasSelect.value;
-                    qcIdInput.value = "CS-" + dateValue + "-" + waktuDinasValue[0];
+                    qcIdInput.value = "CS-" + dateValue + "-" + getCsSuffix(waktuDinasValue);
                 }
 
                 function updateJamPelaksanaan() {

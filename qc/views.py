@@ -130,8 +130,8 @@ def populate_sheet_with_record(sheet, record):
     """
     Populates the given sheet with data from the record.
     """
-    tanggal = format_date_indonesian(record.qc_id[3:-2])
-    hari = get_hari_indonesia(record.qc_id[3:-2])
+    tanggal = format_date_indonesian(record.qc_id[3:-3])
+    hari = get_hari_indonesia(record.qc_id[3:-3])
     sheet['G2'] = ': ' + tanggal
     sheet['G3'] = ': ' + hari
     sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
@@ -188,8 +188,12 @@ def export_to_excel(request, record_id):
     sheet.row_dimensions[8 + rows_to_add * 2 + 8].height = 23.5
     sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
 
+    def simplify_qc_id(qc_id):
+        import re
+        return re.sub(r'-(\d)([DPSM])$', r'-\2', qc_id)
+    simple_qc_id = simplify_qc_id(record.qc_id)
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename=QC_{record.qc_id}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename=QC_{simple_qc_id}.xlsx'
     workbook.save(response)
 
     return response
@@ -214,10 +218,14 @@ def export_to_pdf(request, record_id):
     sheet.row_dimensions[8 + rows_to_add * 2 + 8].height = 23.5
     sheet.cell(row=8 + rows_to_add * 2 + 9, column=13, value='NIP. ' + record.operator.NIP)
     
-    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/qc/{record.qc_id}.xlsx')
+    def simplify_qc_id(qc_id):
+        import re
+        return re.sub(r'-(\d)([DPSM])$', r'-\2', qc_id)
+    simple_qc_id = simplify_qc_id(record.qc_id)
+    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/qc/{simple_qc_id}.xlsx')
     workbook.save(temp_xlsx)
     temp_pdf_dir = os.path.join(os.path.dirname(__file__), 'static/qc')
-    temp_pdf = os.path.join(temp_pdf_dir, f'{record.qc_id}.pdf')
+    temp_pdf = os.path.join(temp_pdf_dir, f'{simple_qc_id}.pdf')
 
     import subprocess
     try:
@@ -231,7 +239,7 @@ def export_to_pdf(request, record_id):
 
     with open(temp_pdf, 'rb') as pdf_file:
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'inline; filename={record.qc_id}.pdf'
+        response['Content-Disposition'] = f'inline; filename={simple_qc_id}.pdf'
 
     if os.path.exists(temp_pdf):
         os.remove(temp_pdf)
