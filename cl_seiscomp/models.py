@@ -29,7 +29,7 @@ SHIFT = (
 class CsRecordModel(models.Model):
     # fields of the model
     date = models.DateField(default=timezone.now)
-    cs_id = models.CharField(max_length=16, default='0')
+    cs_id = models.CharField(max_length=16, default='0', unique=True)
     shift = models.CharField(max_length=15, choices=SHIFT, default='P')
     jam_pelaksanaan = models.CharField(max_length=20, choices=WAKTU, default='12:00 WIB')
     kelompok = models.IntegerField(choices=KELOMPOK, default=1)
