@@ -24,7 +24,7 @@ def get_default_date():
 
 class QcFmRecord(models.Model):
     date = models.DateField(default=get_default_date)
-    qcfm_id = models.CharField(max_length=17, default='0')
+    qcfm_id = models.CharField(max_length=18, default='0')
 
     shift = models.CharField(max_length=15, choices=SHIFT, default='P')
     kelompok = models.CharField(max_length=1, choices=KELOMPOK, default='1')

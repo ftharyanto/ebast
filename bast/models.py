@@ -30,7 +30,7 @@ def get_default_date():
 
 class BastRecordModel(models.Model):
     date = models.DateField(default=get_default_date)
-    bast_id = models.CharField(max_length=17, default='0')
+    bast_id = models.CharField(max_length=18, default='0')
     waktu_pelaksanaan = models.CharField(choices=WAKTU_PELAKSANAAN, max_length=20, default='08:00 - 14:00 WIB', blank=True, null=True)
     shift = models.CharField(max_length=15, choices=SHIFT, default='Pagi')
     kelompok = models.CharField(max_length=1, choices=KELOMPOK, default='1')
