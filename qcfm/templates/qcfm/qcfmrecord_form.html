@@ -277,17 +277,32 @@
         }, false);
     })();
 
+    // Helper for QCFM ID suffix
+    function getQcfmSuffix(waktuDinasValue) {
+        switch (waktuDinasValue) {
+            case 'Dini Hari':
+                return '1D';
+            case 'Pagi':
+                return '2P';
+            case 'Siang':
+                return '3S';
+            case 'Malam':
+                return '4M';
+            default:
+                return '';
+        }
+    }
     // change qcfm_id value based on date_input and waktu_dinas
     document.addEventListener('DOMContentLoaded', function () {
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
         const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
         const qcIdInput = document.getElementById('{{ form.qcfm_id.id_for_label }}');
-        qcIdInput.value = "QCFM-" + dateInput.value + "-" + waktuDinasSelect.value[0];
+        qcIdInput.value = "QCFM-" + dateInput.value + "-" + getQcfmSuffix(waktuDinasSelect.value);
 
         function updateQcId() {
             const dateValue = dateInput.value;
             const waktuDinasValue = waktuDinasSelect.value;
-            qcIdInput.value = "QCFM-" + dateValue + "-" + waktuDinasValue[0];
+            qcIdInput.value = "QCFM-" + dateValue + "-" + getQcfmSuffix(waktuDinasValue);
         }
 
         dateInput.addEventListener('change', updateQcId);

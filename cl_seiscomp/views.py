@@ -126,12 +126,12 @@ def prepare_workbook(record):
     sheet = workbook['checklist_seiscomp']
     sheet.title = 'Checklist Seiscomp'
 
-    tanggal = datetime.datetime.strptime(record.cs_id[3:-2], "%Y-%m-%d")
+    tanggal = datetime.datetime.strptime(record.cs_id[3:-3], "%Y-%m-%d")
     if record.shift.upper() == 'MALAM':
         tanggal = date_range_to_string([tanggal, tanggal + timedelta(days=1)])
         sheet['R3'] = tanggal
     else:
-        tanggal = record.cs_id[3:-2]
+        tanggal = record.cs_id[3:-3]
         sheet['R3'] = f'{get_hari_indonesia(tanggal)}, {format_date_indonesian(tanggal)}'
 
     sheet['A3'] = f'KELOMPOK: {record.kelompok}'
@@ -164,7 +164,7 @@ def prepare_workbook(record):
 
     # Prepare slmon sheet
     sheet = workbook['slmon']
-    tanggal = datetime.datetime.strptime(record.cs_id[3:-2], "%Y-%m-%d")
+    tanggal = datetime.datetime.strptime(record.cs_id[3:-3], "%Y-%m-%d")
     if record.shift.upper() == 'MALAM':
         tanggal = (tanggal + timedelta(days=1)).strftime('%Y-%m-%d')
     else:
@@ -199,8 +199,12 @@ def cs_export_excel(request, record_id):
         return HttpResponse(status=404)
 
     workbook = prepare_workbook(record)
+    def simplify_cs_id(cs_id):
+        import re
+        return re.sub(r'-(\d)([DPSM])$', r'-\2', cs_id)
+    simple_cs_id = simplify_cs_id(record.cs_id)
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename={record.cs_id}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename={simple_cs_id}.xlsx'
     workbook.save(response)
     return response
 
@@ -213,9 +217,13 @@ def cs_export_pdf(request, record_id):
         return HttpResponse(status=404)
 
     workbook = prepare_workbook(record)
-    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/cl_seiscomp/{record.cs_id}.xlsx')
+    def simplify_cs_id(cs_id):
+        import re
+        return re.sub(r'-(\d)([DPSM])$', r'-\2', cs_id)
+    simple_cs_id = simplify_cs_id(record.cs_id)
+    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/cl_seiscomp/{simple_cs_id}.xlsx')
     temp_pdf_dir = os.path.join(os.path.dirname(__file__), 'static/cl_seiscomp')
-    temp_pdf = os.path.join(temp_pdf_dir, f'{record.cs_id}.pdf')
+    temp_pdf = os.path.join(temp_pdf_dir, f'{simple_cs_id}.pdf')
 
     workbook.save(temp_xlsx)
 
@@ -230,7 +238,7 @@ def cs_export_pdf(request, record_id):
 
     with open(temp_pdf, 'rb') as pdf_file:
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'inline; filename={record.cs_id}.pdf'
+        response['Content-Disposition'] = f'inline; filename={simple_cs_id}.pdf'
 
     if os.path.exists(temp_pdf):
         os.remove(temp_pdf)

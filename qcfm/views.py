@@ -107,8 +107,8 @@ def prepare_workbook(record):
     sheet = workbook.active
     sheet.title = 'QC Records'
 
-    tanggal = format_date_indonesian(record.qcfm_id[5:-2])
-    hari = get_hari_indonesia(record.qcfm_id[5:-2])
+    tanggal = format_date_indonesian(record.qcfm_id[5:-3])
+    hari = get_hari_indonesia(record.qcfm_id[5:-3])
     sheet['G2'] = ': ' + tanggal
     sheet['G3'] = ': ' + hari
     sheet['G4'] = f': {record.jam_pelaksanaan.strftime("%H:%M")} - selesai'
@@ -156,8 +156,12 @@ def export_to_excel(request, record_id):
         return HttpResponse(status=404)
 
     workbook = prepare_workbook(record)
+    def simplify_qcfm_id(qcfm_id):
+        import re
+        return re.sub(r'-(\d)([DPSM])$', r'-\2', qcfm_id)
+    simple_qcfm_id = simplify_qcfm_id(record.qcfm_id)
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename=QCFM_{record.qcfm_id}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename=QCFM_{simple_qcfm_id}.xlsx'
     workbook.save(response)
     return response
 
@@ -168,9 +172,13 @@ def export_to_pdf(request, record_id):
         return HttpResponse(status=404)
 
     workbook = prepare_workbook(record)
-    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/qcfm/{record.qcfm_id}.xlsx')
+    def simplify_qcfm_id(qcfm_id):
+        import re
+        return re.sub(r'-(\d)([DPSM])$', r'-\2', qcfm_id)
+    simple_qcfm_id = simplify_qcfm_id(record.qcfm_id)
+    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/qcfm/{simple_qcfm_id}.xlsx')
     temp_pdf_dir = os.path.join(os.path.dirname(__file__), 'static/qcfm')
-    temp_pdf = os.path.join(temp_pdf_dir, f'{record.qcfm_id}.pdf')
+    temp_pdf = os.path.join(temp_pdf_dir, f'{simple_qcfm_id}.pdf')
 
     workbook.save(temp_xlsx)
 
@@ -186,7 +194,7 @@ def export_to_pdf(request, record_id):
 
     with open(temp_pdf, 'rb') as pdf_file:
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'inline; filename={record.qcfm_id}.pdf'
+        response['Content-Disposition'] = f'inline; filename={simple_qcfm_id}.pdf'
 
     if os.path.exists(temp_pdf):
         os.remove(temp_pdf)

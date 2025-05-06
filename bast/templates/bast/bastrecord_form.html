@@ -341,17 +341,34 @@
         }, false);
     })();
 
+    // Helper for BAST ID suffix
+    function getBastSuffix(waktuDinasValue) {
+        switch (waktuDinasValue) {
+            case 'Dini Hari':
+                return '1D';
+            case 'Pagi':
+                return '2P';
+            case 'Siang':
+                return '3S';
+            case 'Malam':
+                return '4M';
+            default:
+                return '';
+        }
+    }
+
     // change bast_id and waktu_pelaksanaan value based on date_input and waktu_dinas
     document.addEventListener('DOMContentLoaded', function () {
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
         const waktuDinasSelect = document.getElementById('{{ form.shift.id_for_label }}');
         const bastIdInput = document.getElementById('{{ form.bast_id.id_for_label }}');
-        bastIdInput.value = "BAST-" + dateInput.value + "-" + waktuDinasSelect.value[0];
+        // Set initial value
+        bastIdInput.value = "BAST-" + dateInput.value + "-" + getBastSuffix(waktuDinasSelect.value);
 
         function updateBastId() {
             const dateValue = dateInput.value;
             const waktuDinasValue = waktuDinasSelect.value;
-            bastIdInput.value = "BAST-" + dateValue + "-" + waktuDinasValue[0];
+            bastIdInput.value = "BAST-" + dateValue + "-" + getBastSuffix(waktuDinasValue);
             const waktuPelaksanaanSelect = document.getElementById('{{ form.waktu_pelaksanaan.id_for_label }}');
             switch (waktuDinasValue) {
                 case 'Pagi':

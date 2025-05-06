@@ -153,8 +153,12 @@ def export_to_excel(request, record_id):
     populate_bast_sheet(sheet, record)
 
     # Save the workbook to a BytesIO object
+    def simplify_bast_id(bast_id):
+        import re
+        return re.sub(r'-(\d)([DPSM])$', r'-\2', bast_id)
+    simple_bast_id = simplify_bast_id(record.bast_id)
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename={record.bast_id}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename={simple_bast_id}.xlsx'
     workbook.save(response)
 
     return response
@@ -176,10 +180,14 @@ def export_to_pdf(request, record_id):
     populate_bast_sheet(sheet, record)
 
     # temporarily save the workbook to a file
-    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/bast/{record.bast_id}.xlsx')
+    def simplify_bast_id(bast_id):
+        import re
+        return re.sub(r'-(\d)([DPSM])$', r'-\2', bast_id)
+    simple_bast_id = simplify_bast_id(record.bast_id)
+    temp_xlsx = os.path.join(os.path.dirname(__file__), f'static/bast/{simple_bast_id}.xlsx')
     workbook.save(temp_xlsx)
     temp_pdf_dir = os.path.join(os.path.dirname(__file__), 'static/bast')
-    temp_pdf = os.path.join(temp_pdf_dir, f'{record.bast_id}.pdf')
+    temp_pdf = os.path.join(temp_pdf_dir, f'{simple_bast_id}.pdf')
 
     import subprocess
     try:
@@ -194,7 +202,7 @@ def export_to_pdf(request, record_id):
     # Read the generated PDF file and return it in the response
     with open(temp_pdf, 'rb') as pdf_file:
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'inline; filename={record.bast_id}.pdf'
+        response['Content-Disposition'] = f'inline; filename={simple_bast_id}.pdf'
 
     if os.path.exists(temp_pdf):
         os.remove(temp_pdf)
@@ -250,8 +258,8 @@ def populate_bast_sheet(sheet, record):
     import re
 
     member = json.loads(record.member)
-    tanggal = format_date_indonesian(record.bast_id[5:-2])
-    hari = get_hari_indonesia(record.bast_id[5:-2])
+    tanggal = format_date_indonesian(record.bast_id[5:-3])
+    hari = get_hari_indonesia(record.bast_id[5:-3])
 
     sheet['J4'] = f'{convert_to_roman(record.kelompok)} ({convert_to_indonesian(record.kelompok)})'
     sheet['J6'] = f'{convert_to_roman(record.kel_berikut)} ({convert_to_indonesian(record.kel_berikut)})'
