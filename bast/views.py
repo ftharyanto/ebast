@@ -290,6 +290,7 @@ def populate_bast_sheet(sheet, record):
     sheet['C46'] = f'Jakarta, {tanggal}'
     sheet['C54'] = f'{record.spv}'
     sheet['C55'] = f'NIP. {record.NIP}'
+    sheet['D43'] = f'{record.notes}'
 
         # import the events from the record using pandas
     events = pd.read_csv(StringIO(record.events))
