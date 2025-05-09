@@ -1,0 +1,134 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load form_tags %}
+{% load json_tags %}
+{% block title %}{% if object %}Edit{% else %}Tambah{% endif %} Error Stasiun{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="container">
+        <h1 class="mt-5">{% if object %}Edit{% else %}Tambah{% endif %} Error Stasiun</h1>
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                Please correct the errors below.
+                <ul>
+                    {% for field in form %}
+                    {% if field.errors %}
+                    {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            <div class="form-group row mb-3">
+                <div class="col-md-6 position-relative">
+                    <label for="kodeStasiunInput">Kode Stasiun:</label>
+                    <input type="text" id="kodeStasiunInput" class="form-control" autocomplete="off" placeholder="Ketik kode stasiun..." value="{{ form.initial.kode_stasiun|default:'' }}">
+                    <input type="hidden" name="kode_stasiun" id="id_kode_stasiun" value="{{ form.initial.kode_stasiun|default:'' }}">
+                    <div id="kodeStasiunSuggestions" class="suggestions d-none"></div>
+                </div>
+                <div class="col-md-6">
+                    {{ form.lokasi.label_tag }}
+                    {{ form.lokasi|add_class:"form-control" }}
+                </div>
+            </div>
+            <div class="form-group mb-3">
+                {{ form.deskripsi_error.label_tag }}
+                {{ form.deskripsi_error|add_class:"form-control" }}
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-1"></i> Simpan
+                </button>
+                <a href="{% url 'qc:errorstation_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Kembali
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.suggestions {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.suggestions div {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.suggestions div:hover {
+    background: #f0f0f0;
+}
+</style>
+
+<script>
+const stationList = {{ station_list|tojson|safe }};
+const stationData = {};
+stationList.forEach(s => {
+    stationData[s.code] = `${s.province} - ${s.location} - ${s.UPT}`;
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const kodeStasiunInput = document.getElementById('kodeStasiunInput');
+    const kodeStasiunHidden = document.getElementById('id_kode_stasiun');
+    const lokasiInput = document.getElementById('id_lokasi');
+    const suggestionsBox = document.getElementById('kodeStasiunSuggestions');
+
+    function showSuggestions(value) {
+        const val = value.toLowerCase();
+        suggestionsBox.innerHTML = '';
+        if (!val) {
+            suggestionsBox.classList.add('d-none');
+            return;
+        }
+        const matches = stationList.filter(s => s.code.toLowerCase().includes(val));
+        if (matches.length === 0) {
+            suggestionsBox.classList.add('d-none');
+            return;
+        }
+        matches.forEach(s => {
+            const div = document.createElement('div');
+            div.textContent = s.code;
+            div.onclick = function() {
+                kodeStasiunInput.value = s.code;
+                kodeStasiunHidden.value = s.code;
+                lokasiInput.value = stationData[s.code] || '';
+                suggestionsBox.classList.add('d-none');
+            };
+            suggestionsBox.appendChild(div);
+        });
+        suggestionsBox.classList.remove('d-none');
+    }
+
+    kodeStasiunInput.addEventListener('input', function() {
+        showSuggestions(this.value);
+        kodeStasiunHidden.value = '';
+        lokasiInput.value = '';
+    });
+    kodeStasiunInput.addEventListener('focus', function() {
+        showSuggestions(this.value);
+    });
+    document.addEventListener('click', function(e) {
+        if (!suggestionsBox.contains(e.target) && e.target !== kodeStasiunInput) {
+            suggestionsBox.classList.add('d-none');
+        }
+    });
+    // Set initial value for update
+    if (kodeStasiunInput.value) {
+        kodeStasiunHidden.value = kodeStasiunInput.value;
+        lokasiInput.value = stationData[kodeStasiunInput.value] || lokasiInput.value;
+    }
+});
+</script>
+{% endblock %} 

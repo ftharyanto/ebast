@@ -1,7 +1,7 @@
 from django.views import View
 from django.http import HttpResponse
 from django.urls import path
-from .views import QcRecordListView, QcRecordCreateView, QcRecordUpdateView, fetch_data, export_to_excel, QcRecordDeleteDirectView
+from .views import QcRecordListView, QcRecordCreateView, QcRecordUpdateView, fetch_data, export_to_excel, QcRecordDeleteDirectView, ErrorStationListView, ErrorStationCreateView, ErrorStationUpdateView, ErrorStationDeleteView
 from . import views
 
 app_name = 'qc'
@@ -16,4 +16,8 @@ urlpatterns = [
     path('export-to-pdf/<int:record_id>/', views.export_to_pdf, name='export_to_pdf'),
     path('delete-direct/<int:pk>/', QcRecordDeleteDirectView.as_view(), name='qcrecord_delete_direct'),
     path('save-nip/', views.save_nip, name='save_nip'),
+    path('errorstations/', ErrorStationListView.as_view(), name='errorstation_list'),
+    path('errorstations/add/', ErrorStationCreateView.as_view(), name='errorstation_add'),
+    path('errorstations/<int:pk>/edit/', ErrorStationUpdateView.as_view(), name='errorstation_edit'),
+    path('errorstations/<int:pk>/delete/', ErrorStationDeleteView.as_view(), name='errorstation_delete'),
 ]

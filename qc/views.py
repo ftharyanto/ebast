@@ -1,7 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from .models import QcRecord
-from .forms import QcRecordForm
+from .models import QcRecord, ErrorStation
+from .forms import QcRecordForm, ErrorStationForm
 from django.shortcuts import render
 import requests, openpyxl, datetime, os
 import pandas as pd
@@ -14,6 +14,7 @@ from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import json
+from cl_seiscomp.models import StationListModel
 
 class QcRecordListView(ListView):
     model = QcRecord
@@ -44,6 +45,37 @@ class QcRecordDeleteDirectView(View):
         except QcRecord.DoesNotExist:
             return HttpResponse(status=404)
 
+class ErrorStationListView(ListView):
+    model = ErrorStation
+    template_name = 'qc/errorstation_list.html'
+    context_object_name = 'errorstations'
+
+class ErrorStationCreateView(CreateView):
+    model = ErrorStation
+    form_class = ErrorStationForm
+    template_name = 'qc/errorstation_form.html'
+    success_url = reverse_lazy('qc:errorstation_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['station_list'] = list(StationListModel.objects.values('code', 'province', 'location', 'UPT'))
+        return context
+
+class ErrorStationUpdateView(UpdateView):
+    model = ErrorStation
+    form_class = ErrorStationForm
+    template_name = 'qc/errorstation_form.html'
+    success_url = reverse_lazy('qc:errorstation_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['station_list'] = list(StationListModel.objects.values('code', 'province', 'location', 'UPT'))
+        return context
+
+class ErrorStationDeleteView(DeleteView):
+    model = ErrorStation
+    template_name = 'qc/errorstation_confirm_delete.html'
+    success_url = reverse_lazy('qc:errorstation_list')
 
 # Functions
 def clean_index3(data, start_datetime='2024-12-11 13:00:00', end_datetime='2024-12-11 19:00:00'):

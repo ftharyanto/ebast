@@ -38,3 +38,11 @@ class QcRecord(models.Model):
 
     def __str__(self):
         return self.qc_id
+
+class ErrorStation(models.Model):
+    kode_stasiun = models.CharField(max_length=20, unique=True)
+    lokasi = models.CharField(max_length=200, null=True, blank=True)
+    deskripsi_error = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.kode_stasiun} - {self.lokasi}"

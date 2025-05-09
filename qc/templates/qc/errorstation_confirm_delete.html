@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Hapus Error Stasiun</h2>
+<p>Apakah Anda yakin ingin menghapus error stasiun berikut?</p>
+<ul>
+    <li><strong>Kode Stasiun:</strong> {{ object.kode_stasiun }}</li>
+    <li><strong>Nama Stasiun:</strong> {{ object.nama_stasiun }}</li>
+    <li><strong>Deskripsi Error:</strong> {{ object.deskripsi_error }}</li>
+</ul>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+    <a href="{% url 'qc:errorstation_list' %}" class="btn btn-secondary">Batal</a>
+</form>
+{% endblock %} 
