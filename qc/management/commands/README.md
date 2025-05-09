@@ -40,5 +40,5 @@ python manage.py find_duplicates_all
 
 ---
 
-**Author:** Your Team
+**Author:** Fajar T. Haryanto
 **Location:** `qc/management/commands/find_duplicates_all.py` 
