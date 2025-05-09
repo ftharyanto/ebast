@@ -452,3 +452,21 @@ and this project adheres to Semantic Versioning (though we are not using explici
 
 ### Fixed
 - Fix forms not submitted correctly
+
+## 2025-05-10
+
+### Enhanced
+- Improved suggestion dropdown functionality in kelompok_form and errorstation_form:
+  - Updated CSS to style suggestion dropdowns for better visibility and usability.
+  - Modified JavaScript in kelompok_form.js to show all suggestions when the input is focused, even if empty.
+  - Adjusted errorstation_form.js to display all stations when the input is empty, improving user experience.
+- Updated base.html to use the latest Bootstrap version for improved styling and functionality.
+- Cleaned up unnecessary script imports in kelompok_form.html.
+
+## 2025-05-11
+
+### Enhanced
+- Improved suggestion dropdowns in kelompok_form and errorstation_form to display all options when the input is focused, even if empty.
+- Updated CSS for better visibility and usability of suggestion dropdowns.
+- Updated base.html to use Bootstrap 5.3.6 for improved styling and functionality.
+- Cleaned up unnecessary script imports in kelompok_form.html.

@@ -52,26 +52,6 @@
     </div>
 </div>
 
-<style>
-.suggestions {
-    position: absolute;
-    z-index: 1000;
-    width: 100%;
-    background: #fff;
-    border: 1px solid #ccc;
-    border-top: none;
-    max-height: 200px;
-    overflow-y: auto;
-}
-.suggestions div {
-    padding: 8px 12px;
-    cursor: pointer;
-}
-.suggestions div:hover {
-    background: #f0f0f0;
-}
-</style>
-
 <script>
 const stationList = {{ station_list|tojson|safe }};
 const stationData = {};
@@ -88,18 +68,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function showSuggestions(value) {
         const val = value.toLowerCase();
         suggestionsBox.innerHTML = '';
-        if (!val) {
-            suggestionsBox.classList.add('d-none');
-            return;
+        let matches;
+        if (!val) { // If input is empty
+            matches = stationList; // Prepare to show all stations
+        } else {
+            matches = stationList.filter(s => s.code.toLowerCase().includes(val));
         }
-        const matches = stationList.filter(s => s.code.toLowerCase().includes(val));
+
         if (matches.length === 0) {
             suggestionsBox.classList.add('d-none');
             return;
         }
         matches.forEach(s => {
             const div = document.createElement('div');
-            div.textContent = s.code;
+            div.className = 'suggestion-item';
+            div.textContent = s.code + " - " + (stationData[s.code] || '');
             div.onclick = function() {
                 kodeStasiunInput.value = s.code;
                 kodeStasiunHidden.value = s.code;
@@ -131,4 +114,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-{% endblock %} 
+{% endblock %}

@@ -46,28 +46,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Show suggestions as user types
-    oprInput.addEventListener('input', () => {
+    // Show suggestions when input is focused, even if empty
+    oprInput.addEventListener('focus', () => {
         const query = oprInput.value.toLowerCase();
         suggestionsBox.innerHTML = '';
-        if (query) {
-            const matchedOpr = operators.filter(operator => operator.name.toLowerCase().includes(query));
-            if (matchedOpr.length) {
-                matchedOpr.forEach(operator => {
-                    const item = document.createElement('div');
-                    item.className = 'suggestion-item';
-                    item.textContent = operator.name;
-                    item.addEventListener('click', () => {
-                        addOprToTable(operator.name);
-                        oprInput.value = '';
-                        suggestionsBox.classList.add('d-none');
-                    });
-                    suggestionsBox.appendChild(item);
+        let matchedOpr;
+        if (!query) {
+            matchedOpr = operators; // Show all if input is empty
+        } else {
+            matchedOpr = operators.filter(operator => operator.name.toLowerCase().includes(query));
+        }
+        if (matchedOpr.length) {
+            matchedOpr.forEach(operator => {
+                const item = document.createElement('div');
+                item.className = 'suggestion-item';
+                item.textContent = operator.name;
+                item.addEventListener('click', () => {
+                    addOprToTable(operator.name);
+                    oprInput.value = '';
+                    suggestionsBox.classList.add('d-none');
                 });
-                suggestionsBox.classList.remove('d-none');
-            } else {
-                suggestionsBox.classList.add('d-none');
-            }
+                suggestionsBox.appendChild(item);
+            });
+            suggestionsBox.classList.remove('d-none');
         } else {
             suggestionsBox.classList.add('d-none');
         }
