@@ -62,7 +62,7 @@
 
 {% block content %}
 <div class="form-container">
-    <h1 class="page-header">Sensor Statistics</h1>
+    <h1 class="page-header">Station Statistics</h1>
     
     <form method="get" action="">
         <div class="d-flex flex-wrap gap-2 mb-4">
@@ -94,16 +94,23 @@
             <div id="statsChart"></div>
         </div>
     </div>
+    
+    <div class="card mt-4">
+        <div class="card-body">
+            <div id="stationChart"></div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Load the plot from JSON
+    // Load the main plot from JSON
     const plotData = {{ plot_json|safe }};
+    const stationPlotData = {{ station_plot_json|safe }};
     
-    // Create plot with improved x-axis tick formatting
-    const layout = {
+    // Create main chart with improved x-axis tick formatting
+    Plotly.newPlot('statsChart', plotData.data, {
         ...plotData.layout,
         xaxis: {
             ...plotData.layout.xaxis,
@@ -117,9 +124,10 @@ document.addEventListener('DOMContentLoaded', function() {
             tickmode: 'auto',
             nticks: 10
         }
-    };
+    });
     
-    Plotly.newPlot('statsChart', plotData.data, layout);
+    // Create station error frequency chart
+    Plotly.newPlot('stationChart', stationPlotData.data, stationPlotData.layout);
 
     // Update date inputs with current date range
     const startDateInput = document.getElementById('start_date');

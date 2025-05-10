@@ -124,14 +124,40 @@ class StatsView(View):
         spikes_data = []
         slmon_data = []
         
+        # Calculate error frequencies per station
+        station_errors = {}
+        
         for record in records:
             dates.append(f"{record.date.strftime('%Y-%m-%d')} {record.jam_pelaksanaan}")
             gaps_data.append(record.count_gaps)
             blanks_data.append(record.count_blanks)
             spikes_data.append(record.count_spikes)
             slmon_data.append(record.slmon)
+            
+            # Process gaps
+            if record.gaps:
+                for station in record.gaps.splitlines():
+                    station_errors[station] = station_errors.get(station, {'gaps': 0, 'spikes': 0, 'blanks': 0})
+                    station_errors[station]['gaps'] += 1
+            
+            # Process spikes
+            if record.spikes:
+                for station in record.spikes.splitlines():
+                    station_errors[station] = station_errors.get(station, {'gaps': 0, 'spikes': 0, 'blanks': 0})
+                    station_errors[station]['spikes'] += 1
+            
+            # Process blanks
+            if record.blanks:
+                for station in record.blanks.splitlines():
+                    station_errors[station] = station_errors.get(station, {'gaps': 0, 'spikes': 0, 'blanks': 0})
+                    station_errors[station]['blanks'] += 1
         
-        # Create Plotly figure
+        # Sort stations by total errors (descending)
+        sorted_stations = sorted(station_errors.items(), 
+                               key=lambda x: sum(x[1].values()), 
+                               reverse=True)
+        
+        # Create Plotly figure for main chart
         fig = go.Figure()
 
         # Add traces
@@ -143,7 +169,7 @@ class StatsView(View):
         # Update layout with enhanced styling
         fig.update_layout(
             title={
-                'text': f'Sensor Statistics ({start_date.strftime("%b %Y")} - {end_date.strftime("%b %Y")})',
+                'text': f'Station Statistics ({start_date.strftime("%b %Y")} - {end_date.strftime("%b %Y")})',
                 'font': {'size': 24, 'color': '#333'},
                 'x': 0.5,
                 'xanchor': 'center'
@@ -199,11 +225,101 @@ class StatsView(View):
             ]
         )
 
-        # Convert figure to JSON
+        # Create second figure for station error frequencies
+        station_fig = go.Figure()
+        
+        # Create traces for each error type
+        station_names = [station[0] for station in sorted_stations]
+        gaps_freq = [station[1]['gaps'] for station in sorted_stations]
+        spikes_freq = [station[1]['spikes'] for station in sorted_stations]
+        blanks_freq = [station[1]['blanks'] for station in sorted_stations]
+        
+        station_fig.add_trace(go.Bar(
+            x=station_names,
+            y=gaps_freq,
+            name='Gaps',
+            marker_color='rgb(75, 192, 192)'
+        ))
+        station_fig.add_trace(go.Bar(
+            x=station_names,
+            y=spikes_freq,
+            name='Spikes',
+            marker_color='rgb(54, 162, 235)'
+        ))
+        station_fig.add_trace(go.Bar(
+            x=station_names,
+            y=blanks_freq,
+            name='Blanks',
+            marker_color='rgb(255, 99, 132)'
+        ))
+        
+        # Update layout for station chart
+        station_fig.update_layout(
+            title={
+                'text': f'Frequency of Errors per Station ({start_date.strftime("%b %Y")} - {end_date.strftime("%b %Y")})',
+                'font': {'size': 24, 'color': '#333'},
+                'x': 0.5,
+                'xanchor': 'center'
+            },
+            xaxis_title={
+                'text': 'Station',
+                'font': {'size': 16, 'color': '#666'}
+            },
+            yaxis_title={
+                'text': 'Count',
+                'font': {'size': 16, 'color': '#666'}
+            },
+            barmode='stack',
+            xaxis={
+                'showgrid': True,
+                'gridcolor': '#eee',
+                'tickfont': {'size': 12},
+                'tickangle': -45
+            },
+            yaxis={
+                'showgrid': True,
+                'gridcolor': '#eee',
+                'tickfont': {'size': 12}
+            },
+            hovermode='x unified',
+            hoverlabel={
+                'font_size': 14,
+                'font_family': 'Arial'
+            },
+            legend={
+                'orientation': 'h',
+                'yanchor': 'bottom',
+                'y': 1.02,
+                'xanchor': 'right',
+                'x': 1,
+                'font': {'size': 14},
+                'title': {'font': {'size': 16}}
+            },
+            margin={'t': 80, 'b': 80, 'l': 80, 'r': 80},
+            plot_bgcolor='#fff',
+            paper_bgcolor='#fff',
+            annotations=[
+                {
+                    'text': 'Click and drag to zoom, double-click to reset zoom',
+                    'x': 1,
+                    'y': -0.3,
+                    'xref': 'paper',
+                    'yref': 'paper',
+                    'showarrow': False,
+                    'font': {'size': 12, 'color': '#999'},
+                    'bgcolor': 'rgba(255, 255, 255, 0.8)',
+                    'align': 'right'
+                }
+            ]
+        )
+        
+        # Convert figures to JSON
         plot_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        station_plot_json = json.dumps(station_fig, cls=plotly.utils.PlotlyJSONEncoder)
 
         context = {
             'plot_json': plot_json,
+            'station_plot_json': station_plot_json,
             'start_date': start_date,
             'end_date': end_date,
             'times': WAKTU,
