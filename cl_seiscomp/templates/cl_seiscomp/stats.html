@@ -1,121 +1,114 @@
 {% extends 'base.html' %}
 {% load static %}
 
+<style>
+    .form-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .page-header {
+        color: #333;
+        font-size: 2.5em;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .form-floating label {
+        font-size: 1.1em;
+        color: #333;
+    }
+
+    .form-control, .form-select {
+        font-size: 1.1em;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        border: 1px solid #ddd;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+
+    .btn-primary {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1em;
+        border-radius: 0.5rem;
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+        margin-top: 30px;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    #statsChart {
+        min-height: 500px;
+        margin: 0 auto;
+    }
+</style>
+
 {% block content %}
 <div class="form-container">
     <h1 class="page-header">Seiscomp Statistics</h1>
     
-    <div class="d-flex flex-wrap gap-2 mb-4">
-        <div class="form-floating flex-grow-1">
-            <input type="date" class="form-control" id="start_date" name="start_date" 
-                   value="{{ start_date|date:'Y-m-d' }}" required>
-            <label for="start_date">Start Date</label>
+    <form method="get" action="">
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            <div class="form-floating flex-grow-1">
+                <input type="date" class="form-control" id="start_date" name="start_date" 
+                       value="{{ start_date|date:'Y-m-d' }}" required>
+                <label for="start_date">Start Date</label>
+            </div>
+            <div class="form-floating flex-grow-1">
+                <input type="date" class="form-control" id="end_date" name="end_date" 
+                       value="{{ end_date|date:'Y-m-d' }}" required>
+                <label for="end_date">End Date</label>
+            </div>
+            <div class="form-floating flex-grow-1">
+                <select class="form-select" id="time" name="time">
+                    <option value="">All Times</option>
+                    {% for value, text in times %}
+                    <option value="{{ value }}" {% if value == selected_time %}selected{% endif %}>{{ text }}</option>
+                    {% endfor %}
+                </select>
+                <label for="time">Time</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Chart</button>
         </div>
-        <div class="form-floating flex-grow-1">
-            <input type="date" class="form-control" id="end_date" name="end_date" 
-                   value="{{ end_date|date:'Y-m-d' }}" required>
-            <label for="end_date">End Date</label>
-        </div>
-        <div class="form-floating flex-grow-1">
-            <select class="form-select" id="time" name="time">
-                <option value="">All Times</option>
-                {% for value, text in times %}
-                <option value="{{ value }}" {% if value == selected_time %}selected{% endif %}>{{ text }}</option>
-                {% endfor %}
-            </select>
-            <label for="time">Time</label>
-        </div>
-        <button type="submit" class="btn btn-primary">Update Chart</button>
-    </div>
+    </form>
 
     <div class="card">
         <div class="card-body">
-            <canvas id="statsChart"></canvas>
+            <div id="statsChart"></div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('statsChart').getContext('2d');
-    const dates = {{ dates|safe }};
-    const gapsData = {{ gaps_data|safe }};
-    const blanksData = {{ blanks_data|safe }};
-    const spikesData = {{ spikes_data|safe }};
-    const slmonData = {{ slmon_data|safe }};
-
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: dates,
-            datasets: [
-                {
-                    label: 'Gaps',
-                    data: gapsData,
-                    borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    hidden: false
-                },
-                {
-                    label: 'Blanks',
-                    data: blanksData,
-                    borderColor: 'rgb(255, 99, 132)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    hidden: false
-                },
-                {
-                    label: 'Spikes',
-                    data: spikesData,
-                    borderColor: 'rgb(54, 162, 235)',
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    hidden: false
-                },
-                {
-                    label: 'SLMON',
-                    data: slmonData,
-                    borderColor: 'rgb(255, 205, 86)',
-                    backgroundColor: 'rgba(255, 205, 86, 0.2)',
-                    hidden: false
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: 'Seiscomp Statistics ({{ start_date|date:"M Y" }} - {{ end_date|date:"M Y" }})'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // Add toggle functionality
-    document.querySelector('canvas').addEventListener('click', function(event) {
-        const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
-        if (elements.length > 0) {
-            const datasetIndex = elements[0].datasetIndex;
-            chart.data.datasets[datasetIndex].hidden = !chart.data.datasets[datasetIndex].hidden;
-            chart.update();
-        }
-    });
+    // Load the plot from JSON
+    const plotData = {{ plot_json|safe }};
+    
+    // Create plot
+    Plotly.newPlot('statsChart', plotData.data, plotData.layout);
 
     // Update date inputs with current date range
     const startDateInput = document.getElementById('start_date');
     const endDateInput = document.getElementById('end_date');
+    const timeSelect = document.getElementById('time');
     
     if (startDateInput && endDateInput) {
         // Set min/max dates for inputs
@@ -130,6 +123,22 @@ document.addEventListener('DOMContentLoaded', function() {
         startDateInput.addEventListener('change', () => {
             endDateInput.min = startDateInput.value;
         });
+
+        // Update the chart when any input changes
+        function updateChart() {
+            const formData = new FormData();
+            formData.append('start_date', startDateInput.value);
+            formData.append('end_date', endDateInput.value);
+            formData.append('time', timeSelect.value);
+
+            // Submit the form
+            document.querySelector('form').submit();
+        }
+
+        // Add change listeners to all inputs
+        startDateInput.addEventListener('change', updateChart);
+        endDateInput.addEventListener('change', updateChart);
+        timeSelect.addEventListener('change', updateChart);
     }
 });
 </script>

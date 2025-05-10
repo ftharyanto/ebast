@@ -10,6 +10,9 @@ from django.shortcuts import redirect
 from .models import CsRecordModel, StationListModel
 from django.contrib import messages
 import csv
+import plotly.graph_objects as go
+import plotly.utils
+import json
 
 # Define time choices
 WAKTU = (
@@ -111,7 +114,7 @@ class StatsView(View):
         records = CsRecordModel.objects.filter(date__range=[start_date, end_date])
         
         # Filter by time if specified
-        if selected_time:
+        if selected_time and selected_time != 'All':
             records = records.filter(jam_pelaksanaan=selected_time)
         
         # Prepare data for charts
@@ -128,12 +131,82 @@ class StatsView(View):
             spikes_data.append(record.count_spikes)
             slmon_data.append(record.slmon)
         
+        # Create Plotly figure
+        fig = go.Figure()
+
+        # Add traces
+        fig.add_trace(go.Scatter(x=dates, y=gaps_data, name='Gaps', line=dict(color='rgb(75, 192, 192)')))
+        fig.add_trace(go.Scatter(x=dates, y=blanks_data, name='Blanks', line=dict(color='rgb(255, 99, 132)')))
+        fig.add_trace(go.Scatter(x=dates, y=spikes_data, name='Spikes', line=dict(color='rgb(54, 162, 235)')))
+        fig.add_trace(go.Scatter(x=dates, y=slmon_data, name='SLMON', line=dict(color='rgb(255, 205, 86)')))
+
+        # Update layout with enhanced styling
+        fig.update_layout(
+            title={
+                'text': f'Seiscomp Statistics ({start_date.strftime("%b %Y")} - {end_date.strftime("%b %Y")})',
+                'font': {'size': 24, 'color': '#333'},
+                'x': 0.5,
+                'xanchor': 'center'
+            },
+            xaxis_title={
+                'text': 'Date and Time',
+                'font': {'size': 16, 'color': '#666'}
+            },
+            yaxis_title={
+                'text': 'Count',
+                'font': {'size': 16, 'color': '#666'}
+            },
+            xaxis={
+                'showgrid': True,
+                'gridcolor': '#eee',
+                'tickfont': {'size': 12},
+                'tickangle': -45
+            },
+            yaxis={
+                'showgrid': True,
+                'gridcolor': '#eee',
+                'tickfont': {'size': 12}
+            },
+            hovermode='x unified',
+            hoverlabel={
+                'font_size': 14,
+                'font_family': 'Arial'
+            },
+            legend={
+                'orientation': 'h',
+                'yanchor': 'bottom',
+                'y': 1.02,
+                'xanchor': 'right',
+                'x': 1,
+                'font': {'size': 14},
+                'title': {'font': {'size': 16}}
+            },
+            margin={'t': 80, 'b': 80, 'l': 80, 'r': 80},
+            plot_bgcolor='#fff',
+            paper_bgcolor='#fff',
+            annotations=[
+                {
+                    'text': 'Click and drag to zoom, double-click to reset zoom',
+                    'x': 0.5,
+                    'y': 1.1,
+                    'xref': 'paper',
+                    'yref': 'paper',
+                    'showarrow': False,
+                    'font': {'size': 12, 'color': '#666'},
+                    'bgcolor': 'rgba(255, 255, 255, 0.8)',
+                    'bordercolor': '#ddd',
+                    'borderwidth': 1,
+                    'borderpad': 4,
+                    'align': 'center'
+                }
+            ]
+        )
+
+        # Convert figure to JSON
+        plot_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
         context = {
-            'dates': dates,
-            'gaps_data': gaps_data,
-            'blanks_data': blanks_data,
-            'spikes_data': spikes_data,
-            'slmon_data': slmon_data,
+            'plot_json': plot_json,
             'start_date': start_date,
             'end_date': end_date,
             'times': WAKTU,
