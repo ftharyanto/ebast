@@ -187,17 +187,14 @@ class StatsView(View):
             annotations=[
                 {
                     'text': 'Click and drag to zoom, double-click to reset zoom',
-                    'x': 0.5,
-                    'y': 1.1,
+                    'x': 1.1,
+                    'y': -0.7,
                     'xref': 'paper',
                     'yref': 'paper',
                     'showarrow': False,
-                    'font': {'size': 12, 'color': '#666'},
+                    'font': {'size': 12, 'color': '#999'},
                     'bgcolor': 'rgba(255, 255, 255, 0.8)',
-                    'bordercolor': '#ddd',
-                    'borderwidth': 1,
-                    'borderpad': 4,
-                    'align': 'center'
+                    'align': 'right'
                 }
             ]
         )
