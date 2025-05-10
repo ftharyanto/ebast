@@ -11,6 +11,22 @@ from .models import CsRecordModel, StationListModel
 from django.contrib import messages
 import csv
 
+# Define time choices
+WAKTU = (
+    ('00:00 WIB', '00:00 WIB'),
+    ('06:00 WIB', '06:00 WIB'),
+    ('12:00 WIB', '12:00 WIB'),
+    ('18:00 WIB', '18:00 WIB'),
+)
+
+# Define shift choices
+SHIFT = (
+    ('Pagi', 'Pagi'),
+    ('Siang', 'Siang'),
+    ('Malam', 'Malam'),
+    ('Dini Hari', 'Dini Hari'),
+)
+
 ##### Station List Views
 class StationListView(ListView):
     model = StationListModel
@@ -72,6 +88,58 @@ class StationBulkCreateView(View):
         messages.success(request, 'Stations added successfully')
         return redirect('cl_seiscomp:station_list')
 
+
+##### Stats View
+class StatsView(View):
+    template_name = 'cl_seiscomp/stats.html'
+
+    def get(self, request):
+        # Get date range from request parameters
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        selected_time = request.GET.get('time')
+        
+        # Set default date range to last 30 days if not specified
+        if not start_date or not end_date:
+            end_date = datetime.date.today()
+            start_date = end_date - datetime.timedelta(days=30)
+        else:
+            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+        
+        # Get records within the date range
+        records = CsRecordModel.objects.filter(date__range=[start_date, end_date])
+        
+        # Filter by time if specified
+        if selected_time:
+            records = records.filter(jam_pelaksanaan=selected_time)
+        
+        # Prepare data for charts
+        dates = []
+        gaps_data = []
+        blanks_data = []
+        spikes_data = []
+        slmon_data = []
+        
+        for record in records:
+            dates.append(f"{record.date.strftime('%Y-%m-%d')} {record.jam_pelaksanaan}")
+            gaps_data.append(record.count_gaps)
+            blanks_data.append(record.count_blanks)
+            spikes_data.append(record.count_spikes)
+            slmon_data.append(record.slmon)
+        
+        context = {
+            'dates': dates,
+            'gaps_data': gaps_data,
+            'blanks_data': blanks_data,
+            'spikes_data': spikes_data,
+            'slmon_data': slmon_data,
+            'start_date': start_date,
+            'end_date': end_date,
+            'times': WAKTU,
+            'selected_time': selected_time or 'All'
+        }
+        return render(request, self.template_name, context)
 
 ##### Checklist Seiscomp View
 class CsListView(ListView):

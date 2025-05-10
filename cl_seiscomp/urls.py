@@ -19,4 +19,5 @@ urlpatterns = [
     path('cs-export-excel/<int:record_id>/', cs_export_excel, name='cs_export_excel'),
     path('cs-export-pdf/<int:record_id>/', cs_export_pdf, name='cs_export_pdf'),
     path('cs/fetch_gaps_blanks/', fetch_gaps_blanks, name='fetch_gaps_blanks'),
+    path('stats/', views.StatsView.as_view(), name='stats'),
 ]

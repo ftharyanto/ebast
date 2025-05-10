@@ -80,6 +80,9 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'station_list' %}active{% endif %}" href="{% url 'cl_seiscomp:station_list' %}">Station List</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'stats' %}active{% endif %}" href="{% url 'cl_seiscomp:stats' %}">Stats</a>
+                    </li>
                 </ul>
             </div>
         </div>
