@@ -143,7 +143,7 @@ class StatsView(View):
         # Update layout with enhanced styling
         fig.update_layout(
             title={
-                'text': f'Seiscomp Statistics ({start_date.strftime("%b %Y")} - {end_date.strftime("%b %Y")})',
+                'text': f'Sensor Statistics ({start_date.strftime("%b %Y")} - {end_date.strftime("%b %Y")})',
                 'font': {'size': 24, 'color': '#333'},
                 'x': 0.5,
                 'xanchor': 'center'
