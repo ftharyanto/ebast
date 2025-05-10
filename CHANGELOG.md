@@ -16,6 +16,14 @@ and this project adheres to Semantic Versioning (though we are not using explici
 ## 2025-05-10 ([Full Changelog](https://github.com/ftharyanto/ebast/commits/main?since=2025-05-10&until=2025-05-10))
 
 ### Enhanced
+- Standardized form styling across application:
+  - Updated form layouts with flexbox and proper spacing
+  - Implemented consistent floating labels and input groups
+  - Added uniform button styling
+  - Improved responsive behavior of forms
+  - Updated Bootstrap to version 5.3.6
+  - Cleaned up unnecessary script imports
+  - Updated page headers and container structure
 - Improved suggestion dropdown functionality in kelompok_form and errorstation_form:
   - Updated CSS to style suggestion dropdowns for better visibility and usability.
   - Modified JavaScript in kelompok_form.js to show all suggestions when the input is focused, even if empty.
