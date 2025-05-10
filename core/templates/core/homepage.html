@@ -15,16 +15,35 @@
         <div class="mt-5">
             <h2>BAST</h2>
             <ul class="list-group">
-                <li class="list-group-item"><a href="{% url 'bast:bastrecord_list' %}"
-                        class="text-decoration-none">BAST</a></li>
-                <li class="list-group-item"><a href="{% url 'qc:qcrecord_list' %}" class="text-decoration-none">QC-3</a> |
-                    <a href="{% url 'qc:errorstation_list' %}" class="text-decoration-none">Error Station List</a>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% url 'bast:bastrecord_list' %}" class="text-decoration-none">BAST</a>
+                    <a href="{% url 'bast:bastrecord_create' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>Create
+                    </a>
                 </li>
-                <li class="list-group-item"><a href="{% url 'qcfm:qcfmrecord_list' %}" class="text-decoration-none">QC
-                        Focal Mechanism</a></li>
-                <li class="list-group-item">
-                    <a href="{% url 'cl_seiscomp:cs_list' %}" class="text-decoration-none">Ceklis Seiscomp</a> |
-                    <a href="{% url 'cl_seiscomp:stats' %}" class="text-decoration-none">Stats</a>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{% url 'qc:qcrecord_list' %}" class="text-decoration-none">QC-3</a> |
+                        <a href="{% url 'qc:errorstation_list' %}" class="text-decoration-none">Error Station List</a>
+                    </div>
+                    <a href="{% url 'qc:qcrecord_create' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>Create
+                    </a>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% url 'qcfm:qcfmrecord_list' %}" class="text-decoration-none">QC Focal Mechanism</a>
+                    <a href="{% url 'qcfm:qcfmrecord_create' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>Create
+                    </a>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{% url 'cl_seiscomp:cs_list' %}" class="text-decoration-none">Ceklis Seiscomp</a> |
+                        <a href="{% url 'cl_seiscomp:stats' %}" class="text-decoration-none">Stats</a>
+                    </div>
+                    <a href="{% url 'cl_seiscomp:cs_create' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>Create
+                    </a>
                 </li>
             </ul>
         </div>
