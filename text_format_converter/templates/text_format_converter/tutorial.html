@@ -3,20 +3,20 @@
 {% load static %}
 
 <div class="form-container">
-    <h1 class="mt-5 page-header">Text Formatter Tutorial</h1>
+    <h1 class="mt-5 page-header">Text Format Converter Tutorial</h1>
     <h2 class="text-success">Salin dari WhatsApp Web</h2>
     <p>Untuk menyalin teks dari WhatsApp Web, Anda dapat menggunakan fitur salin teks yang ada di WhatsApp Web. Untuk
         memastikan format teks (bold, italic, dll.) ikut tersalin, gunakan perintah salin yang berada pada kanan atas
         dari teks yang ingin disalin.</p>
     <div class="text-center">
-        <img src="{% static 'text_formatter/images/tf_tut1.jpg' %}" alt="" class="img-fluid rounded shadow">
+        <img src="{% static 'text_format_converter/images/tf_tut1.jpg' %}" alt="" class="img-fluid rounded shadow">
     </div>
 
-    <h2 class="text-success mt-5">Tempelkan ke Text Formatter</h2>
-    <p>Setelah menyalin teks dari WhatsApp Web, pergi ke <a href="{% url 'text_formatter:text_formatter_view' %}"
-            class="text-decoration-none text-info">Text Formatter</a> dan tempelkan pada input untuk WhatsApp.</p>
+    <h2 class="text-success mt-5">Tempelkan ke Text Format Converter</h2>
+    <p>Setelah menyalin teks dari WhatsApp Web, pergi ke <a href="{% url 'text_format_converter:converter_view' %}"
+            class="text-decoration-none text-info">Text Format Converter</a> dan tempelkan pada input untuk WhatsApp.</p>
     <div class="text-center">
-        <img src="{% static 'text_formatter/images/tf_tut2.jpg' %}" alt="" class="img-fluid rounded shadow">
+        <img src="{% static 'text_format_converter/images/tf_tut2.png' %}" alt="" class="img-fluid rounded shadow">
     </div>
     <p class="mt-3">Setelah menempelkan teks pada input untuk WhatsApp, hasil format akan muncul pada output untuk Telegram dan Web Narasi. Klik tombol Copy dan tempelkan pada Telegram atau Web Narasi.</p>
 </div>

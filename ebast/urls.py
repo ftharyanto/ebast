@@ -27,7 +27,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('qc/', include('qc.urls')),
     path('cl_seiscomp/', include('cl_seiscomp.urls')),
-    path('text_formatter/', include('text_formatter.urls')),
+    path('text-format-converter/', include('text_format_converter.urls')),
     path('bast/', include('bast.urls')),
     path('qcfm/', include('qcfm.urls')),
 ]

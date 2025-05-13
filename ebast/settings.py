@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'core',
     'qc',
     'cl_seiscomp',
-    'text_formatter',
+    'text_format_converter',
     'bast',
     'qcfm',
 ]

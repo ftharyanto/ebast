@@ -1,0 +1,253 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<style>
+    .form-container {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        height: 100%;
+    }
+    .card-header {
+        background-color: #f1f8ff;
+        border-bottom: 1px solid #e3f2fd;
+        font-weight: 600;
+        color: #0d6efd;
+    }
+    .btn-copy {
+        background-color: #0d6efd;
+        color: #fff;
+        border: 1px solid #0d6efd;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .btn-copy:hover, .btn-copy:focus {
+        background-color: #fff;
+        color: #0d6efd;
+        border: 1px solid #0d6efd;
+    }
+    .btn-paste {
+        background-color: #20c997;
+        color: #fff;
+        border: 1px solid #20c997;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .btn-paste:hover, .btn-paste:focus {
+        background-color: #fff;
+        color: #20c997;
+        border: 1px solid #20c997;
+    }
+    .btn-group-sm > .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        border-radius: 0.2rem;
+    }
+    .text-area-container {
+        position: relative;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .btn-group-sm > .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        border-radius: 0.2rem;
+    }
+    textarea.form-control, #web {
+        border-radius: 8px;
+        resize: none;
+        flex-grow: 1;
+    }
+    #web {
+        background-color: #fff;
+        padding: 0.75rem;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow-y: auto;
+        min-height: 300px;
+    }
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .toast-header {
+        background-color: #0d6efd;
+        color: white;
+        border-radius: 5px 5px 0 0;
+    }
+    .toast-body {
+        background-color: white;
+        border-radius: 0 0 5px 5px;
+    }
+    .btn-close {
+        color: white;
+    }
+</style>
+
+<div class="form-container">
+    <div class="container">
+        <div class="d-flex align-items-center mb-4">
+            <i class="fab fa-whatsapp fa-2x me-3" style="color: #25D366;"></i>
+            <h1 class="page-header mb-0 text-primary">WhatsApp Text Format Converter</h1>
+        </div>
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            {% load form_tags %}
+
+            <div class="row g-4">
+                <!-- Input Column -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fab fa-whatsapp me-2"></i>Input from WhatsApp</span>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-copy btn-sm" onclick="copyToClipboard('input')" title="Copy to clipboard">
+    <i class="fas fa-copy"></i> Copy
+</button>
+<button type="button" class="btn btn-paste btn-sm" onclick="pasteFromClipboard('input')" title="Paste from clipboard">
+    <i class="fas fa-paste"></i> Paste
+</button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0 d-flex flex-column">
+                            <textarea class="form-control border-0 flex-grow-1" id="input" placeholder="📱 Paste your WhatsApp text here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Telegram Output Column -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fab fa-telegram me-2"></i>Output Telegram</span>
+                            <button type="button" class="btn btn-copy btn-sm" onclick="copyToClipboard('telegram')" title="Copy to clipboard">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <div class="card-body p-0 d-flex flex-column">
+                            <textarea class="form-control border-0 flex-grow-1" id="telegram" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Web Narasi Output Column -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-globe me-2"></i>Output Web Narasi</span>
+                            <button type="button" class="btn btn-copy btn-sm" onclick="copyToClipboard('web')" title="Copy to clipboard">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <div class="card-body p-3 flex-grow-1">
+                            <div id="web" class="h-100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="copyToast" data-delay="3000">
+        <div class="toast-header">
+            <strong class="me-auto">
+                <i class="fas fa-check-circle me-2"></i>Success
+            </strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastBody">
+            Text copied to clipboard!
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // replace the * in the input text to ** when the input changes, use vanilla js
+        document.getElementById('input').addEventListener('input', function () {
+            let input = document.getElementById('input').value;
+
+            // Clean newlines that contain only spaces
+            input = input.replace(/^\s*[\r\n]/gm, '\n');
+
+            let telegram = input.replace(/\*/g, '**').replace(/\_/g, '__').replace('infobmkg.**', 'infobmkg.*');
+            document.getElementById('telegram').value = telegram;
+
+            // Change the input text format to HTML format
+            // Replace *bold* with <strong></strong>
+            let web = input.replace(/\*(.+?)\*/g, '<strong>$1</strong>');
+
+            // Add one new line after the second line
+            web = web.replace(/^((?:.*\n){1})/, '$1<br>');
+
+            // Make the first line center-aligned
+            web = web.replace(/^(.*?)(\n|$)/, '<p style="text-align: center;  margin-bottom: 0;">$1</p>');
+
+            // Make all paragraphs justify-aligned except the subtitle (bold text)
+            web = web.replace(/^(?!<strong>)(.+?)(\n|$)/gm, '<p style="text-align: justify; margin-bottom: 0;">$1</p>');
+
+            // Replace _italic_ with <em></em> (if you need italics)
+            web = web.replace(/\_(.+?)\_/g, '<em>$1</em>');
+
+            // Replace newline characters with <br> for line breaks
+            web = web.replace(/\n/g, '<br>');
+            document.getElementById('web').innerHTML = web;
+        });
+
+        // copy the text to clipboard
+        function copyToClipboard(elementId) {
+            var copyText = document.getElementById(elementId);
+            if (elementId === 'web') {
+                var range = document.createRange();
+                range.selectNode(copyText);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                document.execCommand("copy");
+                window.getSelection().removeAllRanges();
+            } else {
+                copyText.select();
+                document.execCommand("copy");
+            }
+            // Update toast message
+            var toastBody = document.getElementById('toastBody');
+            toastBody.innerText = elementId.charAt(0).toUpperCase() + elementId.slice(1) + ' text copied to clipboard!';
+            // Show toast notification
+            $('#copyToast').toast('show');
+        }
+
+        async function pasteFromClipboard(elementId) {
+            try {
+                const text = await navigator.clipboard.readText();
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.value = text;
+                    // Trigger the input event to update the other fields
+                    const event = new Event('input', { bubbles: true });
+                    element.dispatchEvent(event);
+                    
+                    // Show success toast
+                    const toastBody = document.getElementById('toastBody');
+                    toastBody.innerText = 'Text pasted from clipboard!';
+                    $('#copyToast').toast('show');
+                }
+            } catch (err) {
+                console.error('Failed to read clipboard:', err);
+                // Show error toast
+                const toastBody = document.getElementById('toastBody');
+                toastBody.innerText = 'Failed to paste from clipboard. Please check permissions.';
+                $('#copyToast').toast('show');
+            }
+        }
+    </script>
+</div>
+{% endblock %}

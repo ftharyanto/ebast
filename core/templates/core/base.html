@@ -131,7 +131,7 @@
     </nav>
     {% endif %}
 
-    {% if request.resolver_match.namespace == 'text_formatter' %}
+    {% if request.resolver_match.namespace == 'text_format_converter' %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-secondary py-1">
         <div class="container">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavTextFormatter"
@@ -141,10 +141,10 @@
             <div class="collapse navbar-collapse" id="navbarNavTextFormatter">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'text_formatter_view' %}active{% endif %}" href="{% url 'text_formatter:text_formatter_view' %}">Text Formatter</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'converter_view' %}active{% endif %}" href="{% url 'text_format_converter:converter_view' %}">Text Format Converter</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'text_formatter_tutorial' %}active{% endif %}" href="{% url 'text_formatter:text_formatter_tutorial' %}">Tutorial</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'tutorial_view' %}active{% endif %}" href="{% url 'text_format_converter:tutorial_view' %}">Tutorial</a>
                     </li>
                 </ul>
             </div>
