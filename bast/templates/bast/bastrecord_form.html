@@ -850,6 +850,7 @@
             .then(data => {
                 // Get all existing rows in the table
                 const rows = document.querySelectorAll('#member-data-table tbody tr');
+                let updated = false;
                 
                 // For each row, update only the Keterangan column if there's matching data
                 rows.forEach((row, index) => {
@@ -864,8 +865,16 @@
                     // Only update Keterangan if we found a match and it has a value
                     if (memberData && memberData.keterangan) {
                         keteranganCell.textContent = memberData.keterangan;
+                        updated = true;
                     }
                 });
+                
+                // If any updates were made, trigger the conversion to update the hidden field
+                if (updated) {
+                    convertMemberTableToJSON();
+                } else {
+                    alert('Tidak ada data keterangan yang diperbarui');
+                }
             })
             .catch(error => {
                 console.error('Error fetching previous members:', error);
