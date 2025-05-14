@@ -6,7 +6,7 @@
 <div class="form-container">
     <div class="container mt-5">
         <div class="text-center">
-            <h1 class="mt-3 page-header">Welcome to the <span class="btn btn-primary disabled"
+            <h1 class="mt-3 page-header">Welcome to the <span class="btn btn-primary"
                     style="pointer-events: none;"><b>eBAST</b></span> Homepage</h1>
             <p class="mt-3 text-muted">Your one-stop solution for BAST management and others.</p>
             <p class="mt-3 text-muted">Silakan isi NIP anda di <a href="{% url 'core:operator_list' %}"
@@ -16,35 +16,39 @@
             <h2>BAST</h2>
             <ul class="list-group">
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <a href="{% url 'bast:bastrecord_list' %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View BAST Records">BAST</a>
-                    <a href="{% url 'bast:bastrecord_create' %}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Create New BAST Record">
-                        <i class="fas fa-plus me-1"></i>Create
-                    </a>
+                    <div>
+                        <a href="{% url 'bast:bastrecord_create' %}" class="btn btn-sm btn-primary me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Create New BAST Record">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                        <a href="{% url 'bast:bastrecord_list' %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View BAST Records">BAST</a>
+                    </div>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
+                        <a href="{% url 'qc:qcrecord_create' %}" class="btn btn-sm btn-primary me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Create New QC Record">
+                            <i class="fas fa-plus"></i>
+                        </a>
                         <a href="{% url 'qc:qcrecord_list' %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View QC-3 Records">QC-3</a> |
-                        <a href="{% url 'qc:errorstation_list' %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View Error Station List">Error Station List</a>
+                        <a href="{% url 'qc:errorstation_list' %}" class="text-decoration-none ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="View Error Station List">Error Station List</a>
                     </div>
-                    <a href="{% url 'qc:qcrecord_create' %}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Create New QC Record">
-                        <i class="fas fa-plus me-1"></i>Create
-                    </a>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <a href="{% url 'qcfm:qcfmrecord_list' %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View QC Focal Mechanism Records">QC Focal Mechanism</a>
-                    <a href="{% url 'qcfm:qcfmrecord_create' %}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Create New QC Focal Mechanism Record">
-                        <i class="fas fa-plus me-1"></i>Create
-                    </a>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
+                        <a href="{% url 'qcfm:qcfmrecord_create' %}" class="btn btn-sm btn-primary me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Create New QC Focal Mechanism Record">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                        <a href="{% url 'qcfm:qcfmrecord_list' %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View QC Focal Mechanism Records">QC Focal Mechanism</a>
+
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{% url 'cl_seiscomp:cs_create' %}" class="btn btn-sm btn-primary me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Create New Checklist Record">
+                            <i class="fas fa-plus"></i>
+                        </a>
                         <a href="{% url 'cl_seiscomp:cs_list' %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View Checklist Records">Ceklis Seiscomp</a> |
-                        <a href="{% url 'cl_seiscomp:station_list' %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View Station List">Station List</a> |
-                        <a href="{% url 'cl_seiscomp:stats' %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View Checklist Statistics">Stats</a>
+                        <a href="{% url 'cl_seiscomp:station_list' %}" class="text-decoration-none ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="View Station List">Station List</a> |
+                        <a href="{% url 'cl_seiscomp:stats' %}" class="text-decoration-none ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="View Checklist Statistics">Stats</a>
                     </div>
-                    <a href="{% url 'cl_seiscomp:cs_create' %}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Create New Checklist Record">
-                        <i class="fas fa-plus me-1"></i>Create
-                    </a>
                 </li>
             </ul>
         </div>

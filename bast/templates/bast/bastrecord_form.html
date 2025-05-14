@@ -8,17 +8,14 @@
             {% load form_tags %}
 
             {% if form.errors %}
-            <div class="alert alert-danger">
-                Please correct the errors below.
-                <ul>
-                    {% for field in form %}
+            <div id="form-errors" data-errors="true" style="display: none;">
+                {% for field in form %}
                     {% if field.errors %}
-                    {% for error in field.errors %}
-                    <li>{{ field.label }}: {{ error }}</li>
-                    {% endfor %}
+                        {% for error in field.errors %}
+                            <div data-field="{{ field.id_for_label }}" data-error="{{ error|escapejs }}"></div>
+                        {% endfor %}
                     {% endif %}
-                    {% endfor %}
-                </ul>
+                {% endfor %}
             </div>
             {% endif %}
             <div class="form-group row">
@@ -286,7 +283,7 @@
 
             <div class="form-group row">
                 <div class="col-md-6">
-                    {{ form.spv.label_tag }}
+                    <label for="{{ form.spv.id_for_label }}">SPV:</label>
                     {{ form.spv|add_class:"form-control" }}
                     <div class="invalid-feedback">
                         Please select a valid SPV.
@@ -312,17 +309,14 @@
             </div>
 
             {% if form.errors %}
-            <div class="alert alert-danger">
-                Please correct the errors below.
-                <ul>
-                    {% for field in form %}
+            <div id="form-errors" data-errors="true" style="display: none;">
+                {% for field in form %}
                     {% if field.errors %}
-                    {% for error in field.errors %}
-                    <li>{{ field.label }}: {{ error }}</li>
-                    {% endfor %}
+                        {% for error in field.errors %}
+                            <div data-field="{{ field.id_for_label }}" data-error="{{ error|escapejs }}"></div>
+                        {% endfor %}
                     {% endif %}
-                    {% endfor %}
-                </ul>
+                {% endfor %}
             </div>
             {% endif %}
             <button type="submit" class="btn btn-primary" id="submit-button">Save</button>
@@ -363,12 +357,51 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- Helper function for showing error messages in modal -->
 <script>
-    // Initialize tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+    function showErrorModal(message) {
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        const errorContent = document.getElementById('errorModalContent');
+        errorContent.innerHTML = `<p>${message}</p>`;
+        errorModal.show();
+    }
+</script>
+<script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+        
+        // Form validation
+        const form = document.querySelector('.needs-validation');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    const errorContent = document.getElementById('errorModalContent');
+                    let errorHtml = '<p>Please correct the following errors:</p><ul class="mb-0">';
+                    
+                    // Find all invalid fields
+                    const invalidFields = form.querySelectorAll(':invalid');
+                    invalidFields.forEach(field => {
+                        const fieldLabel = document.querySelector(`label[for="${field.id}"]`);
+                        const labelText = fieldLabel ? fieldLabel.textContent.trim().replace(':', '') : field.name;
+                        errorHtml += `<li><strong>${labelText}:</strong> ${field.validationMessage || 'This field is required'}</li>`;
+                    });
+                    
+                    errorHtml += '</ul>';
+                    errorContent.innerHTML = errorHtml;
+                    errorModal.show();
+                }
+                
+                form.classList.add('was-validated');
+            }, false);
+        };
 
     // date picker initialization
     document.addEventListener('DOMContentLoaded', function () {
@@ -577,16 +610,43 @@
 
         function updateNip() {
             const selectedSpv = spvSelect.value;
+            const selectedSpvText = spvSelect.options[spvSelect.selectedIndex].text;
+            
+            // Only proceed if an SPV is actually selected (not the default empty option)
+            if (!selectedSpv) {
+                nipInput.value = '';
+                return;
+            }
+
             fetch(`/bast/api/get_nip/${selectedSpv}/`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Gagal mengambil data dari server');
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    if (data.nip) {
+                    if (data && data.nip) {
                         nipInput.value = data.nip;
                     } else {
-                        nipInput.value = ''
+                        nipInput.value = '';
+                        // Show modal for empty NIP
+                        const emptyNipModal = new bootstrap.Modal(document.getElementById('emptyNipModal'));
+                        const modalBody = document.getElementById('emptyNipModalBody');
+                        modalBody.innerHTML = `
+                            <p>Operator <strong>${selectedSpvText}</strong> belum memiliki NIP yang terdaftar.</p>
+                            <p>Silakan tambahkan NIP melalui halaman <a href="{% url 'core:operator_list' %}" class="alert-link">Manajemen Operator</a>.</p>
+                        `;
+                        emptyNipModal.show();
                     }
                 })
-                .catch(error => console.error('Error fetching NIP:', error));
+                .catch(error => {
+                    console.error('Error fetching NIP:', error);
+                    // Only show error modal if an SPV is selected
+                    if (spvSelect.value) {
+                        showErrorModal('Gagal mengambil data NIP: ' + (error.message || 'Terjadi kesalahan'));
+                    }
+                });
         }
 
         spvSelect.addEventListener('change', updateNip);
@@ -873,12 +933,12 @@
                 if (updated) {
                     convertMemberTableToJSON();
                 } else {
-                    alert('Hanya bisa mengambil data jika kelompok yang dipilih sama dengan kelompok pada data sebelumnya');
+                    showErrorModal('Hanya bisa mengambil data jika kelompok yang dipilih sama dengan kelompok pada data sebelumnya');
                 }
             })
             .catch(error => {
                 console.error('Error fetching previous members:', error);
-                alert('Gagal mengambil data anggota sebelumnya: ' + error.message);
+                showErrorModal('Gagal mengambil data anggota sebelumnya: ' + error.message);
             });
     });
 // --- End Fetch Previous Members ---
@@ -899,12 +959,12 @@
                             const event = new Event('change');
                             pocoExpInput.dispatchEvent(event);
                         } else {
-                            alert('No previous Poco Expiration Date found');
+                            showErrorModal('No previous Poco Expiration Date found');
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching previous Poco Expiration Date:', error);
-                        alert('Error fetching previous Poco Expiration Date');
+                        showErrorModal('Error fetching previous Poco Expiration Date');
                     });
             });
         }
@@ -924,12 +984,12 @@
                             const event = new Event('change');
                             samsungExpInput.dispatchEvent(event);
                         } else {
-                            alert('No previous Samsung Expiration Date found');
+                            showErrorModal('No previous Samsung Expiration Date found');
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching previous Samsung Expiration Date:', error);
-                        alert('Error fetching previous Samsung Expiration Date');
+                        showErrorModal('Error fetching previous Samsung Expiration Date');
                     });
             });
         }
@@ -949,16 +1009,59 @@
                             const event = new Event('change');
                             pulsaPocoInput.dispatchEvent(event);
                         } else {
-                            alert('No previous Pulsa Poco value found');
+                            showErrorModal('No previous Pulsa Poco value found');
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching previous Pulsa Poco value:', error);
-                        alert('Error fetching previous Pulsa Poco value');
+                        showErrorModal('Error fetching previous Pulsa Poco value');
                     });
             });
         }
     });
 // --- End Fetch Previous Poco Exp ---
+
+    // Handle form validation errors
+    document.addEventListener('DOMContentLoaded', function() {
+        const formErrors = document.getElementById('form-errors');
+        if (formErrors && formErrors.dataset.errors === 'true') {
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            const errorContent = document.getElementById('errorModalContent');
+            let errorHtml = '<p>Silakan perbaiki kesalahan berikut:</p><ul class="mb-0">';
+            
+            // Get all error elements
+            const errorElements = formErrors.querySelectorAll('[data-field][data-error]');
+            errorElements.forEach(el => {
+                const fieldId = el.dataset.field;
+                const errorMsg = el.dataset.error;
+                const fieldLabel = document.querySelector(`label[for="${fieldId}"]`);
+                const labelText = fieldLabel ? fieldLabel.textContent.trim().replace(':', '') : fieldId;
+                errorHtml += `<li><strong>${labelText}:</strong> ${errorMsg}</li>`;
+            });
+            
+            errorHtml += '</ul>';
+            errorContent.innerHTML = errorHtml;
+            errorModal.show();
+        }
+    });
 </script>
+<!-- Empty NIP Modal -->
+<div class="modal fade" id="emptyNipModal" tabindex="-1" aria-labelledby="emptyNipModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="emptyNipModalLabel">NIP Tidak Ditemukan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body" id="emptyNipModalBody">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <a href="{% url 'core:operator_list' %}" class="btn btn-primary">Pergi ke Manajemen Operator</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

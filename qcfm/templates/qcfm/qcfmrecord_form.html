@@ -9,18 +9,25 @@
             {% load form_tags %}
 
             {% if form.errors %}
-            <div class="alert alert-danger">
-                Please correct the errors below.
-                <ul>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    const errorContent = document.getElementById('errorModalContent');
+                    let errorHtml = '<p>Please correct the following errors:</p><ul class="mb-0">';
+                    
                     {% for field in form %}
-                    {% if field.errors %}
-                    {% for error in field.errors %}
-                    <li>{{ field.label }}: {{ error }}</li>
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                errorHtml += `<li><strong>${document.querySelector('label[for="{{ field.id_for_label }}"]') ? document.querySelector('label[for="{{ field.id_for_label }}"]').textContent.trim().replace(':', '') : '{{ field.label|escapejs }}'}:</strong> {{ error|escapejs }}</li>`;
+                            {% endfor %}
+                        {% endif %}
                     {% endfor %}
-                    {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
+                    
+                    errorHtml += '</ul>';
+                    errorContent.innerHTML = errorHtml;
+                    errorModal.show();
+                });
+            </script>
             {% endif %}
             <div class="form-group row">
                 <div class="col-md-4">
@@ -229,18 +236,25 @@
                 </div>
             </div>
             {% if form.errors %}
-            <div class="alert alert-danger">
-                Please correct the errors below.
-                <ul>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    const errorContent = document.getElementById('errorModalContent');
+                    let errorHtml = '<p>Please correct the following errors:</p><ul class="mb-0">';
+                    
                     {% for field in form %}
-                    {% if field.errors %}
-                    {% for error in field.errors %}
-                    <li>{{ field.label }}: {{ error }}</li>
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                errorHtml += `<li><strong>${document.querySelector('label[for="{{ field.id_for_label }}"]') ? document.querySelector('label[for="{{ field.id_for_label }}"]').textContent.trim().replace(':', '') : '{{ field.label|escapejs }}'}:</strong> {{ error|escapejs }}</li>`;
+                            {% endfor %}
+                        {% endif %}
                     {% endfor %}
-                    {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
+                    
+                    errorHtml += '</ul>';
+                    errorContent.innerHTML = errorHtml;
+                    errorModal.show();
+                });
+            </script>
             {% endif %}
             <button type="submit" class="btn btn-primary">Save</button>
             <button type="button" class="btn btn-secondary"
@@ -251,6 +265,16 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- Helper function for showing error messages in modal -->
+<script>
+    function showErrorModal(message) {
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        const errorContent = document.getElementById('errorModalContent');
+        errorContent.innerHTML = `<p>${message}</p>`;
+        errorModal.show();
+    }
+</script>
 <script>
     // date picker initialization
     document.addEventListener('DOMContentLoaded', function () {
@@ -342,7 +366,10 @@
                     document.querySelector('[data-target="#fetchedDataSection"]').click();
                 }
             })
-            .catch(error => console.error('Error fetching data:', error));
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                showErrorModal('Error fetching data: ' + error.message);
+            });
     });
 
     // Fetch data and fill qc
@@ -378,7 +405,10 @@
                     document.querySelector('[data-target="#qcFmDataSection"]').click();
                 }
             })
-            .catch(error => console.error('Error fetching data:', error));
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                showErrorModal('Error fetching data: ' + error.message);
+            });
     });
 
     // set the datetime_qcfm_prev_start and datetime_qcfm_prev_end default value to be dependent on the waktu_dinas
@@ -442,20 +472,70 @@
 
         function updateNip() {
             const selectedOperator = operatorSelect.value;
+            const selectedOperatorText = operatorSelect.options[operatorSelect.selectedIndex].text;
+            
+            // Only proceed if an operator is actually selected (not the default empty option)
+            if (!selectedOperator) {
+                nipInput.value = '';
+                return;
+            }
+
             fetch(`/qcfm/api/get_nip/${selectedOperator}/`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    if (data.nip) {
+                    if (data && data.nip) {
                         nipInput.value = data.nip;
                     } else {
-                        nipInput.value = ''
+                        nipInput.value = '';
+                        // Show modal for empty NIP
+                        const emptyNipModal = new bootstrap.Modal(document.getElementById('emptyNipModal'));
+                        const modalBody = document.getElementById('emptyNipModalBody');
+                        modalBody.innerHTML = `
+                            <p>Operator <strong>${selectedOperatorText}</strong> doesn't have an NIP assigned.</p>
+                            <p>Please add the NIP in the <a href="/core/operators/" class="alert-link">Operator Management</a> page.</p>
+                        `;
+                        emptyNipModal.show();
                     }
                 })
-                .catch(error => console.error('Error fetching NIP:', error));
+                .catch(error => {
+                    console.error('Error fetching NIP:', error);
+                    // Don't show error modal for initial page load with no selection
+                    if (operatorSelect.value) {
+                        showErrorModal('Error fetching NIP: ' + (error.message || 'Unknown error occurred'));
+                    }
+                });
         }
 
         operatorSelect.addEventListener('change', updateNip);
-        updateNip();
+        
+        // Only call updateNip on page load if an operator is already selected
+        if (operatorSelect.value) {
+            updateNip();
+        }
     });
 </script>
+<!-- Empty NIP Modal -->
+<div class="modal fade" id="emptyNipModal" tabindex="-1" aria-labelledby="emptyNipModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="emptyNipModalLabel">NIP Not Found</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="emptyNipModalBody">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="/core/operators/" class="btn btn-primary">Go to Operator Management</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
