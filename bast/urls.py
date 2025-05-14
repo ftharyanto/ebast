@@ -16,4 +16,8 @@ urlpatterns = [
     path('export-to-excel/<int:record_id>/', views.export_to_excel, name='export_to_excel'),
     path('export-to-pdf/<int:record_id>/', views.export_to_pdf, name='export_to_pdf'),
     path('delete-direct/<int:pk>/', views.BastRecordDeleteDirectView.as_view(), name='bastrecord_delete_direct'),
+    path('api/get_previous_members/', views.get_previous_members, name='get_previous_members'),
+    path('api/get_previous_poco_exp/', views.get_previous_poco_exp, name='get_previous_poco_exp'),
+    path('api/get_previous_samsung_exp/', views.get_previous_samsung_exp, name='get_previous_samsung_exp'),
+    path('api/get_previous_pulsa_poco/', views.get_previous_pulsa_poco, name='get_previous_pulsa_poco'),
 ]

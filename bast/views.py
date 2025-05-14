@@ -252,6 +252,73 @@ def get_cs_data(request, cs_id):
     except CsRecordModel.DoesNotExist:
         return JsonResponse({'error': 'CS record not found'}, status=404)
 
+def get_previous_poco_exp(request):
+    """
+    Returns the poco_exp value from the most recent BAST record.
+    Returns None if no records exist.
+    """
+    try:
+        latest_record = BastRecordModel.objects.latest('date')
+        return JsonResponse({'poco_exp': latest_record.poco_exp})
+    except BastRecordModel.DoesNotExist:
+        return JsonResponse({'poco_exp': None}, status=404)
+
+
+def get_previous_samsung_exp(request):
+    """
+    Returns the samsung_exp value from the most recent BAST record.
+    Returns None if no records exist.
+    """
+    try:
+        latest_record = BastRecordModel.objects.latest('date')
+        return JsonResponse({'samsung_exp': latest_record.samsung_exp})
+    except BastRecordModel.DoesNotExist:
+        return JsonResponse({'samsung_exp': None}, status=404)
+
+
+def get_previous_pulsa_poco(request):
+    """
+    Returns the pulsa_poco value from the most recent BAST record.
+    Returns None if no records exist.
+    """
+    try:
+        latest_record = BastRecordModel.objects.latest('date')
+        return JsonResponse({'pulsa_poco': latest_record.pulsa_poco})
+    except BastRecordModel.DoesNotExist:
+        return JsonResponse({'pulsa_poco': None}, status=404)
+
+def get_previous_members(request):
+    """
+    Returns the members data from the most recent BAST record.
+    The response format is a list of dicts with 'nama' and 'keterangan' keys.
+    """
+    try:
+        # Get the most recent BAST record
+        latest_record = BastRecordModel.objects.latest('date', 'id')
+        
+        # Parse the member data (assuming it's stored as a JSON string in the member field)
+        try:
+            import json
+            members = json.loads(latest_record.member) if latest_record.member else []
+            return JsonResponse(members, safe=False)
+        except json.JSONDecodeError:
+            # If member data is not valid JSON, try to parse it as a simple string
+            members = []
+            if latest_record.member:
+                # Assuming each line is a member name, and there's no keterangan
+                for i, name in enumerate(latest_record.member.split('\n')):
+                    if name.strip():
+                        members.append({
+                            'nama': name.strip(),
+                            'keterangan': ''
+                        })
+            return JsonResponse(members, safe=False)
+            
+    except BastRecordModel.DoesNotExist:
+        return JsonResponse([], safe=False)  # Return empty list if no records exist
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
 def populate_bast_sheet(sheet, record):
     from qc.views import format_date_indonesian, get_hari_indonesia
     import json

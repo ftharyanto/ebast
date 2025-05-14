@@ -65,7 +65,17 @@
                             Please select a valid waktu pelaksanaan.
                         </div>
                     </div>
+                    
                     <!-- create a table of members from "Kelompok" model -->
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <div class="row">
+                            <div class="col-md-12 text-right">
+                                <button type="button" id="fetch-prev-members-btn" class="btn btn-primary btn-sm text-white">
+                                    <i class="fas fa-users mr-1"></i> Fetch Previous Members
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="table-responsive container" style="padding-right: 5em; padding-left: 5em;">
                         <table class="table table-bordered table-hover table-sm" id="member-data-table"
                             style="width: auto;">
@@ -232,22 +242,40 @@
                     </div>
                     <div class="form-group row mt-3">
                         <div class="col-md-3">
-                            {{ form.pulsa_poco.label_tag }}
-                            {{ form.pulsa_poco|add_class:"form-control" }}
+                            <label for="{{ form.pulsa_poco.id_for_label }}" class="form-label">Pulsa Poco:</label>
+                            <div class="input-group" style="width: 100%;">
+                                {{ form.pulsa_poco|add_class:"form-control" }}
+                                <button class="btn btn-fetch-previous" type="button" id="fetchPreviousPulsaPoco" 
+                                    data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Fetch previous Pulsa Poco value">
+                                    <i class="fas fa-history"></i>
+                                </button>
+                            </div>
                             <div class="invalid-feedback">
                                 Please provide a valid pulsa poco.
                             </div>
                         </div>
                         <div class="col-md-3">
-                            {{ form.poco_exp.label_tag }}
-                            {{ form.poco_exp|add_class:"form-control" }}
+                            <label for="{{ form.poco_exp.id_for_label }}" class="form-label">Poco Expiration Date:</label>
+                            <div class="input-group" style="width: 100%;">
+                                {{ form.poco_exp|add_class:"form-control" }}
+                                <button class="btn btn-fetch-previous" type="button" id="fetchPreviousPocoExp" 
+                                    data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Fetch previous Poco Expiration Date value">
+                                    <i class="fas fa-history"></i>
+                                </button>
+                            </div>
                             <div class="invalid-feedback">
                                 Please provide a valid poco exp.
                             </div>
                         </div>
                         <div class="col-md-3">
-                            {{ form.samsung_exp.label_tag }}
-                            {{ form.samsung_exp|add_class:"form-control" }}
+                            <label for="{{ form.samsung_exp.id_for_label }}" class="form-label">Samsung Expiration Date:</label>
+                            <div class="input-group" style="width: 100%;">
+                                {{ form.samsung_exp|add_class:"form-control" }}
+                                <button class="btn btn-fetch-previous" type="button" id="fetchPreviousSamsungExp" 
+                                    data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Fetch previous Samsung Expiration Date value">
+                                    <i class="fas fa-history"></i>
+                                </button>
+                            </div>
                             <div class="invalid-feedback">
                                 Please provide a valid samsung exp.
                             </div>
@@ -304,6 +332,26 @@
     </div>
 </div>
 <style>
+/* Button styles for fetch previous button */
+.btn-fetch-previous {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #e6e9ec;
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btn-fetch-previous:hover, .btn-fetch-previous:focus {
+    background-color: #e9ecef;
+    color: #495057;
+    border-color: #e6e9ec;
+    box-shadow: none;
+}
+
 /* Accordion clickable header hover effect */
 .card-header.clickable {
     transition: background-color 0.2s;
@@ -316,6 +364,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
     // date picker initialization
     document.addEventListener('DOMContentLoaded', function () {
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
@@ -786,5 +840,116 @@
         dateInput.addEventListener('change', handleDateOrShiftChange);
         bastIdInput.addEventListener('change', autofillCounts);
     });
+// --- Fetch Previous Members Button Logic ---
+    document.getElementById('fetch-prev-members-btn').addEventListener('click', function() {
+        fetch('/bast/api/get_previous_members/')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                // Get all existing rows in the table
+                const rows = document.querySelectorAll('#member-data-table tbody tr');
+                
+                // For each row, update only the Keterangan column if there's matching data
+                rows.forEach((row, index) => {
+                    const namaCell = row.cells[1]; // Nama is in the second cell (index 1)
+                    const keteranganCell = row.cells[2]; // Keterangan is in the third cell (index 2)
+                    
+                    // Find matching member data by name (case insensitive)
+                    const memberData = data.find(m => 
+                        m.nama && namaCell.textContent.trim().toLowerCase() === m.nama.trim().toLowerCase()
+                    );
+                    
+                    // Only update Keterangan if we found a match and it has a value
+                    if (memberData && memberData.keterangan) {
+                        keteranganCell.textContent = memberData.keterangan;
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching previous members:', error);
+                alert('Gagal mengambil data anggota sebelumnya: ' + error.message);
+            });
+    });
+// --- End Fetch Previous Members ---
+// --- Fetch Previous Poco Exp Button Logic ---
+    document.addEventListener('DOMContentLoaded', function() {
+        // Poco Expiration Date
+        const fetchPocoButton = document.getElementById('fetchPreviousPocoExp');
+        const pocoExpInput = document.getElementById('{{ form.poco_exp.id_for_label }}');
+        
+        if (fetchPocoButton && pocoExpInput) {
+            fetchPocoButton.addEventListener('click', function() {
+                fetch('{% url "bast:get_previous_poco_exp" %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.poco_exp !== null && data.poco_exp !== undefined) {
+                            pocoExpInput.value = data.poco_exp;
+                            // Trigger change event in case there are any listeners
+                            const event = new Event('change');
+                            pocoExpInput.dispatchEvent(event);
+                        } else {
+                            alert('No previous Poco Expiration Date found');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching previous Poco Expiration Date:', error);
+                        alert('Error fetching previous Poco Expiration Date');
+                    });
+            });
+        }
+
+        // Samsung Expiration Date
+        const fetchSamsungButton = document.getElementById('fetchPreviousSamsungExp');
+        const samsungExpInput = document.getElementById('{{ form.samsung_exp.id_for_label }}');
+        
+        if (fetchSamsungButton && samsungExpInput) {
+            fetchSamsungButton.addEventListener('click', function() {
+                fetch('{% url "bast:get_previous_samsung_exp" %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.samsung_exp !== null && data.samsung_exp !== undefined) {
+                            samsungExpInput.value = data.samsung_exp;
+                            // Trigger change event in case there are any listeners
+                            const event = new Event('change');
+                            samsungExpInput.dispatchEvent(event);
+                        } else {
+                            alert('No previous Samsung Expiration Date found');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching previous Samsung Expiration Date:', error);
+                        alert('Error fetching previous Samsung Expiration Date');
+                    });
+            });
+        }
+
+        // Pulsa Poco
+        const fetchPulsaPocoButton = document.getElementById('fetchPreviousPulsaPoco');
+        const pulsaPocoInput = document.getElementById('{{ form.pulsa_poco.id_for_label }}');
+        
+        if (fetchPulsaPocoButton && pulsaPocoInput) {
+            fetchPulsaPocoButton.addEventListener('click', function() {
+                fetch('{% url "bast:get_previous_pulsa_poco" %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.pulsa_poco !== null && data.pulsa_poco !== undefined) {
+                            pulsaPocoInput.value = data.pulsa_poco;
+                            // Trigger change event in case there are any listeners
+                            const event = new Event('change');
+                            pulsaPocoInput.dispatchEvent(event);
+                        } else {
+                            alert('No previous Pulsa Poco value found');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching previous Pulsa Poco value:', error);
+                        alert('Error fetching previous Pulsa Poco value');
+                    });
+            });
+        }
+    });
+// --- End Fetch Previous Poco Exp ---
 </script>
 {% endblock %}
