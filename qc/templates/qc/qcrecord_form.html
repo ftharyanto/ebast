@@ -233,20 +233,20 @@
             </div>
 
             <!-- Modal for NIP notification -->
-            <div class="modal fade" id="nipModal" tabindex="-1" role="dialog" aria-labelledby="nipModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
+<!-- Empty NIP Modal -->
+            <div class="modal fade" id="emptyNipModal" tabindex="-1" aria-labelledby="emptyNipModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="nipModalLabel">NIP Notification</h5>
-                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title" id="emptyNipModalLabel">NIP Tidak Ditemukan</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                         </div>
-                        <div class="modal-body">
-                            Data NIP belum ada di database, silakan isi NIP Anda dan klik tombol "Save NIP".
+                        <div class="modal-body" id="emptyNipModalBody">
+                            <!-- Content will be dynamically inserted here -->
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                            <a href="{% url 'core:operator_list' %}" class="btn btn-primary">Pergi ke Manajemen Operator</a>
                         </div>
                     </div>
                 </div>
@@ -277,6 +277,61 @@
         </form>
     </div>
 </div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="errorModalLabel">Kesalahan Validasi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body" id="errorModalContent">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Helper function for showing error messages in modal
+    function showErrorModal(message) {
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        const errorContent = document.getElementById('errorModalContent');
+        errorContent.innerHTML = `<p>${message}</p>`;
+        errorModal.show();
+    }
+
+    // Form validation with Bootstrap 5 and error modal
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('.needs-validation');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    const errorContent = document.getElementById('errorModalContent');
+                    let errorHtml = '<p>Mohon perbaiki kesalahan berikut:</p><ul class="mb-0">';
+                    // Find all invalid fields
+                    const invalidFields = form.querySelectorAll(':invalid');
+                    invalidFields.forEach(field => {
+                        const fieldLabel = document.querySelector(`label[for="${field.id}"]`);
+                        const labelText = fieldLabel ? fieldLabel.textContent.trim().replace(':', '') : field.name;
+                        errorHtml += `<li><strong>${labelText}:</strong> ${field.validationMessage || 'Wajib diisi'}</li>`;
+                    });
+                    errorHtml += '</ul>';
+                    errorContent.innerHTML = errorHtml;
+                    errorModal.show();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        }
+    });
+</script>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -474,10 +529,25 @@
 
         function updateNip() {
             const selectedOperator = operatorSelect.value;
+            
+            // Don't proceed if no operator is selected
+            if (!selectedOperator) {
+                nipInput.value = '';
+                saveButton.style.display = 'none';
+                nipContainer.classList.remove('col-md-4');
+                nipContainer.classList.add('col-md-6');
+                return;
+            }
+
             fetch(`/qc/api/get_nip/${selectedOperator}/`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    if (data.nip) {
+                    if (data && data.nip) {
                         nipInput.value = data.nip;
                         saveButton.style.display = 'none'; // Hide the button
                         nipContainer.classList.remove('col-md-4');
@@ -488,12 +558,27 @@
                         nipContainer.classList.remove('col-md-6');
                         nipContainer.classList.add('col-md-4');
 
-                        // Show modal when NIP is empty
-                        const nipModal = new bootstrap.Modal(document.getElementById('nipModal'));
-                        nipModal.show();
+                        // Only show modal if an operator is actually selected
+                        if (selectedOperator) {
+                            const emptyNipModal = new bootstrap.Modal(document.getElementById('emptyNipModal'));
+                            const modalBody = document.getElementById('emptyNipModalBody');
+                            const selectedOperatorText = operatorSelect.options[operatorSelect.selectedIndex].text;
+                            
+                            modalBody.innerHTML = `
+                                <p>Operator <strong>${selectedOperatorText}</strong> belum memiliki NIP yang terdaftar.</p>
+                                <p>Silakan tambahkan NIP melalui halaman <a href="{% url 'core:operator_list' %}" class="alert-link">Manajemen Operator</a>.</p>
+                            `;
+                            emptyNipModal.show();
+                        }
                     }
                 })
-                .catch(error => console.error('Error fetching NIP:', error));
+                .catch(error => {
+                    console.error('Error fetching NIP:', error);
+                    // Don't show error if no operator is selected
+                    if (selectedOperator) {
+                        showErrorModal('Gagal mengambil data NIP: ' + (error.message || 'Terjadi kesalahan'));
+                    }
+                });
         }
 
         operatorSelect.addEventListener('change', updateNip);
@@ -540,8 +625,8 @@
     document.addEventListener('DOMContentLoaded', function () {
         const operatorSelect = document.getElementById('{{ form.operator.id_for_label }}');
         const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
-        const nipModalElement = document.getElementById('nipModal');
-        const nipModal = new bootstrap.Modal(nipModalElement);
+        const emptyNipModalElement = document.getElementById('emptyNipModal');
+        const emptyNipModal = new bootstrap.Modal(emptyNipModalElement);
     });
 </script>
 {% endblock %}

@@ -8,20 +8,6 @@
         <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
             {% csrf_token %}
             {% load form_tags %}
-            {% if form.errors %}
-            <div class="alert alert-danger">
-                Please correct the errors below.
-                <ul>
-                    {% for field in form %}
-                    {% if field.errors %}
-                    {% for error in field.errors %}
-                    <li>{{ field.label }}: {{ error }}</li>
-                    {% endfor %}
-                    {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
 
             <div class="form-group row">
                 <div class="form-group col-md-4">
@@ -268,4 +254,56 @@
         </script>
     </div>
 </div>
+<!-- Error Validation Modal (Bootstrap 5) -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="errorModalLabel">Kesalahan Validasi</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div id="errorModalContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Helper function for showing error messages in modal
+    function showErrorModal(message) {
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        const errorContent = document.getElementById('errorModalContent');
+        errorContent.innerHTML = `<p>${message}</p>`;
+        errorModal.show();
+    }
+    // Form validation with Bootstrap 5 and error modal
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('.needs-validation');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    const errorContent = document.getElementById('errorModalContent');
+                    let errorHtml = '<p>Mohon perbaiki kesalahan berikut:</p><ul class="mb-0">';
+                    // Find all invalid fields
+                    const invalidFields = form.querySelectorAll(':invalid');
+                    invalidFields.forEach(field => {
+                        const fieldLabel = document.querySelector(`label[for="${field.id}"]`);
+                        const labelText = fieldLabel ? fieldLabel.textContent.trim().replace(':', '') : field.name;
+                        errorHtml += `<li><strong>${labelText}:</strong> ${field.validationMessage || 'Wajib diisi'}</li>`;
+                    });
+                    errorHtml += '</ul>';
+                    errorContent.innerHTML = errorHtml;
+                    errorModal.show();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        }
+    });
+</script>
 {% endblock %}

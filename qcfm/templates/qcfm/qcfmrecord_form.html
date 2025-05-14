@@ -496,8 +496,8 @@
                         const emptyNipModal = new bootstrap.Modal(document.getElementById('emptyNipModal'));
                         const modalBody = document.getElementById('emptyNipModalBody');
                         modalBody.innerHTML = `
-                            <p>Operator <strong>${selectedOperatorText}</strong> doesn't have an NIP assigned.</p>
-                            <p>Please add the NIP in the <a href="/core/operators/" class="alert-link">Operator Management</a> page.</p>
+                            <p>Operator <strong>${selectedOperatorText}</strong> belum memiliki NIP yang terdaftar.</p>
+                            <p>Silakan tambahkan NIP melalui halaman <a href="{% url 'core:operator_list' %}" class="alert-link">Manajemen Operator</a>.</p>
                         `;
                         emptyNipModal.show();
                     }
@@ -506,7 +506,7 @@
                     console.error('Error fetching NIP:', error);
                     // Don't show error modal for initial page load with no selection
                     if (operatorSelect.value) {
-                        showErrorModal('Error fetching NIP: ' + (error.message || 'Unknown error occurred'));
+                        showErrorModal('Gagal mengambil data NIP: ' + (error.message || 'Terjadi kesalahan'));
                     }
                 });
         }
@@ -524,15 +524,15 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="emptyNipModalLabel">NIP Not Found</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="emptyNipModalLabel">NIP Tidak Ditemukan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body" id="emptyNipModalBody">
                 <!-- Content will be dynamically inserted here -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <a href="/core/operators/" class="btn btn-primary">Go to Operator Management</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <a href="{% url 'core:operator_list' %}" class="btn btn-primary">Pergi ke Manajemen Operator</a>
             </div>
         </div>
     </div>
