@@ -14,10 +14,22 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from django.views import View
 from django.shortcuts import redirect
 
+from django.core.paginator import Paginator
+
 class BastRecordListView(ListView):
     model = BastRecordModel
     template_name = 'bast/bastrecord_list.html'
     context_object_name = 'bastrecords'
+    paginate_by = 10
+    ordering = ['-bast_id']
+
+    def get_paginate_by(self, queryset):
+        if self.request.GET.get('all') == '1':
+            return None
+        return self.paginate_by
+
+    def get_queryset(self):
+        return super().get_queryset().order_by('-bast_id')
 
 class BastRecordCreateView(CreateView):
     model = BastRecordModel
