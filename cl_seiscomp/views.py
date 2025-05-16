@@ -328,10 +328,22 @@ class StatsView(View):
         return render(request, self.template_name, context)
 
 ##### Checklist Seiscomp View
+from django.core.paginator import Paginator
+
 class CsListView(ListView):
     model = CsRecordModel
     template_name = 'cl_seiscomp/cs_list.html'
     context_object_name = 'csrecords'
+    paginate_by = 10
+    ordering = ['-cs_id']
+
+    def get_paginate_by(self, queryset):
+        if self.request.GET.get('all') == '1':
+            return None
+        return self.paginate_by
+
+    def get_queryset(self):
+        return super().get_queryset().order_by('-cs_id')
 
 class CsCreateView(CreateView):
     model = CsRecordModel

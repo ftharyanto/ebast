@@ -8,24 +8,40 @@
     <div class="container mt-4">
         <div class="row justify-content-center">
             <div class="col-xl-12">
-                <div class="d-flex justify-content-end align-items-center mb-4">
-                    <a href="{% url 'cl_seiscomp:cs_create' %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i> Add New Record
-                    </a>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        {% if request.GET.all == '1' %}
+                        <form method="get" class="d-inline-block">
+                            {% for key, value in request.GET.items %}
+                                {% if key != 'all' %}<input type="hidden" name="{{ key }}" value="{{ value }}" />{% endif %}
+                            {% endfor %}
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-table me-1"></i> Show 10 Last Records
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <a href="{% url 'cl_seiscomp:cs_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i> Add New Record
+                        </a>
+                    </div>
                 </div>
 
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-                        <div>
+                        {% if not request.GET.all %}
+                        <div class="d-flex align-items-center">
                             <label for="recordsPerPageTop" class="form-label me-2 mb-0 small">Show:</label>
                             <select id="recordsPerPageTop" class="form-select form-select-sm d-inline-block w-auto">
                                 <option value="5">5</option>
                                 <option value="10" selected>10</option>
-                                <option value="20">20</option>
-                                <option value="50">50</option>
                             </select>
                             <span class="ms-1 small">entries</span>
                         </div>
+                        {% else %}
+                        <div id="tableInfo" class="small text-muted"></div>
+                        {% endif %}
                         <div class="input-group input-group-sm w-auto">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
                             <input type="text" id="searchFilter" placeholder="Search ID, Jam, Kelompok, Operator..."
@@ -95,17 +111,56 @@
                             </table>
                         </div>
                     </div>
-                    <div class="card-footer bg-light d-flex justify-content-between align-items-center py-2">
-                        <div id="tableInfo" class="small text-muted"></div>
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination pagination-sm mb-0">
-                                <li class="page-item"><button id="prevPage" class="page-link"><i
-                                            class="fas fa-angle-left"></i></button></li>
-                                <li class="page-item disabled"><span id="pageInfo" class="page-link"></span></li>
-                                <li class="page-item"><button id="nextPage" class="page-link"><i
-                                            class="fas fa-angle-right"></i></button></li>
-                            </ul>
-                        </nav>
+                        <div class="card-footer bg-light py-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <!-- Entries Info -->
+                            <div id="tableInfo" class="small text-muted"></div>
+                            
+                            <!-- Pagination and Actions -->
+                            <div class="d-flex align-items-center">
+                                {% if not request.GET.all %}
+                                    <!-- Pagination -->
+                                    <nav aria-label="Page navigation">
+                                        <ul class="pagination mb-0 me-2">
+                                            <li class="page-item">
+                                                <button id="prevPage" class="page-link"><i class="fas fa-angle-left"></i></button>
+                                            </li>
+                                            <li class="page-item">
+                                                <span id="pageInfo" class="page-link"></span>
+                                            </li>
+                                            <li class="page-item">
+                                                <button id="nextPage" class="page-link"><i class="fas fa-angle-right"></i></button>
+                                            </li>
+                                        </ul>
+                                    </nav>
+
+                                    <!-- Show All Button -->
+                                    <form method="get" class="d-inline-block">
+                                        {% for key, value in request.GET.items %}
+                                            {% if key != 'all' %}
+                                                <input type="hidden" name="{{ key }}" value="{{ value }}" />
+                                            {% endif %}
+                                        {% endfor %}
+                                        <input type="hidden" name="all" value="1" />
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-list"></i> Show All Records
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <!-- Show Paged View Button -->
+                                    <form method="get" class="d-inline-block">
+                                        {% for key, value in request.GET.items %}
+                                            {% if key != 'all' %}
+                                                <input type="hidden" name="{{ key }}" value="{{ value }}" />
+                                            {% endif %}
+                                        {% endfor %}
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-table"></i> Show 10 Last Records
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,7 +169,8 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize tooltips (assuming Bootstrap 5)
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             if (typeof bootstrap !== 'undefined') {
@@ -122,6 +178,7 @@
             }
         });
 
+        // Initialize delete confirmations
         const deleteForms = document.querySelectorAll('.delete-form');
         deleteForms.forEach(form => {
             form.addEventListener('submit', function (event) {
@@ -132,13 +189,22 @@
             });
         });
 
-        let currentPage = 1;
-        let recordsPerPage = parseInt(document.getElementById("recordsPerPageTop").value);
         const table = document.getElementById("csRecordTable");
         const tbody = document.getElementById("csRecordTableBody");
+        // Store original data rows, exclude empty message row if present
         const originalRows = Array.from(tbody.querySelectorAll("tr:not(:has(td[colspan='6']))"));
-        let currentRows = [...originalRows];
-        let totalPages = Math.ceil(currentRows.length / recordsPerPage);
+        let currentRows = [...originalRows]; // Rows currently being displayed/filtered/sorted
+        let currentPage = 1;
+        let recordsPerPage = 10;
+        let totalPages = 1;
+        
+        // Only set recordsPerPage if the select exists (when not in 'all' view)
+        if (document.getElementById("recordsPerPageTop")) {
+            recordsPerPage = parseInt(document.getElementById("recordsPerPageTop").value) || 10;
+            totalPages = Math.ceil(currentRows.length / recordsPerPage);
+        }
+
+        // Initial sort: ID descending (column 0)
         let sortDirection = { 0: 'desc' };
 
         const pageInfoSpan = document.getElementById("pageInfo");
@@ -148,24 +214,68 @@
         const searchFilterInput = document.getElementById("searchFilter");
         const tableInfoDiv = document.getElementById("tableInfo");
 
+        function updateEntriesCount() {
+            if (!tableInfoDiv) return;
+            const totalEntries = currentRows.length;
+            const urlParams = new URLSearchParams(window.location.search);
+            const showAll = urlParams.get('all') === '1';
+            
+            if (totalEntries === 0) {
+                tableInfoDiv.textContent = 'No entries found';
+            } else if (showAll) {
+                tableInfoDiv.textContent = `Showing all ${totalEntries} entries`;
+            } else {
+                const start = (currentPage - 1) * recordsPerPage + 1;
+                const end = Math.min(currentPage * recordsPerPage, totalEntries);
+                tableInfoDiv.textContent = `Showing ${start} to ${end} of ${totalEntries} entries`;
+            }
+        }
+
         function displayPage(page) {
-            currentPage = page;
-            const start = (page - 1) * recordsPerPage;
-            const end = start + recordsPerPage;
+            // If we're in 'all' view, show all records
+            const urlParams = new URLSearchParams(window.location.search);
+            const showAll = urlParams.get('all') === '1';
+            
+            if (showAll) {
+                // Show all records
+                originalRows.forEach(row => row.style.display = '');
+                totalPages = 1;
+                currentPage = 1;
+            } else {
+                // Paginated view
+                const start = (page - 1) * recordsPerPage;
+                const end = start + recordsPerPage;
 
-            originalRows.forEach(row => row.style.display = 'none');
-            const pageRows = currentRows.slice(start, end);
-            pageRows.forEach(row => row.style.display = '');
+                originalRows.forEach(row => row.style.display = 'none');
 
-            totalPages = Math.ceil(currentRows.length / recordsPerPage);
-            if (totalPages === 0) totalPages = 1;
-            pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
-            prevPageButton.parentElement.classList.toggle('disabled', currentPage === 1);
-            nextPageButton.parentElement.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
+                const pageRows = currentRows.slice(start, end);
+                pageRows.forEach(row => row.style.display = '');
 
-            const startRecord = currentRows.length > 0 ? start + 1 : 0;
-            const endRecord = Math.min(end, currentRows.length);
-            tableInfoDiv.textContent = `Showing ${startRecord} to ${endRecord} of ${currentRows.length} entries`;
+                totalPages = Math.ceil(currentRows.length / recordsPerPage);
+                if (totalPages === 0) totalPages = 1;
+            }
+
+            // Only update page info if pageInfoSpan exists
+            if (pageInfoSpan) {
+                if (showAll) {
+                    pageInfoSpan.textContent = 'Showing all records';
+                } else {
+                    pageInfoSpan.textContent = `Page ${page} of ${totalPages}`;
+                }
+            }
+
+            // Only update pagination buttons if they exist
+            if (prevPageButton && nextPageButton) {
+                if (showAll) {
+                    prevPageButton.parentElement.classList.add('disabled');
+                    nextPageButton.parentElement.classList.add('disabled');
+                } else {
+                    prevPageButton.parentElement.classList.toggle('disabled', page === 1);
+                    nextPageButton.parentElement.classList.toggle('disabled', page === totalPages || totalPages === 0);
+                }
+            }
+
+            updateEntriesCount();
 
             handleEmptyTable();
         }
@@ -178,7 +288,7 @@
             if (!hasDataRows && !emptyRow) {
                 const tr = document.createElement('tr');
                 tr.classList.add('empty-row');
-                tr.innerHTML = `<td colspan="${colspanValue}" class="text-center text-muted py-3">No matching records found.</td>`;
+                tr.innerHTML = `<td colspan="${colspanValue}" class="text-center text-muted py-3">No Ceklis Seiscomp records found.</td>`;
                 tbody.appendChild(tr);
             } else if (hasDataRows && emptyRow) {
                 emptyRow.remove();
@@ -215,12 +325,14 @@
                 return (cells[0] && cells[0].textContent.toLowerCase().includes(filter)) ||
                     (cells[1] && cells[1].textContent.toLowerCase().includes(filter)) ||
                     (cells[2] && cells[2].textContent.toLowerCase().includes(filter)) ||
-                    (cells[3] && cells[3].textContent.toLowerCase().includes(filter)) ||
                     (cells[4] && cells[4].textContent.toLowerCase().includes(filter));
             });
             totalPages = Math.ceil(currentRows.length / recordsPerPage);
             if (totalPages === 0) totalPages = 1;
             currentPage = 1;
+
+            updateEntriesCount();
+
             applySort();
         }
 
@@ -269,47 +381,47 @@
             if (emptyRow) tbody.appendChild(emptyRow);
 
             currentRows.forEach(row => tbody.appendChild(row));
+
+            updateEntriesCount();
+
             displayPage(currentPage);
         }
 
         function resetArrows() {
-            document.getElementById("idSortArrow").innerHTML = "";
-            document.getElementById("jampelSortArrow").innerHTML = "";
-            document.getElementById("kelompokSortArrow").innerHTML = "";
-            document.getElementById("operatorSortArrow").innerHTML = "";
-            document.getElementById("blankSortArrow").innerHTML = "";
+            const arrows = document.querySelectorAll('.table-pointer span');
+            arrows.forEach(arrow => arrow.textContent = '');
         }
 
         function setArrow(n, dir) {
-            resetArrows();
-            const arrow = dir === "asc" ? '<i class="fas fa-sort-up ms-1"></i>' : '<i class="fas fa-sort-down ms-1"></i>';
-            if (n === 0) {
-                document.getElementById("idSortArrow").innerHTML = arrow;
-            } else if (n === 1) {
-                document.getElementById("jampelSortArrow").innerHTML = arrow;
-            } else if (n === 2) {
-                document.getElementById("kelompokSortArrow").innerHTML = arrow;
-            } else if (n === 3) {
-                document.getElementById("blankSortArrow").innerHTML = arrow;
-            } else if (n === 4) {
-                document.getElementById("operatorSortArrow").innerHTML = arrow;
+            const arrow = document.getElementById(`${n}SortArrow`);
+            if (arrow) {
+                arrow.textContent = dir === 'asc' ? '↑' : '↓';
             }
         }
 
-        recordsPerPageSelect.addEventListener("change", updateRecordsPerPage);
-        searchFilterInput.addEventListener("input", filterTable);
+        // Only add event listeners if the elements exist
+        if (recordsPerPageSelect) {
+            recordsPerPageSelect.addEventListener("change", updateRecordsPerPage);
+        }
+        if (searchFilterInput) {
+            searchFilterInput.addEventListener("input", filterTable);
+        }
 
-        prevPageButton.addEventListener("click", function () {
-            if (currentPage > 1) {
-                displayPage(currentPage - 1);
-            }
-        });
+        if (prevPageButton) {
+            prevPageButton.addEventListener("click", function () {
+                if (currentPage > 1) {
+                    displayPage(currentPage - 1);
+                }
+            });
+        }
 
-        nextPageButton.addEventListener("click", function () {
-            if (currentPage < totalPages) {
-                displayPage(currentPage + 1);
-            }
-        });
+        if (nextPageButton) {
+            nextPageButton.addEventListener("click", function () {
+                if (currentPage < totalPages) {
+                    displayPage(currentPage + 1);
+                }
+            });
+        }
 
         applySort();
         setArrow(0, 'desc');
