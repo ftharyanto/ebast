@@ -1,0 +1,193 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}BAST Records Tabulator{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1 class="page-header">BAST Records Tabulator</h1>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-xl-12">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                        <h5 class="mb-0">BAST Records</h5>
+                        <a href="{% url 'bast:bastrecord_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i> Create New Record
+                        </a>
+                    </div>
+                    <div class="card-body p-3">
+                        <!-- Global Search and Actions -->
+                        <div class="mb-3">
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <button id="getSelectedBtn" class="btn btn-primary" title="Get selected rows">
+                                    <i class="fas fa-list-check me-1"></i> Get Selected
+                                </button>
+                                <button id="clearSelectionBtn" class="btn btn-outline-secondary" title="Clear selection">
+                                    <i class="fas fa-times me-1"></i> Clear Selection
+                                </button>
+                                <div class="input-group ms-auto" style="max-width: 400px;">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" id="globalSearch" class="form-control" placeholder="Search in all columns...">
+                                    <button id="clearSearch" class="btn btn-outline-secondary" type="button" title="Clear search">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tabulator container -->
+                        <div id="tabulator-table" style="width: 100%; min-height: 500px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Tabulator CSS -->
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+<!-- Include Tabulator JS -->
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+
+<!-- Initialize Tabulator -->
+<script>
+// Sample data - replace this with your actual data from the server
+const sampleData = [
+    { id: 1, make: "Tesla", model: "Model Y", price: 64950, electric: true },
+    { id: 2, make: "Ford", model: "F-Series", price: 33850, electric: false },
+    { id: 3, make: "Toyota", model: "Corolla", price: 29600, electric: false },
+    { id: 4, make: "Mercedes", model: "EQA", price: 48890, electric: true },
+    { id: 5, make: "Fiat", model: "500", price: 15774, electric: false },
+    { id: 6, make: "Nissan", model: "Juke", price: 20675, electric: false }
+];
+
+// Initialize Tabulator
+const table = new Tabulator("#tabulator-table", {
+    data: sampleData,
+    layout: "fitColumns",
+    pagination: "local",
+    paginationSize: 10,
+    paginationSizeSelector: [10, 25, 50, 100],
+    movableColumns: true,
+    selectable: true,
+    selectableRangeMode: "highlight",
+    columns: [
+        {
+            title: "",
+            formatter: "rowSelection",
+            titleFormatter: "rowSelection",
+            hozAlign: "center",
+            headerHozAlign: "center",
+            headerSort: false,
+            width: 50,
+            frozen: true
+        },
+        { 
+            title: "Make", 
+            field: "make", 
+            sorter: "string",
+            headerFilter: "input",
+            headerFilterPlaceholder: "Filter Make..."
+        },
+        { 
+            title: "Model", 
+            field: "model", 
+            sorter: "string",
+            headerFilter: "input",
+            headerFilterPlaceholder: "Filter Model..."
+        },
+        { 
+            title: "Price", 
+            field: "price", 
+            sorter: "number",
+            formatter: "money",
+            formatterParams: {
+                symbol: "$",
+                precision: 0,
+                thousand: ","
+            },
+            headerFilter: "number",
+            headerFilterPlaceholder: "Filter Price..."
+        },
+        { 
+            title: "Electric", 
+            field: "electric", 
+            sorter: "boolean",
+            formatter: "tickCross",
+            hozAlign: "center",
+            headerFilter: "tickCross",
+            headerFilterParams: {
+                tristate: true,
+                tickValue: true,
+                crossValue: false,
+                values: [true, false, null],
+            },
+            headerFilterEmptyCheck: (value) => value === null
+        }
+    ]
+});
+
+// Function to get selected rows
+function getSelectedRows() {
+    return table.getSelectedData();
+}
+
+// Function to log selected rows
+function logSelectedRows() {
+    const selectedRows = getSelectedRows();
+    console.log('Selected Rows:', selectedRows);
+    return selectedRows;
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Get selected rows button
+    document.getElementById('getSelectedBtn').addEventListener('click', function() {
+        const selectedRows = logSelectedRows();
+        if (selectedRows.length === 0) {
+            alert('No rows selected');
+        } else {
+            alert(`Selected ${selectedRows.length} row(s)`);
+        }
+    });
+
+    // Clear selection button
+    document.getElementById('clearSelectionBtn').addEventListener('click', function() {
+        table.deselectRow();
+    });
+
+    // Global search
+    const globalSearch = document.getElementById('globalSearch');
+    
+    globalSearch.addEventListener('input', function() {
+        table.setFilter([
+            {field: "make", type: "like", value: this.value},
+            {field: "model", type: "like", value: this.value},
+            {field: "price", type: "like", value: this.value}
+        ], "or");
+    });
+
+    // Clear search button
+    document.getElementById('clearSearch').addEventListener('click', function() {
+        globalSearch.value = '';
+        table.clearFilter();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Focus search with Ctrl+F or Cmd+F
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            globalSearch.focus();
+            globalSearch.select();
+        }
+        // Clear search with Escape
+        else if (e.key === 'Escape' && document.activeElement === globalSearch) {
+            e.preventDefault();
+            globalSearch.value = '';
+            table.clearFilter();
+        }
+    });
+});
+</script>
+{% endblock %}

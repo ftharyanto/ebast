@@ -16,6 +16,25 @@ from django.shortcuts import redirect
 
 from django.core.paginator import Paginator
 
+# API endpoint for ag-Grid to fetch all BAST records
+from django.forms.models import model_to_dict
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
+def bastrecord_list_api(request):
+    records = BastRecordModel.objects.all().order_by('-bast_id').select_related('spv')
+    # Serialize with related supervisor name
+    data = []
+    for record in records:
+        record_dict = model_to_dict(record)
+        # Add supervisor name if exists
+        if record.spv:
+            record_dict['spv_name'] = record.spv.name
+        else:
+            record_dict['spv_name'] = ''
+        data.append(record_dict)
+    return JsonResponse(data, safe=False)
+
 class BastRecordListView(ListView):
     model = BastRecordModel
     template_name = 'bast/bastrecord_list.html'
@@ -49,15 +68,65 @@ class BastRecordUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         record = self.get_object()
-        context['existing_data'] = record.events
-        context['existing_member_data'] = record.member
+
+
+class BastRecordGridView(ListView):
+    model = BastRecordModel
+    template_name = 'bast/bastrecord_grid.html'
+    context_object_name = 'bastrecords'
+    paginate_by = 10
+    ordering = ['-bast_id']
+
+    def get_paginate_by(self, queryset):
+        if self.request.GET.get('all') == '1':
+            return None
+        return self.paginate_by
+
+    def get_queryset(self):
+        return super().get_queryset().order_by('-bast_id')
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['existing_data'] = self.object.events if hasattr(self, 'object') else None
+        context['existing_member_data'] = self.object.member if hasattr(self, 'object') else None
         return context
 
+
+class BastRecordGridJSView(ListView):
+    model = BastRecordModel
+    template_name = 'bast/bastrecord_gridjs.html'
+    context_object_name = 'bastrecords'
+    paginate_by = 10
+    ordering = ['-bast_id']
+    
+    def get_paginate_by(self, queryset):
+        if self.request.GET.get('all') == '1':
+            return None
+        return self.paginate_by
+        
+    def get_queryset(self):
+        return super().get_queryset().order_by('-bast_id')
+
     def get_member_data(self, **kwargs):
-        context = super().get_member_data(**kwargs)
-        record = self.get_object()
-        context['existing_member_data'] = record.member
+        context = super().get_context_data(**kwargs)
+        if hasattr(self, 'object'):
+            context['existing_member_data'] = self.object.member
         return context
+
+class BastRecordTabulatorView(ListView):
+    model = BastRecordModel
+    template_name = 'bast/bastrecord_tabulator.html'
+    context_object_name = 'bastrecords'
+    paginate_by = 10
+    ordering = ['-bast_id']
+
+    def get_paginate_by(self, queryset):
+        if self.request.GET.get('all') == '1':
+            return None
+        return self.paginate_by
+
+    def get_queryset(self):
+        return super().get_queryset().order_by('-bast_id')
 
 class BastRecordDeleteDirectView(View):
     def post(self, request, pk, *args, **kwargs):

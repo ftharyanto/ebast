@@ -99,7 +99,16 @@
             <div class="collapse navbar-collapse" id="navbarNavBast">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'bastrecord_list' %}active{% endif %}" href="{% url 'bast:bastrecord_list' %}">BAST List</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'bastrecord_list' %}active{% endif %}" href="{% url 'bast:bastrecord_list' %}">BAST Records</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'bastrecord_grid' %}active{% endif %}" href="{% url 'bast:bastrecord_grid' %}">BAST Grid</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'bastrecord_gridjs' %}active{% endif %}" href="{% url 'bast:bastrecord_gridjs' %}">BAST GridJS</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'bastrecord_tabulator' %}active{% endif %}" href="{% url 'bast:bastrecord_tabulator' %}">BAST Tabulator</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'bastrecord_create' %}active{% endif %}" href="{% url 'bast:bastrecord_create' %}">Create BAST</a>
