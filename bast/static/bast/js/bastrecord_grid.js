@@ -98,14 +98,7 @@ const gridOptions = {
         // logSelectedRows();
     },
     enableCellTextSelection: true,
-    enableRangeSelection: true,
     enableCellChangeFlash: true,
-    statusBar: {
-        statusPanels: [
-            { statusPanel: 'agTotalRowCountComponent', align: 'left' },
-            { statusPanel: 'agFilteredRowCountComponent' }
-        ]
-    }
 };
 
 // Create Grid
@@ -133,20 +126,36 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('globalSearch').addEventListener('input', onFilterTextBoxChanged);
     document.getElementById('clearSearch').addEventListener('click', clearSearch);
 
-    // Add event listeners for selection buttons
-    document.getElementById('getSelectedBtn').addEventListener('click', () => {
-        const selectedRows = logSelectedRows();
-        if (selectedRows.length === 0) {
-            alert('No rows selected');
-        } else {
-            // You can process the selected rows here
-            console.log('Processing selected rows:', selectedRows);
+    // Add event listener for CSV export
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+        try {
+            console.log('Starting CSV export...');
+            
+            // Get all column fields
+            const columnFields = gridApi.getColumnDefs()
+                .map(col => col.field)
+                .filter(Boolean);
+                
+            console.log('Column fields:', columnFields);
+            
+            // Basic export with minimal options
+            const params = {
+                fileName: `bast_records_${new Date().toISOString().slice(0, 10)}.csv`,
+                skipColumnHeaders: false,
+                skipColumnGroupHeaders: true,
+                onlySelected: false,
+                allColumns: false
+            };
+            
+            console.log('Exporting with params:', params);
+            
+            // Export the data
+            gridApi.exportDataAsCsv(params);
+            console.log('CSV export initiated');
+        } catch (error) {
+            console.error('Error during CSV export:', error);
+            alert('Failed to export CSV. Please check console for details.');
         }
-    });
-
-    document.getElementById('clearSelectionBtn').addEventListener('click', () => {
-        gridApi.deselectAll();
-        console.log('Selection cleared');
     });
 
     // Add keyboard shortcuts
