@@ -13,7 +13,13 @@
                     <!-- Export and Search controls -->
                     <div class="input-group input-group-sm me-2" style="min-width: 250px;">
                         <button id="export-csv" class="btn btn-sm btn-outline-primary me-2" title="Export to CSV">
-                            <i class="fas fa-file-export me-1"></i> Export CSV
+                            <i class="fas fa-file-export me-1"></i> Export All to CSV
+                        </button>
+                        <button id="export-selected-excel" class="btn btn-sm btn-outline-primary me-2" title="Export to Excel">
+                            <i class="fas fa-file-export me-1"></i> Export Selected to Excel
+                        </button>
+                        <button id="export-selected-pdf" class="btn btn-sm btn-outline-primary me-2" title="Export to PDF">
+                            <i class="fas fa-file-pdf me-1"></i> Export Selected to PDF
                         </button>
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input type="text" id="globalSearch" class="form-control" placeholder="Search in all columns...">
@@ -182,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Selection settings
         selectable: true,
-        selectableRangeMode: "click",
+        selectableRangeMode: false,
         selectableRollingSelection: true,
         selectablePersistence: true,
         selectableCheck: function(row) {
@@ -265,28 +271,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateStatusBar();
             });
             
+            // Delete Confirmation Modal
+            const deleteConfirmationModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+            const deleteModalBody = document.getElementById('deleteConfirmationModal').querySelector('.modal-body');
+            const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+            
             document.getElementById('delete-selected').addEventListener('click', () => {
                 const selectedRows = table.getSelectedRows();
                 if (selectedRows.length > 0) {
-                    if (confirm(`Are you sure you want to delete ${selectedRows.length} selected records?`)) {
-                        // Get the IDs of selected rows
-                        const selectedIds = selectedRows.map(row => row.getData().id);
-                        
-                        // Here you would typically make an AJAX call to delete the records
-                        console.log('Deleting records with IDs:', selectedIds);
-                        
-                        // For now, just remove the rows from the table
-                        selectedRows.forEach(row => row.delete());
-                        
-                        // Show success message
-                        alert(`${selectedRows.length} records deleted successfully`);
-                        
-                        // Update the status bar
-                        updateStatusBar();
-                    }
+                    deleteModalBody.innerHTML = `Are you sure you want to delete ${selectedRows.length} selected record(s)?`;
+                    
+                    // Store the selected rows in the modal's dataset
+                    deleteConfirmationModal._element.dataset.rows = JSON.stringify(selectedRows.map(row => row.getData().id));
+                    
+                    // Show the modal
+                    deleteConfirmationModal.show();
                 } else {
-                    alert('Please select at least one record to delete');
+                    showErrorModal('Please select at least one record to delete');
                 }
+            });
+            
+            // Handle the actual delete when confirmed
+            confirmDeleteButton.addEventListener('click', () => {
+                const selectedIds = JSON.parse(deleteConfirmationModal._element.dataset.rows || '[]');
+                
+                // Here you would typically make an AJAX call to delete the records
+                console.log('Deleting records with IDs:', selectedIds);
+                
+                // For now, just remove the rows from the table
+                const selectedRows = table.getSelectedRows();
+                selectedRows.forEach(row => row.delete());
+                
+                // Show success message
+                showSuccessModal(`${selectedRows.length} record(s) deleted successfully`);
+                
+                // Update the status bar
+                updateStatusBar();
+                
+                // Hide the modal
+                deleteConfirmationModal.hide();
             });
             
             // Update status when selection changes
@@ -513,15 +536,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.member) {
                         try {
                             const members = JSON.parse(data.member);
-                            let html = '<table border="1" cellpadding="5"><tr><th>Nama</th><th>Keterangan</th></tr>';
+                            let html = '<table class="table table-bordered"><thead><tr><th>Nama</th><th>Keterangan</th></tr></thead><tbody>';
                             members.forEach(m => {
                                 html += `<tr><td>${m.nama || ''}</td><td>${m.keterangan || ''}</td></tr>`;
                             });
-                            html += '</table>';
-                            const win = window.open('', '_blank');
-                            win.document.write(html);
+                            html += '</tbody></table>';
+                            
+                            // Show in a modal instead of a new window
+                            const modalBody = document.getElementById('membersModalBody');
+                            if (modalBody) {
+                                modalBody.innerHTML = html;
+                                const modal = new bootstrap.Modal(document.getElementById('membersModal'));
+                                modal.show();
+                            } else {
+                                // Fallback to window.open if modal not found
+                                const win = window.open('', '_blank');
+                                win.document.write(html);
+                            }
                         } catch (e) {
-                            alert('Error parsing members data');
+                            showErrorModal('Error parsing members data');
                         }
                     }
                 },
@@ -672,16 +705,259 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.removeChild(a);
             
             // Show success message
-            alert('Export completed successfully!');
+            showSuccessModal('Export completed successfully!');
         } catch (error) {
             console.error('Export failed:', error);
-            alert('Export failed: ' + error.message);
+            showErrorModal('Export failed: ' + error.message);
         } finally {
             // Reset button state
             button.disabled = false;
             button.innerHTML = originalText;
         }
     });
+
+    // Export Selected to Excel button click handler
+    document.getElementById('export-selected-excel').addEventListener('click', async function() {
+        // Show loading state
+        const button = this;
+        const originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
+        
+        try {
+            // Get selected records from the table
+            const selectedRows = table.getSelectedRows();
+            
+            if (selectedRows.length === 0) {
+                showErrorModal('Please select at least one record to export');
+                button.disabled = false;
+                button.innerHTML = originalText;
+                return;
+            }
+    
+            // Update button text to show progress
+            button.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Exporting 0/${selectedRows.length}...`;
+            
+            // Process each selected record
+            for (let i = 0; i < selectedRows.length; i++) {
+                const row = selectedRows[i];
+                const recordId = row.getData().id;
+                
+                try {
+                    // Update progress
+                    button.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Exporting ${i + 1}/${selectedRows.length}...`;
+                    
+                    // Make a fetch request for each record
+                    const response = await fetch(`/bast/export-to-excel/${recordId}/`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status} for record ${recordId}`);
+                    }
+                    
+                    // Get the blob data and filename from the response
+                    const blob = await response.blob();
+                    const filename = response.headers.get('content-disposition')?.split('filename=')[1]?.replace(/['"]+/g, '');
+                    
+                    // Create a temporary URL for the blob
+                    const url = window.URL.createObjectURL(blob);
+                    
+                    // Create a temporary link and trigger the download
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename || `bast_record_${recordId}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // Cleanup
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    // Small delay between downloads to avoid overwhelming the browser
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                } catch (error) {
+                    console.error(`Error exporting record ${recordId}:`, error);
+                    // Continue with next record even if one fails
+                    continue;
+                }
+            }
+            
+            // Show completion message
+            showSuccessModal(`Successfully exported ${selectedRows.length} record(s)`);
+            
+        } catch (error) {
+            console.error('Export failed:', error);
+            showErrorModal('Export failed: ' + error.message);
+        } finally {
+            // Reset button state
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    }); 
+
+    // Export Selected to PDF button click handler
+    document.getElementById('export-selected-pdf').addEventListener('click', async function() {
+        // Show loading state
+        const button = this;
+        const originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
+        
+        try {
+            // Get selected records from the table
+            const selectedRows = table.getSelectedRows();
+            
+            if (selectedRows.length === 0) {
+                showErrorModal('Please select at least one record to export');
+                button.disabled = false;
+                button.innerHTML = originalText;
+                return;
+            }
+    
+            // Update button text to show progress
+            button.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Exporting 0/${selectedRows.length}...`;
+            
+            // Process each selected record
+            for (let i = 0; i < selectedRows.length; i++) {
+                const row = selectedRows[i];
+                const recordId = row.getData().id;
+                
+                try {
+                    // Update progress
+                    button.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Exporting ${i + 1}/${selectedRows.length}...`;
+                    
+                    // Make a fetch request for each record
+                    const response = await fetch(`/bast/export-to-pdf/${recordId}/`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status} for record ${recordId}`);
+                    }
+                    
+                    // Get the blob data and filename from the response
+                    const blob = await response.blob();
+                    const filename = response.headers.get('content-disposition')?.split('filename=')[1]?.replace(/['"]+/g, '');
+                    
+                    // Create a temporary URL for the blob
+                    const url = window.URL.createObjectURL(blob);
+                    
+                    // Create a temporary link and trigger the download
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename || `bast_record_${recordId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // Cleanup
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    // Small delay between downloads to avoid overwhelming the browser
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                } catch (error) {
+                    console.error(`Error exporting record ${recordId}:`, error);
+                    // Continue with next record even if one fails
+                    continue;
+                }
+            }
+            
+            // Show completion message
+            showSuccessModal(`Successfully exported ${selectedRows.length} record(s)`);
+            
+        } catch (error) {
+            console.error('Export failed:', error);
+            showErrorModal('Export failed: ' + error.message);
+        } finally {
+            // Reset button state
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    }); 
+
+    // Function to show error modal
+    function showErrorModal(message) {
+        const errorContent = document.getElementById('errorModalContent');
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        
+        if (errorContent) {
+            errorContent.textContent = message;
+            errorModal.show();
+        } else {
+            // Fallback to alert if modal not found
+            console.error('Error modal not found. Message:', message);
+            alert(message);
+        }
+    }
+    
+    // Function to show success modal
+    function showSuccessModal(message) {
+        const successContent = document.getElementById('successModalContent');
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        
+        if (successContent) {
+            successContent.textContent = message;
+            successModal.show();
+        } else {
+            // Fallback to alert if modal not found
+            console.log('Success modal not found. Message:', message);
+            alert(message);
+        }
+    }
 });
 </script>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="successModalLabel">Success</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="successModalContent">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal (should be in base.html, but adding here as fallback) -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="errorModalContent">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Members Modal -->
+<div class="modal fade" id="membersModal" tabindex="-1" aria-labelledby="membersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="membersModalLabel">Members</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="membersModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
