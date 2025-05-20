@@ -203,46 +203,59 @@
         </div>
     </div>
 
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">Success</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="successModalContent">
+                    <!-- Content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
     
     <script>
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the modal elements
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+            var deleteForm = document.getElementById('deleteForm');
+            var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
 
-        document.addEventListener("DOMContentLoaded", function () {
-            var deleteForm;
-            var deleteButtons = document.querySelectorAll(".delete-button");
-            var confirmationModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
-
-            deleteButtons.forEach(function (button) {
-                button.addEventListener("click", function (event) {
-                    event.preventDefault();
-                    deleteForm = button.closest("form");
-                    // Use Bootstrap 5 JS API
-                    confirmationModal.show();
+            // Show delete modal when delete button is clicked
+            document.querySelectorAll('.delete-btn').forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (deleteForm) {
+                        deleteForm.action = this.dataset.deleteUrl;
+                    }
+                    deleteModal.show();
                 });
             });
 
-            document.getElementById("confirmDeleteButton").addEventListener("click", function () {
+            // Handle delete modal hide
+            deleteModal._element.addEventListener('hide.bs.modal', function() {
+                if (deleteForm) {
+                    deleteForm.action = '';
+                }
+            });
+
+            // Handle delete confirmation
+            document.getElementById('confirmDeleteButton').addEventListener('click', function() {
                 if (deleteForm) {
                     deleteForm.submit();
                 }
             });
-
-            // Bootstrap 5 handles modal dismissal via data-bs-dismiss attributes,
-            // so explicit hide calls on cancel/close are often not needed unless
-            // doing something custom. The existing data-bs-dismiss attributes
-            // on the buttons should work.
-            // If needed, you could add listeners to hide manually:
-            // document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function (button) {
-            //     button.addEventListener('click', function() {
-            //         confirmationModal.hide();
-            //     });
-            // });
         });
     </script>
 </body>

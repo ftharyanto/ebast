@@ -12,13 +12,13 @@
                 <div class="d-flex flex-wrap align-items-center w-100 w-md-auto gap-2">
                     <!-- Export and Search controls -->
                     <div class="input-group input-group-sm me-2" style="min-width: 250px;">
-                        <button id="export-csv" class="btn btn-sm btn-outline-primary me-2" title="Export to CSV">
-                            <i class="fas fa-file-export me-1"></i> Export All to CSV
+                        <button id="export-csv" class="btn btn-sm btn-light text-success me-2" title="Export to CSV">
+                            <i class="fas fa-file-csv me-1"></i> Export All to CSV
                         </button>
-                        <button id="export-selected-excel" class="btn btn-sm btn-outline-primary me-2" title="Export to Excel">
-                            <i class="fas fa-file-export me-1"></i> Export Selected to Excel
+                        <button id="export-selected-excel" class="btn btn-sm btn-light text-success me-2" title="Export to Excel">
+                            <i class="fas fa-file-excel me-1"></i> Export Selected to Excel
                         </button>
-                        <button id="export-selected-pdf" class="btn btn-sm btn-outline-primary me-2" title="Export to PDF">
+                        <button id="export-selected-pdf" class="btn btn-sm btn-light text-danger" title="Export to PDF">
                             <i class="fas fa-file-pdf me-1"></i> Export Selected to PDF
                         </button>
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
@@ -31,7 +31,13 @@
             </div>
             <div class="card-body p-0 d-flex flex-column" style="height: calc(100vh - 200px);">
                 <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column;">
-                    <div id="tabulator-table" class="loading" style="flex: 1; min-height: 0; min-width: 100%;"></div>
+                    <div id="tabulator-table" class="loading" style="flex: 1; min-height: 0; min-width: 100%; position: relative;">
+                        <div class="loader-container" style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;'>
+                            <div class="loader" style='display:inline-block; border:4px solid #0d6efd; border-radius:10px; background:#fff; font-weight:bold; font-size:16px; color:#0d6efd; padding:12px 24px; border-width: 2px; box-shadow: 0 2px 4px rgba(0, 109, 237, 0.2);'>
+                                Loading Data...
+                            </div>
+                        </div>
+                    </div>
                 </div>
         </div>
     </div>
@@ -43,6 +49,8 @@
 <!-- Include Tabulator CSS and Themes -->
 <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
 <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet">
+
+
 <!-- Include Tabulator JS -->
 <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
 
@@ -166,27 +174,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var table = new Tabulator("#tabulator-table", {
         // Disable header filters
         headerFilterLiveFilter: false,
-        
-        // Custom filter function for case-insensitive search
-        dataFiltered: function(filters, rows) {
-            // Update the counter when data is filtered
-            var count = rows.length;
-            var el = document.getElementById('filter-count');
-            if (el) {
-                el.textContent = count + ' records found';
-            }
-        },
         layout: "fitDataTable",
         responsiveLayout: false,
         pagination: "local",
         paginationSize: 25,
         paginationSizeSelector: [10, 25, 50, 100],
         movableColumns: true,
-        height: "100%",
-        columnMinWidth: 80,
-        virtualDom: true,
-        
-        // Selection settings
         selectable: true,
         selectableRangeMode: false,
         selectableRollingSelection: true,
@@ -215,9 +208,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('tabulator-table').classList.remove('loading');
             return [];
         },
-        movableColumns: true,
-        selectable: true,
-        // Disable header filters
         dataLoaded: function(data) {
             console.log('Data loaded into Tabulator. Row count:', data.length);
             if (data.length > 0) {
@@ -228,8 +218,6 @@ document.addEventListener('DOMContentLoaded', function() {
         dataLoadError: function(error) {
             console.error('Data load error:', error);
         },
-        
-        // Initialize scroll buttons and pagination controls
         tableBuilt: function() {
             const table = this;
             
@@ -269,47 +257,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const rows = table.getRows();
                 rows.forEach(row => row.toggleSelect());
                 updateStatusBar();
-            });
-            
-            // Delete Confirmation Modal
-            const deleteConfirmationModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
-            const deleteModalBody = document.getElementById('deleteConfirmationModal').querySelector('.modal-body');
-            const confirmDeleteButton = document.getElementById('confirmDeleteButton');
-            
-            document.getElementById('delete-selected').addEventListener('click', () => {
-                const selectedRows = table.getSelectedRows();
-                if (selectedRows.length > 0) {
-                    deleteModalBody.innerHTML = `Are you sure you want to delete ${selectedRows.length} selected record(s)?`;
-                    
-                    // Store the selected rows in the modal's dataset
-                    deleteConfirmationModal._element.dataset.rows = JSON.stringify(selectedRows.map(row => row.getData().id));
-                    
-                    // Show the modal
-                    deleteConfirmationModal.show();
-                } else {
-                    showErrorModal('Please select at least one record to delete');
-                }
-            });
-            
-            // Handle the actual delete when confirmed
-            confirmDeleteButton.addEventListener('click', () => {
-                const selectedIds = JSON.parse(deleteConfirmationModal._element.dataset.rows || '[]');
-                
-                // Here you would typically make an AJAX call to delete the records
-                console.log('Deleting records with IDs:', selectedIds);
-                
-                // For now, just remove the rows from the table
-                const selectedRows = table.getSelectedRows();
-                selectedRows.forEach(row => row.delete());
-                
-                // Show success message
-                showSuccessModal(`${selectedRows.length} record(s) deleted successfully`);
-                
-                // Update the status bar
-                updateStatusBar();
-                
-                // Hide the modal
-                deleteConfirmationModal.hide();
             });
             
             // Update status when selection changes
@@ -511,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 width: 150,
                 formatter: function(cell) {
                     const value = cell.getValue();
-                    return value ? 'View Events' : '';
+                    return value ? '<span style="color: #0d6efd; cursor: pointer;">View Events</span>' : '';
                 },
                 cellClick: function(e, cell) {
                     const data = cell.getRow().getData();
@@ -529,7 +476,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 width: 150,
                 formatter: function(cell) {
                     const value = cell.getValue();
-                    return value ? 'View Members' : '';
+                    return value ? '<span style="color: #0d6efd; cursor: pointer;">View Members</span>' : '';
                 },
                 cellClick: function(e, cell) {
                     const data = cell.getRow().getData();
@@ -591,36 +538,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add loading state style
     document.getElementById('tabulator-table').classList.add('loading');
 
-    // Handle row click to view details
-    table.on("rowClick", function(e, row) {
-        const bastId = row.getData().bast_id;
-        window.location.href = `/bast/bastrecord/${bastId}/`;
-    });
-
     // Clear selection when clicking outside the table
     document.addEventListener('click', function(e) {
         if (!e.target.closest('#tabulator-table')) {
             table.deselectRow();
-        }
-    });
-
-    // Add delete confirmation
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.tabulator-delete')) {
-            if (confirm('Are you sure you want to delete this record?')) {
-                const row = table.getRow(e.target.closest('.tabulator-row'));
-                const bastId = row.getData().bast_id;
-                fetch(`/bast/bastrecord/delete/${bastId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                }).then(response => {
-                    if (response.ok) {
-                        row.delete();
-                    }
-                });
-            }
         }
     });
 
@@ -722,19 +643,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const button = this;
         const originalText = button.innerHTML;
         button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
-        
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Exporting...';
+
         try {
-            // Get selected records from the table
+            // Get selected rows
             const selectedRows = table.getSelectedRows();
-            
             if (selectedRows.length === 0) {
-                showErrorModal('Please select at least one record to export');
-                button.disabled = false;
-                button.innerHTML = originalText;
+                showErrorModal('Please select at least one record to export.');
                 return;
             }
-    
+            
+            // Check if more than 5 records are selected
+            if (selectedRows.length > 5) {
+                showErrorModal('You can only export up to 5 records at a time. Please select fewer records.');
+                return;
+            }
+
             // Update button text to show progress
             button.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Exporting 0/${selectedRows.length}...`;
             
@@ -905,42 +829,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
-<!-- Success Modal -->
-<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="successModalLabel">Success</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="successModalContent">
-                <!-- Content will be loaded here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Error Modal (should be in base.html, but adding here as fallback) -->
-<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="errorModalLabel">Error</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="errorModalContent">
-                <!-- Content will be loaded here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Members Modal -->
 <div class="modal fade" id="membersModal" tabindex="-1" aria-labelledby="membersModalLabel" aria-hidden="true">
