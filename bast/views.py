@@ -1,12 +1,11 @@
 import csv
 from django.http import HttpResponse
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView
 from django.urls import reverse_lazy
 from .models import BastRecordModel
 from cl_seiscomp.models import CsRecordModel
 from core.models import Kelompok
 from .forms import BastRecordForm
-from django.shortcuts import render
 import requests, openpyxl, datetime, os
 import pandas as pd
 from django.http import JsonResponse, HttpResponse
@@ -15,13 +14,7 @@ from io import StringIO
 from openpyxl.utils.dataframe import dataframe_to_rows
 from django.views import View
 from django.shortcuts import redirect
-
-from django.core.paginator import Paginator
-
-# API endpoint for ag-Grid to fetch all BAST records
 from django.forms.models import model_to_dict
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 
 def bastrecord_list_api(request):
     records = BastRecordModel.objects.all().order_by('-bast_id').select_related('spv')
@@ -70,50 +63,6 @@ class BastRecordUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         record = self.get_object()
-
-
-class BastRecordGridView(ListView):
-    model = BastRecordModel
-    template_name = 'bast/bastrecord_grid.html'
-    context_object_name = 'bastrecords'
-    paginate_by = 10
-    ordering = ['-bast_id']
-
-    def get_paginate_by(self, queryset):
-        if self.request.GET.get('all') == '1':
-            return None
-        return self.paginate_by
-
-    def get_queryset(self):
-        return super().get_queryset().order_by('-bast_id')
-        
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['existing_data'] = self.object.events if hasattr(self, 'object') else None
-        context['existing_member_data'] = self.object.member if hasattr(self, 'object') else None
-        return context
-
-
-class BastRecordGridJSView(ListView):
-    model = BastRecordModel
-    template_name = 'bast/bastrecord_gridjs.html'
-    context_object_name = 'bastrecords'
-    paginate_by = 10
-    ordering = ['-bast_id']
-    
-    def get_paginate_by(self, queryset):
-        if self.request.GET.get('all') == '1':
-            return None
-        return self.paginate_by
-        
-    def get_queryset(self):
-        return super().get_queryset().order_by('-bast_id')
-
-    def get_member_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if hasattr(self, 'object'):
-            context['existing_member_data'] = self.object.member
-        return context
 
 class BastRecordTabulatorView(ListView):
     model = BastRecordModel

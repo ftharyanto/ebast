@@ -7,8 +7,6 @@ app_name = 'bast'
 
 urlpatterns = [
     path('', views.BastRecordListView.as_view(), name='bastrecord_list'),
-    path('grid/', views.BastRecordGridView.as_view(), name='bastrecord_grid'),
-    path('gridjs/', views.BastRecordGridJSView.as_view(), name='bastrecord_gridjs'),
     path('tabulator/', views.BastRecordTabulatorView.as_view(), name='bastrecord_tabulator'),
     path('create/', views.BastRecordCreateView.as_view(), name='bastrecord_create'),
     path('update/<int:pk>/', views.BastRecordUpdateView.as_view(), name='bastrecord_update'),
