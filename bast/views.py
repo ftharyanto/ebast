@@ -16,8 +16,10 @@ from django.views import View
 from django.shortcuts import redirect
 from django.forms.models import model_to_dict
 
-def bastrecord_list_api(request):
+def bastrecord_list_api(request, counts=0):
     records = BastRecordModel.objects.all().order_by('-bast_id').select_related('spv')
+    if counts > 0:
+        records = records[:counts]
     # Serialize with related supervisor name
     data = []
     for record in records:
@@ -38,8 +40,6 @@ class BastRecordListView(ListView):
     ordering = ['-bast_id']
 
     def get_paginate_by(self, queryset):
-        if self.request.GET.get('all') == '1':
-            return None
         return self.paginate_by
 
     def get_queryset(self):

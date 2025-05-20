@@ -18,7 +18,7 @@
                         <button id="export-selected-excel" class="btn btn-sm btn-light text-success me-2" title="Export to Excel">
                             <i class="fas fa-file-excel me-1"></i> Export Selected to Excel
                         </button>
-                        <button id="export-selected-pdf" class="btn btn-sm btn-light text-danger" title="Export to PDF">
+                        <button id="export-selected-pdf" class="btn btn-sm btn-light text-danger me-2" title="Export to PDF">
                             <i class="fas fa-file-pdf me-1"></i> Export Selected to PDF
                         </button>
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
@@ -42,17 +42,6 @@
         </div>
     </div>
 </div>
-
-<!-- Include Luxon for date formatting -->
-<script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
-
-<!-- Include Tabulator CSS and Themes -->
-<link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css" rel="stylesheet">
-<link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet">
-
-
-<!-- Include Tabulator JS -->
-<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
 
 <!-- Initialize Tabulator -->
 <script>
@@ -185,6 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
         movableColumns: true,
         selectable: true,
         selectableRangeMode: false,
+        dataLoader: false,
         selectableRows: true,
         selectableRollingSelection: true,
         selectablePersistence: true,
@@ -195,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addRowPos: "top",
         history: true,
         paginationCounter: "rows",
-        ajaxURL: "/bast/api/bastrecord-list/",
+        ajaxURL: `{% url 'bast:bastrecord_list_api' 0 %}`,
         ajaxConfig: "GET",
         ajaxContentType: "json",
         ajaxResponse: function(url, params, response) {
