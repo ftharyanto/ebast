@@ -10,8 +10,11 @@
         <div class="card">
             <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
                 <div class="d-flex flex-wrap align-items-center w-100 w-md-auto gap-2">
-                    <!-- Search and other controls -->
+                    <!-- Export and Search controls -->
                     <div class="input-group input-group-sm me-2" style="min-width: 250px;">
+                        <button id="export-csv" class="btn btn-sm btn-outline-primary me-2" title="Export to CSV">
+                            <i class="fas fa-file-export me-1"></i> Export CSV
+                        </button>
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input type="text" id="globalSearch" class="form-control" placeholder="Search in all columns...">
                         <button id="clearSearch" class="btn btn-outline-secondary" type="button" title="Clear search" style="border-color: #dee2e6;">
@@ -632,6 +635,51 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             document.getElementById('globalSearch').value = '';
             table.clearFilter();
+        }
+    });
+
+    // Export to CSV button click handler
+    document.getElementById('export-csv').addEventListener('click', async function() {
+        // Show loading state
+        const button = this;
+        const originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Exporting...';
+        
+        try {
+            // Make a fetch request to the export endpoint
+            const response = await fetch('/bast/export-csv/');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Get the blob data
+            const blob = await response.blob();
+            
+            // Create a temporary URL for the blob
+            const url = window.URL.createObjectURL(blob);
+            
+            // Create a temporary link and trigger the download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bast_records_export.csv';
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            // Show success message
+            alert('Export completed successfully!');
+        } catch (error) {
+            console.error('Export failed:', error);
+            alert('Export failed: ' + error.message);
+        } finally {
+            // Reset button state
+            button.disabled = false;
+            button.innerHTML = originalText;
         }
     });
 });

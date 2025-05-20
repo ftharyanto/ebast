@@ -24,4 +24,5 @@ urlpatterns = [
     path('api/get_previous_poco_exp/', views.get_previous_poco_exp, name='get_previous_poco_exp'),
     path('api/get_previous_samsung_exp/', views.get_previous_samsung_exp, name='get_previous_samsung_exp'),
     path('api/get_previous_pulsa_poco/', views.get_previous_pulsa_poco, name='get_previous_pulsa_poco'),
+    path('export-csv/', views.export_bast_to_csv, name='export_bast_csv'),
 ]

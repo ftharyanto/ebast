@@ -1,3 +1,5 @@
+import csv
+from django.http import HttpResponse
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import BastRecordModel
@@ -481,3 +483,90 @@ def populate_bast_sheet(sheet, record):
                 top=openpyxl.styles.Side(style='thin'),
                 bottom=openpyxl.styles.Side(style='thin')
             )
+
+
+def export_bast_to_csv(request):
+    """
+    Export all BAST records to a CSV file.
+    """
+    try:
+        # Log the start of the export
+        print("Starting BAST records export...")
+        
+        # Create the HttpResponse object with the appropriate CSV header
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={
+                'Content-Disposition': 'attachment; filename="bast_records_export.csv"',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            },
+        )
+        
+        # Force the response to be treated as a download
+        response['Content-Encoding'] = 'UTF-8'
+        response['Content-Type'] = 'text/csv; charset=utf-8-sig'  # Add BOM for Excel
+        
+        # Create a CSV writer with proper quoting
+        writer = csv.writer(response, quoting=csv.QUOTE_ALL, delimiter=',')
+        
+        # Write UTF-8 BOM for Excel compatibility
+        response.write('\ufeff')
+        
+        # Write headers
+        writer.writerow([
+            'BAST ID', 'Date', 'Waktu Pelaksanaan', 'Shift', 'Kelompok',
+            'Kelompok Berikut', 'Events', 'Supervisor', 'NIP', 'Event Indonesia',
+            'Event Luar', 'Event Dirasakan', 'Event Dikirim', 'Members',
+            'Count Gaps', 'Count Spikes', 'Count Blanks', 'Waktu CS',
+            'Pulsa Poco', 'POCO Expiry', 'Samsung Expiry', 'Notes'
+        ])
+        
+        # Get all records ordered by bast_id
+        records = BastRecordModel.objects.all().order_by('bast_id')
+        print(f"Found {records.count()} records to export")
+        
+        # Write data rows
+        for record in records:
+            try:
+                writer.writerow([
+                    record.bast_id or '',
+                    record.date.strftime('%Y-%m-%d') if record.date else '',
+                    str(record.waktu_pelaksanaan) if record.waktu_pelaksanaan else '',
+                    str(record.shift) if record.shift else '',
+                    str(record.kelompok) if record.kelompok else '',
+                    str(record.kel_berikut) if record.kel_berikut else '',
+                    record.events or '',
+                    str(record.spv) if record.spv else '',
+                    record.NIP or '',
+                    record.event_indonesia or 0,
+                    record.event_luar or 0,
+                    record.event_dirasakan or 0,
+                    record.event_dikirim or 0,
+                    record.member or '',
+                    record.count_gaps or 0,
+                    record.count_spikes or 0,
+                    record.count_blanks or 0,
+                    record.waktu_cs or '',
+                    record.pulsa_poco or 0,
+                    record.poco_exp.strftime('%Y-%m-%d') if record.poco_exp else '',
+                    record.samsung_exp.strftime('%Y-%m-%d') if record.samsung_exp else '',
+                    record.notes or ''
+                ])
+            except Exception as e:
+                print(f"Error writing record {getattr(record, 'bast_id', 'unknown')}: {str(e)}")
+                # Skip the problematic record and continue with the next one
+                continue
+        
+        print("Export completed successfully")
+        return response
+        
+    except Exception as e:
+        print(f"Error in export_bast_to_csv: {str(e)}")
+        # Return an error response
+        return HttpResponse(
+            f"Error generating CSV: {str(e)}",
+            status=500,
+            content_type='text/plain'
+        )
