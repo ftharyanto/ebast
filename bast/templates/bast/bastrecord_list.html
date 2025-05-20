@@ -31,7 +31,17 @@
                             </button>
                         </div>
                     </div>
-                    <div id="tabulator-table"></div>
+                    <div class="card-body p-0 d-flex flex-column" style="height: calc(100vh - 200px);">
+                        <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column;">
+                            <div id="tabulator-table" class="loading" style="flex: 1; min-height: 0; min-width: 100%; position: relative;">
+                                <div class="loader-container" style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;'>
+                                    <div class="loader" style='display:inline-block; border:4px solid #0d6efd; border-radius:10px; background:#fff; font-weight:bold; font-size:16px; color:#0d6efd; padding:12px 24px; border-width: 2px; box-shadow: 0 2px 4px rgba(0, 109, 237, 0.2);'>
+                                        Loading Data...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -126,8 +136,23 @@
             addRowPos: "top",
             history: true,
             paginationCounter: "rows",
-            ajaxURL: `{% url 'bast:bastrecord_list_api' counts=10 %}`,
+            ajaxURL: `{% url 'bast:bastrecord_list_api' 0 %}`,
             ajaxConfig: "GET",
+            ajaxRequesting: function(url, params) {
+                // Show loading state
+                document.getElementById('tabulator-table').classList.add('loading');
+            },
+            ajaxResponse: function(url, params, response) {
+                // Hide loading state
+                document.getElementById('tabulator-table').classList.remove('loading');
+                console.log('AJAX Response received. Record count:', response ? response.length : 0);
+                return response;
+            },
+            ajaxError: function(xhr, status, error) {
+                // Hide loading state on error
+                document.getElementById('tabulator-table').classList.remove('loading');
+                console.error('AJAX Error:', error);
+            },
             ajaxContentType: "json",
             
             // Function to perform global search
