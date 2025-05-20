@@ -102,7 +102,7 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'bastrecord_list' %}active{% endif %}" href="{% url 'bast:bastrecord_list' %}">BAST Records</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'bastrecord_tabulator' %}active{% endif %}" href="{% url 'bast:bastrecord_tabulator' %}">BAST Tabulator</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'bast_all_records' %}active{% endif %}" href="{% url 'bast:bast_all_records' %}">All Records</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'bastrecord_create' %}active{% endif %}" href="{% url 'bast:bastrecord_create' %}">Create BAST</a>

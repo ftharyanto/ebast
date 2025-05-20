@@ -64,9 +64,9 @@ class BastRecordUpdateView(UpdateView):
         context = super().get_context_data(**kwargs)
         record = self.get_object()
 
-class BastRecordTabulatorView(ListView):
+class BastAllRecordsView(ListView):
     model = BastRecordModel
-    template_name = 'bast/bastrecord_tabulator.html'
+    template_name = 'bast/bast_all_records.html'
     context_object_name = 'bastrecords'
     paginate_by = 10
     ordering = ['-bast_id']

@@ -602,7 +602,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             // Make a fetch request to the export endpoint
-            const response = await fetch('/bast/export-csv/');
+            const response = await fetch('/bast/api/export-csv/');
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -672,7 +672,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Exporting ${i + 1}/${selectedRows.length}...`;
                     
                     // Make a fetch request for each record
-                    const response = await fetch(`/bast/export-to-excel/${recordId}/`);
+                    const response = await fetch(`/bast/api/export-to-excel/${recordId}/`);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status} for record ${recordId}`);
@@ -751,7 +751,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Exporting ${i + 1}/${selectedRows.length}...`;
                     
                     // Make a fetch request for each record
-                    const response = await fetch(`/bast/export-to-pdf/${recordId}/`);
+                    const response = await fetch(`/bast/api/export-to-pdf/${recordId}/`);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status} for record ${recordId}`);

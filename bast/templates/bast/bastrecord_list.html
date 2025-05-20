@@ -8,40 +8,24 @@
     <div class="container mt-4">
         <div class="row justify-content-center">
             <div class="col-xl-12"> {# Make table wider #}
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        {% if request.GET.all == '1' %}
-                        <form method="get" class="d-inline-block">
-                            {% for key, value in request.GET.items %}
-                                {% if key != 'all' %}<input type="hidden" name="{{ key }}" value="{{ value }}" />{% endif %}
-                            {% endfor %}
-                            <button type="submit" class="btn btn-outline-secondary btn-sm">
-                                <i class="fas fa-table me-1"></i> Show 10 Last Records
-                            </button>
-                        </form>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <a href="{% url 'bast:bastrecord_create' %}" class="btn btn-primary">
-                            <i class="fas fa-plus me-1"></i> Create New Record
-                        </a>
-                    </div>
+                <div class="d-flex justify-content-end align-items-center mb-4">
+                    <a href="{% url 'bast:bastrecord_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i> Create New Record
+                    </a>
                 </div>
 
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-                        {% if not request.GET.all %}
-                        <div class="d-flex align-items-center">
+                        <div>
                             <label for="recordsPerPageTop" class="form-label me-2 mb-0 small">Show:</label>
                             <select id="recordsPerPageTop" class="form-select form-select-sm d-inline-block w-auto">
                                 <option value="5">5</option>
                                 <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
                             </select>
                             <span class="ms-1 small">entries</span>
                         </div>
-                        {% else %}
-                        <div id="tableInfo" class="small text-muted"></div>
-                        {% endif %}
                         <div class="input-group input-group-sm w-auto">
                              <span class="input-group-text"><i class="fas fa-search"></i></span>
                              <input type="text" id="searchFilter" placeholder="Search ID or SPV..." class="form-control">
@@ -89,62 +73,22 @@
                             </table>
                         </div>
                     </div>
-                    <div class="card-footer bg-light py-2">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <!-- Entries Info -->
-                            <div id="tableInfo" class="small text-muted"></div>
-                            
-                            <!-- Pagination and Actions -->
-                            <div class="d-flex align-items-center">
-                                {% if not request.GET.all %}
-                                    <!-- Pagination -->
-                                    <nav aria-label="Page navigation">
-                                        <ul class="pagination mb-0 me-2">
-                                            <li class="page-item">
-                                                <button id="prevPage" class="page-link"><i class="fas fa-angle-left"></i></button>
-                                            </li>
-                                            <li class="page-item">
-                                                <span id="pageInfo" class="page-link"></span>
-                                            </li>
-                                            <li class="page-item">
-                                                <button id="nextPage" class="page-link"><i class="fas fa-angle-right"></i></button>
-                                            </li>
-                                        </ul>
-                                    </nav>
-
-                                    <!-- Show All Button -->
-                                    <form method="get" class="d-inline-block">
-                                        {% for key, value in request.GET.items %}
-                                            {% if key != 'all' %}
-                                                <input type="hidden" name="{{ key }}" value="{{ value }}" />
-                                            {% endif %}
-                                        {% endfor %}
-                                        <input type="hidden" name="all" value="1" />
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-list"></i> Show All Records
-                                        </button>
-                                    </form>
-                                {% else %}
-                                    <!-- Show Paged View Button -->
-                                    <form method="get" class="d-inline-block">
-                                        {% for key, value in request.GET.items %}
-                                            {% if key != 'all' %}
-                                                <input type="hidden" name="{{ key }}" value="{{ value }}" />
-                                            {% endif %}
-                                        {% endfor %}
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-table"></i> Show Paged View
-                                        </button>
-                                    </form>
-                                {% endif %}
-                            </div>
-                        </div>
+                    <div class="card-footer bg-light d-flex justify-content-between align-items-center py-2">
+                         <div id="tableInfo" class="small text-muted"></div>
+                         <nav aria-label="Page navigation">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item"><button id="prevPage" class="page-link"><i class="fas fa-angle-left"></i></button></li>
+                                <li class="page-item disabled"><span id="pageInfo" class="page-link"></span></li>
+                                <li class="page-item"><button id="nextPage" class="page-link"><i class="fas fa-angle-right"></i></button></li>
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -170,24 +114,20 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // --- Pagination, Filtering, Sorting Logic ---
     let currentPage = 1;
-    const recordsPerPageSelect = document.getElementById("recordsPerPageTop");
-    let recordsPerPage = recordsPerPageSelect ? parseInt(recordsPerPageSelect.value) : 1000; // Use 1000 as a large number when showing all
+    let recordsPerPage = parseInt(document.getElementById("recordsPerPageTop").value);
     const table = document.getElementById("bastRecordTable");
     const tbody = document.getElementById("bastRecordTableBody");
     // Store original data rows, exclude empty message row if present
     const originalRows = Array.from(tbody.querySelectorAll("tr:not(:has(td[colspan='3']))"));
     let currentRows = [...originalRows]; // Rows currently being displayed/filtered/sorted
-    let totalPages = 1; // Default to 1 page when showing all
-    
-    if (recordsPerPageSelect) {
-        totalPages = Math.ceil(currentRows.length / recordsPerPage);
-    }
+    let totalPages = Math.ceil(currentRows.length / recordsPerPage);
     // Initial sort: ID descending (column 0)
     let sortDirection = { 0: 'desc' };
 
     const pageInfoSpan = document.getElementById("pageInfo");
     const prevPageButton = document.getElementById("prevPage");
     const nextPageButton = document.getElementById("nextPage");
+    const recordsPerPageSelect = document.getElementById("recordsPerPageTop");
     const searchFilterInput = document.getElementById("searchFilter");
     const tableInfoDiv = document.getElementById("tableInfo");
 
@@ -203,23 +143,17 @@ document.addEventListener("DOMContentLoaded", function() {
         const pageRows = currentRows.slice(start, end);
         pageRows.forEach(row => row.style.display = ''); // Use default display (usually 'table-row')
 
+        // Update pagination controls
+        totalPages = Math.ceil(currentRows.length / recordsPerPage); // Recalculate in case of filtering
+        if (totalPages === 0) totalPages = 1; // Avoid Page X of 0
+        pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevPageButton.parentElement.classList.toggle('disabled', currentPage === 1);
+        nextPageButton.parentElement.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
 
-        // Only update pagination controls if they exist
-        if (pageInfoSpan) {
-            totalPages = Math.ceil(currentRows.length / recordsPerPage); // Recalculate in case of filtering
-            if (totalPages === 0) totalPages = 1; // Avoid Page X of 0
-            pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
-            
-            if (prevPageButton && prevPageButton.parentElement) {
-                prevPageButton.parentElement.classList.toggle('disabled', currentPage === 1);
-            }
-            if (nextPageButton && nextPageButton.parentElement) {
-                nextPageButton.parentElement.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
-            }
-        }
-
-        // Update entries count
-        updateEntriesCount();
+        // Update table info
+        const startRecord = currentRows.length > 0 ? start + 1 : 0;
+        const endRecord = Math.min(end, currentRows.length);
+        tableInfoDiv.textContent = `Showing ${startRecord} to ${endRecord} of ${currentRows.length} entries`;
 
         // Handle empty table state dynamically
         handleEmptyTable();
@@ -268,23 +202,6 @@ document.addEventListener("DOMContentLoaded", function() {
         displayPage(currentPage);
     }
 
-    function updateEntriesCount() {
-        if (!tableInfoDiv) return;
-        const totalEntries = currentRows.length;
-        const urlParams = new URLSearchParams(window.location.search);
-        const showAll = urlParams.get('all') === '1';
-        
-        if (totalEntries === 0) {
-            tableInfoDiv.textContent = 'No entries found';
-        } else if (showAll) {
-            tableInfoDiv.textContent = `Showing all ${totalEntries} entries`;
-        } else {
-            const start = (currentPage - 1) * recordsPerPage + 1;
-            const end = Math.min(currentPage * recordsPerPage, totalEntries);
-            tableInfoDiv.textContent = `Showing ${start} to ${end} of ${totalEntries} entries`;
-        }
-    }
-
     function filterTable() {
         const filter = searchFilterInput.value.toLowerCase();
         currentRows = originalRows.filter(row => {
@@ -294,14 +211,11 @@ document.addEventListener("DOMContentLoaded", function() {
                    (cells[1] && cells[1].textContent.toLowerCase().includes(filter));
         });
         totalPages = Math.ceil(currentRows.length / recordsPerPage);
-        if (totalPages === 0) totalPages = 1;
+         if (totalPages === 0) totalPages = 1;
         currentPage = 1; // Reset to first page after filtering
-        
-        // Update entries count
-        updateEntriesCount();
-        
         // Re-apply the last sort before displaying
         applySort();
+        // displayPage(currentPage); // applySort calls displayPage
     }
 
     // Make sortTable globally accessible for onclick handlers
@@ -345,7 +259,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 comparison = x.localeCompare(y);
             }
 
-
             return dir === "asc" ? comparison : -comparison; // Reverse comparison for desc
         });
 
@@ -355,10 +268,6 @@ document.addEventListener("DOMContentLoaded", function() {
         if (emptyRow) tbody.appendChild(emptyRow); // Re-add empty row if it existed
 
         currentRows.forEach(row => tbody.appendChild(row));
-        
-        // Update entries count after sorting
-        updateEntriesCount();
-        
         // After re-appending, call displayPage to apply pagination slicing and visibility
         displayPage(currentPage);
     }
@@ -380,30 +289,22 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // --- Event Listeners ---
-    if (recordsPerPageSelect) {
-        recordsPerPageSelect.addEventListener("change", updateRecordsPerPage);
-    }
-    if (searchFilterInput) {
-        searchFilterInput.addEventListener("input", filterTable); // Use 'input' for responsive filtering
-    }
+    recordsPerPageSelect.addEventListener("change", updateRecordsPerPage);
+    searchFilterInput.addEventListener("input", filterTable); // Use 'input' for responsive filtering
 
-    if (prevPageButton) {
-        prevPageButton.addEventListener("click", function() {
-            if (currentPage > 1) {
-                // No need to call applySort here, just display previous page of currentRows
-                displayPage(currentPage - 1);
-            }
-        });
-    }
+    prevPageButton.addEventListener("click", function() {
+        if (currentPage > 1) {
+            // No need to call applySort here, just display previous page of currentRows
+            displayPage(currentPage - 1);
+        }
+    });
 
-    if (nextPageButton) {
-        nextPageButton.addEventListener("click", function() {
-            if (currentPage < totalPages) {
-                // No need to call applySort here, just display next page of currentRows
-                displayPage(currentPage + 1);
-            }
-        });
-    }
+    nextPageButton.addEventListener("click", function() {
+        if (currentPage < totalPages) {
+             // No need to call applySort here, just display next page of currentRows
+             displayPage(currentPage + 1);
+        }
+    });
 
     // --- Initial Setup ---
     // Apply initial sort (ID descending)
