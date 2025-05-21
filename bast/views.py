@@ -63,6 +63,15 @@ class BastRecordUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         record = self.get_object()
+        context['existing_data'] = record.events
+        context['existing_member_data'] = record.member
+        return context
+
+    def get_member_data(self, **kwargs):
+        context = super().get_member_data(**kwargs)
+        record = self.get_object()
+        context['existing_member_data'] = record.member
+        return context
 
 class BastAllRecordsView(ListView):
     model = BastRecordModel
