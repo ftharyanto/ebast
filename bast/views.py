@@ -71,16 +71,6 @@ class BastAllRecordsView(ListView):
     model = BastRecordModel
     template_name = 'bast/bast_all_records.html'
     context_object_name = 'bastrecords'
-    paginate_by = 10
-    ordering = ['-bast_id']
-
-    def get_paginate_by(self, queryset):
-        if self.request.GET.get('all') == '1':
-            return None
-        return self.paginate_by
-
-    def get_queryset(self):
-        return super().get_queryset().order_by('-bast_id')
 
 class BastRecordDeleteDirectView(View):
     def post(self, request, pk, *args, **kwargs):
