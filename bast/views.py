@@ -17,9 +17,11 @@ from django.shortcuts import redirect
 from django.forms.models import model_to_dict
 
 def bastrecord_list_api(request, counts=0):
-    records = BastRecordModel.objects.all().order_by('-bast_id').select_related('spv')
     if counts > 0:
-        records = records[:counts]
+        records = BastRecordModel.objects.all().order_by('-bast_id').select_related('spv')[:counts]
+    else:
+        records = BastRecordModel.objects.all().order_by('-bast_id').select_related('spv')
+        
     # Serialize with related supervisor name
     data = []
     for record in records:
