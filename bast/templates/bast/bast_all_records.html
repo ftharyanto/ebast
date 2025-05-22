@@ -193,7 +193,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response && response.length > 0) {
                 console.log('First record:', response[0]);
             }
-            document.getElementById('tabulator-table').classList.remove('loading');
             return response;
         },
         ajaxError: function(xhr, status, error) {
@@ -213,6 +212,8 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Data load error:', error);
         },
         tableBuilt: function() {
+        // Remove loading state after table is fully built
+        document.getElementById('tabulator-table').classList.remove('loading');
             const table = this;
             
             // Pagination event handlers
