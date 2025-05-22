@@ -38,14 +38,6 @@ class BastRecordListView(ListView):
     model = BastRecordModel
     template_name = 'bast/bastrecord_list.html'
     context_object_name = 'bastrecords'
-    paginate_by = 10
-    ordering = ['-bast_id']
-
-    def get_paginate_by(self, queryset):
-        return self.paginate_by
-
-    def get_queryset(self):
-        return super().get_queryset().order_by('-bast_id')
 
 class BastRecordCreateView(CreateView):
     model = BastRecordModel
