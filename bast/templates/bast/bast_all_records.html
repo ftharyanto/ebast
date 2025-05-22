@@ -31,13 +31,7 @@
             </div>
             <div class="card-body p-0 d-flex flex-column" style="height: calc(100vh - 200px);">
                 <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column;">
-                    <div id="tabulator-table" class="loading" style="flex: 1; min-height: 0; min-width: 100%; position: relative;">
-                        <div class="loader-container" style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;'>
-                            <div class="loader" style='display:inline-block; border:4px solid #0d6efd; border-radius:10px; background:#fff; font-weight:bold; font-size:16px; color:#0d6efd; padding:12px 24px; border-width: 2px; box-shadow: 0 2px 4px rgba(0, 109, 237, 0.2);'>
-                                Loading Data...
-                            </div>
-                        </div>
-                    </div>
+                    <div id="tabulator-table" style="flex: 1; min-height: 0; min-width: 100%;"></div>
                 </div>
         </div>
     </div>
@@ -159,8 +153,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Add spinner styles
+    var spinnerStyle = document.createElement('style');
+    spinnerStyle.textContent = `
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #333;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+    `;
+    document.head.appendChild(spinnerStyle);
+
     // Initialize Tabulator with horizontal scrolling
     var table = new Tabulator("#tabulator-table", {
+        // Enable Tabulator's built-in loader
+        dataLoader: true,
+        dataLoaderLoading: "<div class='loading-spinner'></div>Sedang memuat data...",
+        dataLoaderError: "Gagal memuat data. Silakan coba lagi.",
         // Disable header filters
         headerFilterLiveFilter: false,
         // Update deprecated configuration options
@@ -174,7 +192,6 @@ document.addEventListener('DOMContentLoaded', function() {
         movableColumns: true,
         selectable: true,
         selectableRangeMode: false,
-        dataLoader: false,
         selectableRows: true,
         selectableRollingSelection: true,
         selectablePersistence: true,
@@ -198,7 +215,6 @@ document.addEventListener('DOMContentLoaded', function() {
         ajaxError: function(xhr, status, error) {
             console.error('AJAX Error:', status, error);
             console.error('Response text:', xhr.responseText);
-            document.getElementById('tabulator-table').classList.remove('loading');
             return [];
         },
         dataLoaded: function(data) {
@@ -212,8 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Data load error:', error);
         },
         tableBuilt: function() {
-        // Remove loading state after table is fully built
-        document.getElementById('tabulator-table').classList.remove('loading');
+
             const table = this;
             
             // Pagination event handlers
@@ -511,27 +526,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     maxHeight: 100
                 }
             }
-        ],
-        ajaxRequesting: function(url, params) {
-            console.log('AJAX Request:', url, params);
-            // Show loading state
-            document.getElementById('tabulator-table').classList.add('loading');
-        },
-        ajaxResponse: function(url, params, response) {
-            console.log('AJAX Response:', url, response);
-            // Hide loading state
-            document.getElementById('tabulator-table').classList.remove('loading');
-            return response;
-        },
-        ajaxError: function(xhr, textStatus, errorThrown) {
-            console.error('AJAX Error:', textStatus, errorThrown);
-            document.getElementById('tabulator-table').classList.remove('loading');
-            return [];
-        }
+        ]
     });
 
-    // Add loading state style
-    document.getElementById('tabulator-table').classList.add('loading');
 
     // Clear selection when clicking outside the table
     document.addEventListener('click', function(e) {
