@@ -465,15 +465,18 @@ document.addEventListener('DOMContentLoaded', function() {
         table.setFilter(function(data) {
             return [
                 'qc_id', 'shift', 'kelompok', 'operator', 'NIP',
-                'event_indonesia', 'event_luar', 'kel_sebelum'
+                'event_indonesia', 'event_luar', 'kel_sebelum',
+                'qc_prev', 'qc'  // Added QC fields
             ].some(field => {
                 const value = data[field];
                 return value !== null && value !== undefined && 
                        value.toString().toLowerCase().includes(searchValue);
             }) || (
-                data.date && new Date(data.date).toISOString().includes(searchValue)
+                // Improved date filtering
+                data.date && data.date.toString().toLowerCase().includes(searchValue)
             ) || (
-                data.jam_pelaksanaan && data.jam_pelaksanation.includes(searchValue)
+                // Fixed typo and improved time filtering
+                data.jam_pelaksanaan && data.jam_pelaksanaan.toString().toLowerCase().includes(searchValue)
             );
         });
     });

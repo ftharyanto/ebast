@@ -179,29 +179,6 @@
                 return false;
             },
             
-            // Function to perform global search
-            globalSearch: function(data, searchValue) {
-                // Check each property of the row
-                for (var key in data) {
-                    // Skip internal Tabulator fields and functions
-                    if (typeof data[key] === 'function' || !(key === 'qc_id' || key === 'spv_name')) {
-                        continue;
-                    }
-                    
-                    // Get the value and convert to string
-                    var value = data[key];
-                    if (value === null || value === undefined) {
-                        continue;
-                    }
-                    
-                    // Convert to string and check if it contains the search term
-                    var stringValue = String(value).toLowerCase();
-                    if (stringValue.includes(searchValue.toLowerCase())) {
-                        return true;
-                    }
-                }
-                return false;
-            },
             ajaxResponse: function (url, params, response) {
                 console.log('AJAX Response received. Record count:', response ? response.length : 0);
                 if (response && response.length > 0) {
@@ -303,7 +280,6 @@
                     title: "Operator",
                     field: "operator",
                     headerHozAlign: "center",
-                    hozAlign: "center",
                     formatter: function (cell) {
                         return cell.getValue() || '';
                     }
