@@ -595,7 +595,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Make a fetch request to the export endpoint
             const response = await fetch('/bast/api/export-csv/');
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

@@ -1,11 +1,11 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}BAST Records Tabulator{% endblock %}
+{% block title %}QC Records Tabulator{% endblock %}
 
 {% block content %}
 <div class="form-container">
-    <h1 class="page-header">BAST Records Tabulator</h1>
+    <h1 class="page-header">QC Records Tabulator</h1>
     <div class="container-fluid mt-3">
         <div class="card">
             <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
@@ -513,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             // Make a fetch request to the export endpoint
-            const response = await fetch('/bast/api/export-csv/');
+            const response = await fetch('/qc/api/export-csv/');
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -528,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create a temporary link and trigger the download
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'bast_records_export.csv';
+            a.download = 'qc_records_export.csv';
             document.body.appendChild(a);
             a.click();
             
@@ -580,7 +580,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Exporting ${i + 1}/${selectedRows.length}...`;
                     
                     // Make a fetch request for each record
-                    const response = await fetch(`/bast/api/export-to-excel/${recordId}/`);
+                    const response = await fetch(`/qc/api/export-to-excel/${recordId}/`);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status} for record ${recordId}`);
@@ -596,7 +596,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Create a temporary link and trigger the download
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = filename || `bast_record_${recordId}.xlsx`;
+                    a.download = filename || `qc_record_${recordId}.xlsx`;
                     document.body.appendChild(a);
                     a.click();
                     
@@ -664,7 +664,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Exporting ${i + 1}/${selectedRows.length}...`;
                     
                     // Make a fetch request for each record
-                    const response = await fetch(`/bast/api/export-to-pdf/${recordId}/`);
+                    const response = await fetch(`/qc/api/export-to-pdf/${recordId}/`);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status} for record ${recordId}`);
@@ -680,7 +680,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Create a temporary link and trigger the download
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = filename || `bast_record_${recordId}.pdf`;
+                    a.download = filename || `qc_record_${recordId}.pdf`;
                     document.body.appendChild(a);
                     a.click();
                     

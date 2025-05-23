@@ -1,3 +1,4 @@
+import csv
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import QcRecord, ErrorStation
@@ -16,6 +17,10 @@ from django.utils.decorators import method_decorator
 import json
 from cl_seiscomp.models import StationListModel
 from django.forms.models import model_to_dict
+import logging
+
+# Create a logger
+logger = logging.getLogger(__name__)
 
 def qcrecord_list_api(request, counts=0):
     if counts > 0:
@@ -340,3 +345,85 @@ def get_hari_indonesia(date_string):
     }
 
     return hari_indonesia_map[day_of_week_num]
+
+def export_qc_to_csv(request):
+    """
+    Export all QC records to a CSV file.
+    """
+    try:
+        # Log the start of the export
+        print("Starting QC records export...")
+        print(f"Request method: {request.method}")
+        print(f"Request headers: {dict(request.headers)}")
+        
+        # Create the HttpResponse object with the appropriate CSV header
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={
+                'Content-Disposition': 'attachment; filename="qc_records_export.csv"',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            },
+        )
+        
+        # Force the response to be treated as a download
+        response['Content-Encoding'] = 'UTF-8'
+        response['Content-Type'] = 'text/csv; charset=utf-8-sig'  # Add BOM for Excel
+        
+        # Create a CSV writer with proper quoting
+        writer = csv.writer(response, quoting=csv.QUOTE_ALL, delimiter=',')
+        
+        # Write UTF-8 BOM for Excel compatibility
+        response.write('\ufeff')
+        
+        # Write headers
+        writer.writerow([
+            'QC ID', 'Date', 'Jam Pelaksanaan', 'Shift', 'Kelompok',
+            'Kel Sebelum', 'Operator', 'NIP', 'Event Indonesia',
+            'Event Luar', 'QC Sebelum', 'QC'
+        ])
+        
+        # Get all records ordered by qc_id
+        records = QcRecord.objects.all().order_by('qc_id')
+        print(f"Found {records.count()} records to export")
+        print(f"First record: {records.first()}")
+        
+        # Write data rows
+        for record in records:
+            try:
+                print(f"Processing record with qc_id: {record.qc_id}")
+                writer.writerow([
+                    record.qc_id or '',
+                    record.date.strftime('%Y-%m-%d') if record.date else '',
+                    str(record.jam_pelaksanaan) if record.jam_pelaksanaan else '',
+                    str(record.shift) if record.shift else '',
+                    str(record.kelompok) if record.kelompok else '',
+                    str(record.kel_sebelum) if record.kel_sebelum else '',
+                    str(record.operator) if record.operator else '',
+                    record.NIP or '',
+                    record.event_indonesia or 0,
+                    record.event_luar or 0,
+                    record.qc_prev or '',
+                    record.qc or ''
+                ])
+            except Exception as e:
+                import traceback
+                print(f"Error writing record {getattr(record, 'qc_id', 'unknown')}: {str(e)}")
+                print(f"Traceback: {traceback.format_exc()}")
+                # Skip the problematic record and continue with the next one
+                continue
+        
+        print("Export completed successfully")
+        return response
+        
+    except Exception as e:
+        import traceback
+        print(f"Error in export_qc_to_csv: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
+            # Return an error response
+        return HttpResponse(
+            f"Error generating CSV: {str(e)}",
+            status=500,
+            content_type='text/plain'
+        )
