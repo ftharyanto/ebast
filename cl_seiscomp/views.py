@@ -9,10 +9,10 @@ from django.views import View
 from django.shortcuts import redirect
 from .models import CsRecordModel, StationListModel
 from django.contrib import messages
-import csv
+import csv, json
 import plotly.graph_objects as go
 import plotly.utils
-import json
+from django.forms.models import model_to_dict
 
 # Define time choices
 WAKTU = (
@@ -328,8 +328,34 @@ class StatsView(View):
         return render(request, self.template_name, context)
 
 ##### Checklist Seiscomp View
-from django.core.paginator import Paginator
+def csrecord_list_api(request, counts=0):
+    if counts > 0:
+        records = CsRecordModel.objects.all().order_by('-cs_id').select_related('operator')[:counts]
+    else:
+        records = CsRecordModel.objects.all().order_by('-cs_id').select_related('operator')
+        
+    # Create a list of dictionaries with the required fields
+    data = []
+    for record in records:
+        record_data = model_to_dict(record)
+        # Convert operator to string
+        record_data['operator'] = record.operator.name if record.operator else ''
+        
+        # Convert ImageField to URL string
+        if record.slmon_image:
+            record_data['slmon_image'] = record.slmon_image.url
+        else:
+            record_data['slmon_image'] = None
+            
+        data.append(record_data)
+    
+    return JsonResponse(data, safe=False)
 
+class CsAllRecordsView(ListView):
+    model = CsRecordModel
+    template_name = 'cl_seiscomp/cs_all_records.html'
+    context_object_name = 'csrecords'
+    
 class CsListView(ListView):
     model = CsRecordModel
     template_name = 'cl_seiscomp/cs_list.html'
@@ -458,7 +484,7 @@ def prepare_workbook(record):
 
     return workbook
 
-def cs_export_excel(request, record_id):
+def export_to_excel(request, record_id):
     try:
         record = CsRecordModel.objects.get(id=record_id)
     except CsRecordModel.DoesNotExist:
@@ -474,7 +500,7 @@ def cs_export_excel(request, record_id):
     workbook.save(response)
     return response
 
-def cs_export_pdf(request, record_id):
+def export_to_pdf(request, record_id):
     import subprocess
 
     try:
@@ -550,3 +576,87 @@ def fetch_gaps_blanks(request):
         last_update = ' '.join(last_update)
 
     return JsonResponse({'last_update': last_update, 'gaps': gaps, 'blanks': blanks})
+
+def export_cs_to_csv(request):
+    """
+    Export all CS records to a CSV file.
+    """
+    try:
+        # Log the start of the export
+        print("Starting CS records export...")
+        print(f"Request method: {request.method}")
+        print(f"Request headers: {dict(request.headers)}")
+        
+        # Create the HttpResponse object with the appropriate CSV header
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={
+                'Content-Disposition': 'attachment; filename="cs_records_export.csv"',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            },
+        )
+        
+        # Force the response to be treated as a download
+        response['Content-Encoding'] = 'UTF-8'
+        response['Content-Type'] = 'text/csv; charset=utf-8-sig'  # Add BOM for Excel
+        
+        # Create a CSV writer with proper quoting
+        writer = csv.writer(response, quoting=csv.QUOTE_ALL, delimiter=',')
+        
+        # Write UTF-8 BOM for Excel compatibility
+        response.write('\ufeff')
+        
+        # Write headers based on the CsRecordModel fields
+        writer.writerow([
+            'CS ID', 'Date', 'Shift', 'Jam Pelaksanaan', 'Kelompok',
+            'Operator', 'Gaps', 'Spikes', 'Blanks', 'SLMON',
+            'Count Gaps', 'Count Spikes', 'Count Blanks', 'SLMON Image'
+        ])
+        
+        # Get all records ordered by cs_id
+        records = CsRecordModel.objects.all().order_by('cs_id')
+        print(f"Found {records.count()} records to export")
+        print(f"First record: {records.first()}")
+        
+        # Write data rows
+        for record in records:
+            try:
+                print(f"Processing record with cs_id: {record.cs_id}")
+                writer.writerow([
+                    record.cs_id or '',
+                    record.date.strftime('%Y-%m-%d') if record.date else '',
+                    str(record.shift) if record.shift else '',
+                    str(record.jam_pelaksanaan) if record.jam_pelaksanaan else '',
+                    str(record.kelompok) if record.kelompok else '',
+                    str(record.operator) if record.operator else '',
+                    record.gaps or '',
+                    record.spikes or '',
+                    record.blanks or '',
+                    str(record.slmon) if record.slmon is not None else '',
+                    str(record.count_gaps) if record.count_gaps is not None else '',
+                    str(record.count_spikes) if record.count_spikes is not None else '',
+                    str(record.count_blanks) if record.count_blanks is not None else '',
+                    str(record.slmon_image) if record.slmon_image else ''
+                ])
+            except Exception as e:
+                import traceback
+                print(f"Error writing record {getattr(record, 'cs_id', 'unknown')}: {str(e)}")
+                print(f"Traceback: {traceback.format_exc()}")
+                # Skip the problematic record and continue with the next one
+                continue
+        
+        print("Export completed successfully")
+        return response
+        
+    except Exception as e:
+        import traceback
+        print(f"Error in export_cs_to_csv: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
+            # Return an error response
+        return HttpResponse(
+            f"Error generating CSV: {str(e)}",
+            status=500,
+            content_type='text/plain'
+        )
