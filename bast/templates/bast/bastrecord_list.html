@@ -160,30 +160,6 @@
                 // Check each property of the row
                 for (var key in data) {
                     // Skip internal Tabulator fields and functions
-                    if (typeof data[key] === 'function' || key === 'id' || key === '_row' || key === 'table') {
-                        continue;
-                    }
-                    
-                    // Get the value and convert to string
-                    var value = data[key];
-                    if (value === null || value === undefined) {
-                        continue;
-                    }
-                    
-                    // Convert to string and check if it contains the search term
-                    var stringValue = String(value).toLowerCase();
-                    if (stringValue.includes(searchValue.toLowerCase())) {
-                        return true;
-                    }
-                }
-                return false;
-            },
-            
-            // Function to perform global search
-            globalSearch: function(data, searchValue) {
-                // Check each property of the row
-                for (var key in data) {
-                    // Skip internal Tabulator fields and functions
                     if (typeof data[key] === 'function' || !(key === 'bast_id' || key === 'spv_name')) {
                         continue;
                     }

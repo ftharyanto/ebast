@@ -1,11 +1,11 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}BAST Records{% endblock %}
+{% block title %}QCFM Records{% endblock %}
 
 {% block content %}
 <div class="form-container">
-    <h1 class="page-header">BAST Records</h1>
+    <h1 class="page-header">QCFM Records</h1>
     <div class="container-fluid mt-3">
         <div class="card">
             <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addRowPos: "top",
         history: true,
         paginationCounter: "rows",
-        ajaxURL: `{% url 'bast:bastrecord_list_api' 0 %}`,
+        ajaxURL: `{% url 'qcfm:qcfmrecord_list_api' 0 %}`,
         ajaxConfig: "GET",
         ajaxContentType: "json",
         ajaxResponse: function(url, params, response) {
@@ -320,8 +320,8 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             { title: "ID", field: "id", width: 80, hozAlign: "right" },
             { 
-                title: "BAST ID", 
-                field: "bast_id", 
+                title: "QCFM ID", 
+                field: "qcfm_id", 
                 width: 180,
                 formatter: function(cell, formatterParams, onRendered) {
                     const value = cell.getValue();
@@ -338,8 +338,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             },
             { 
-                title: "Waktu Pelaksanaan", 
-                field: "waktu_pelaksanaan", 
+                title: "Jam Pelaksanaan", 
+                field: "jam_pelaksanaan", 
                 width: 150,
                 formatter: function(cell) {
                     return cell.getValue() || '';
@@ -360,21 +360,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 hozAlign: "center"
             },
             { 
-                title: "Kelompok Berikut", 
-                field: "kel_berikut", 
+                title: "Kel Sebelum", 
+                field: "kel_sebelum", 
                 width: 120,
                 hozAlign: "center"
             },
             { 
-                title: "SPV ID", 
-                field: "spv", 
-                width: 100,
-                hozAlign: "right",
-                visible: false // Hidden by default as we show spv_name
-            },
-            { 
-                title: "SPV Name", 
-                field: "spv_name", 
+                title: "Operator", 
+                field: "operator", 
                 width: 200,
                 formatter: function(cell) {
                     return cell.getValue() || '';
@@ -389,141 +382,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             },
             { 
-                title: "Event Indonesia", 
-                field: "event_indonesia", 
-                width: 100, 
-                hozAlign: "right" 
-            },
-            { 
-                title: "Event Luar", 
-                field: "event_luar", 
-                width: 100, 
-                hozAlign: "right" 
-            },
-            { 
-                title: "Event Dirasakan", 
-                field: "event_dirasakan", 
-                width: 120, 
-                hozAlign: "right" 
-            },
-            { 
-                title: "Event Dikirim", 
-                field: "event_dikirim", 
-                width: 120, 
-                hozAlign: "right" 
-            },
-            { 
-                title: "Gaps", 
-                field: "count_gaps", 
-                width: 80, 
-                hozAlign: "right" 
-            },
-            { 
-                title: "Spikes", 
-                field: "count_spikes", 
-                width: 80, 
-                hozAlign: "right" 
-            },
-            { 
-                title: "Blanks", 
-                field: "count_blanks", 
-                width: 80, 
-                hozAlign: "right" 
-            },
-            { 
-                title: "Waktu CS", 
-                field: "waktu_cs", 
+                title: "QC Sebelumnya", 
+                field: "qc_prev", 
                 width: 120,
+                hozAlign: "center",
                 formatter: function(cell) {
-                    return cell.getValue() || '';
-                }
-            },
-            { 
-                title: "Pulsa Poco", 
-                field: "pulsa_poco", 
-                width: 120, 
-                hozAlign: "right" 
-            },
-            { 
-                title: "Poco Expiry", 
-                field: "poco_exp", 
-                width: 120, 
-                formatter: function(cell) {
-                    const value = cell.getValue();
-                    return value ? value.substring(0, 10) : '';
-                }
-            },
-            { 
-                title: "Samsung Expiry", 
-                field: "samsung_exp", 
-                width: 140, 
-                formatter: function(cell) {
-                    const value = cell.getValue();
-                    return value ? value.substring(0, 10) : '';
-                }
-            },
-            { 
-                title: "Events Data", 
-                field: "events", 
-                width: 150,
-                formatter: function(cell) {
-                    const value = cell.getValue();
-                    return value ? '<span style="color: #0d6efd; cursor: pointer;">View Events</span>' : '';
+                    return '<span style="color: #0d6efd; cursor: pointer;" class="view-qcfm" data-field="qcfm_prev">View</span>';
                 },
                 cellClick: function(e, cell) {
                     const data = cell.getRow().getData();
-                    if (data.events) {
-                        // Show events in a modal or new window
-                        const win = window.open('', '_blank');
-                        win.document.write(`<pre>${data.events}</pre>`);
+                    const modalBody = document.getElementById('qcfmModalBody');
+                    if (modalBody) {
+                        modalBody.textContent = data.qcfm_prev || 'No data available';
+                        const modal = new bootstrap.Modal(document.getElementById('qcfmModal'));
+                        modal.show();
                     }
-                },
-                cssClass: 'clickable-cell'
+                }
             },
             { 
-                title: "Members", 
-                field: "member", 
-                width: 150,
+                title: "QC FM", 
+                field: "qcfm", 
+                width: 80,
+                hozAlign: "center",
                 formatter: function(cell) {
-                    const value = cell.getValue();
-                    return value ? '<span style="color: #0d6efd; cursor: pointer;">View Members</span>' : '';
+                    return '<span style="color: #0d6efd; cursor: pointer;" class="view-qcfm" data-field="qcfm">View</span>';
                 },
                 cellClick: function(e, cell) {
                     const data = cell.getRow().getData();
-                    if (data.member) {
-                        try {
-                            const members = JSON.parse(data.member);
-                            let html = '<table class="table table-bordered"><thead><tr><th>Nama</th><th>Keterangan</th></tr></thead><tbody>';
-                            members.forEach(m => {
-                                html += `<tr><td>${m.nama || ''}</td><td>${m.keterangan || ''}</td></tr>`;
-                            });
-                            html += '</tbody></table>';
-                            
-                            // Show in a modal instead of a new window
-                            const modalBody = document.getElementById('membersModalBody');
-                            if (modalBody) {
-                                modalBody.innerHTML = html;
-                                const modal = new bootstrap.Modal(document.getElementById('membersModal'));
-                                modal.show();
-                            } else {
-                                // Fallback to window.open if modal not found
-                                const win = window.open('', '_blank');
-                                win.document.write(html);
-                            }
-                        } catch (e) {
-                            showErrorModal('Error parsing members data');
-                        }
+                    const modalBody = document.getElementById('qcfmModalBody');
+                    if (modalBody) {
+                        modalBody.textContent = data.qcfm || 'No data available';
+                        const modal = new bootstrap.Modal(document.getElementById('qcfmModal'));
+                        modal.show();
                     }
-                },
-                cssClass: 'clickable-cell'
-            },
-            { 
-                title: "Notes", 
-                field: "notes", 
-                width: 200, 
-                formatter: "textarea",
-                formatterParams: {
-                    maxHeight: 100
                 }
             }
         ]
@@ -541,24 +432,22 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('globalSearch').addEventListener('input', function(e) {
         const searchValue = e.target.value.toLowerCase();
         table.setFilter(function(data) {
-            return [
-                'bast_id', 'waktu_pelaksanaan', 'shift', 'kelompok', 'kel_berikut',
-                'spv_name', 'NIP', 'waktu_cs', 'notes'
+            // Search in all fields except date
+            const match = [
+                'qcfm_id', 'jam_pelaksanaan', 'shift', 'kelompok', 'kel_sebelum',
+                'operator', 'NIP', 'qcfm', 'qcfm_prev'
             ].some(field => {
                 const value = data[field];
                 return value !== null && value !== undefined && 
                        value.toString().toLowerCase().includes(searchValue);
-            }) || [
-                'event_indonesia', 'event_luar', 'event_dirasakan', 'event_dikirim',
-                'count_gaps', 'count_spikes', 'count_blanks', 'pulsa_poco'
-            ].some(field => {
-                return data[field] !== null && data[field] !== undefined && 
-                       data[field].toString().includes(searchValue);
-            }) || [
-                'date', 'poco_exp', 'samsung_exp'
-            ].some(field => {
-                return data[field] && new Date(data[field]).toISOString().includes(searchValue);
             });
+
+            // Search in date field
+            if (!match && data.date) {
+                return new Date(data.date).toISOString().includes(searchValue);
+            }
+
+            return match;
         });
     });
 
@@ -594,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             // Make a fetch request to the export endpoint
-            const response = await fetch('/bast/api/export-csv/');
+            const response = await fetch('/qcfm/api/export-csv/');
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -609,7 +498,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create a temporary link and trigger the download
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'bast_records_export.csv';
+            a.download = 'qcfm_records_export.csv';
             document.body.appendChild(a);
             a.click();
             
@@ -661,7 +550,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Exporting ${i + 1}/${selectedRows.length}...`;
                     
                     // Make a fetch request for each record
-                    const response = await fetch(`/bast/api/export-to-excel/${recordId}/`);
+                    const response = await fetch(`/qcfm/api/export-to-excel/${recordId}/`);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status} for record ${recordId}`);
@@ -677,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Create a temporary link and trigger the download
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = filename || `bast_record_${recordId}.xlsx`;
+                    a.download = filename || `qcfm_record_${recordId}.xlsx`;
                     document.body.appendChild(a);
                     a.click();
                     
@@ -745,7 +634,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Exporting ${i + 1}/${selectedRows.length}...`;
                     
                     // Make a fetch request for each record
-                    const response = await fetch(`/bast/api/export-to-pdf/${recordId}/`);
+                    const response = await fetch(`/qcfm/api/export-to-pdf/${recordId}/`);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status} for record ${recordId}`);
@@ -761,7 +650,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Create a temporary link and trigger the download
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = filename || `bast_record_${recordId}.pdf`;
+                    a.download = filename || `qcfm_record_${recordId}.pdf`;
                     document.body.appendChild(a);
                     a.click();
                     
@@ -824,15 +713,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Members Modal -->
-<div class="modal fade" id="membersModal" tabindex="-1" aria-labelledby="membersModalLabel" aria-hidden="true">
+<!-- QCFM Modal -->
+<div class="modal fade" id="qcfmModal" tabindex="-1" aria-labelledby="qcfmModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="membersModalLabel">Members</h5>
+                <h5 class="modal-title" id="qcfmModalLabel">QC FM</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="membersModalBody">
+            <div class="modal-body" id="qcfmModalBody">
                 <!-- Content will be loaded here -->
             </div>
             <div class="modal-footer">
