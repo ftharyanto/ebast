@@ -15,6 +15,27 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import json
 from cl_seiscomp.models import StationListModel
+from django.forms.models import model_to_dict
+
+def qcrecord_list_api(request, counts=0):
+    if counts > 0:
+        records = QcRecord.objects.all().order_by('-qc_id').select_related('operator')[:counts]
+    else:
+        records = QcRecord.objects.all().order_by('-qc_id').select_related('operator')
+
+    # Create a list of dictionaries with the required fields
+    data = []
+    for record in records:
+        record_data =   model_to_dict(record)
+        record_data['operator'] = record.operator.name if record.operator else ''
+        data.append(record_data)
+    
+    return JsonResponse(data, safe=False)
+
+class QcAllRecordsView(ListView):
+    model = QcRecord
+    template_name = 'qc/qc_all_records.html'
+    context_object_name = 'qcrecords'
 
 class QcRecordListView(ListView):
     model = QcRecord

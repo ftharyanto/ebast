@@ -60,6 +60,9 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'qcrecord_list' %}active{% endif %}" href="{% url 'qc:qcrecord_list' %}">QC-3 Records</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'qc_all_records' %}active{% endif %}" href="{% url 'qc:qc_all_records' %}">All Records</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'errorstation_list' %}active{% endif %}" href="{% url 'qc:errorstation_list' %}">Error Stasiun</a>
                     </li>
                 </ul>
