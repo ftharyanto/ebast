@@ -272,6 +272,17 @@
                     field: "kelompok",
                     headerHozAlign: "center",
                     hozAlign: "center",
+                    width: 100,
+                    formatter: function (cell) {
+                        return cell.getValue() || '';
+                    }
+                },
+                {
+                    title: "Kelompok Sebelumnya",
+                    field: "kel_sebelum",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 100,
                     formatter: function (cell) {
                         return cell.getValue() || '';
                     }
