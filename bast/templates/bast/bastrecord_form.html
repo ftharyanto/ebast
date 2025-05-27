@@ -476,79 +476,18 @@
             });
         }
         
-        // Add date-picker class to date inputs and set up click handlers for calendar icons
-        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
-        const pocoExpInput = document.getElementById('{{ form.poco_exp.id_for_label }}');
-        const samsungExpInput = document.getElementById('{{ form.samsung_exp.id_for_label }}');
-        const startTimeInput = document.getElementById('datetime_bast_start');
-        const endTimeInput = document.getElementById('datetime_bast_end');
+        // Setup all date and datetime pickers
+        const pickerConfigs = [
+            { id: '{{ form.date.id_for_label }}' },
+            { id: '{{ form.poco_exp.id_for_label }}' },
+            { id: '{{ form.samsung_exp.id_for_label }}' },
+            { id: 'datetime_bast_start', pickerClass: 'datetime-picker' },
+            { id: 'datetime_bast_end', pickerClass: 'datetime-picker' }
+        ];
         
-        // Setup click handler for date input
-        if (dateInput) {
-            dateInput.classList.add('date-picker');
-            const dateWrapper = dateInput.closest('.input-group');
-            if (dateWrapper) {
-                const icon = dateWrapper.querySelector('.input-group-text');
-                if (icon) {
-                    icon.addEventListener('click', () => {
-                        dateInput._flatpickr.open();
-                    });
-                }
-            }
-        }
-        
-        // Setup click handler for poco expiration date
-        if (pocoExpInput) {
-            pocoExpInput.classList.add('date-picker');
-            const pocoExpWrapper = pocoExpInput.closest('.input-group');
-            if (pocoExpWrapper) {
-                const icon = pocoExpWrapper.querySelector('.input-group-text');
-                if (icon) {
-                    icon.addEventListener('click', () => {
-                        pocoExpInput._flatpickr.open();
-                    });
-                }
-            }
-        }
-        
-        if (samsungExpInput) {
-            samsungExpInput.classList.add('date-picker');
-            const samsungExpWrapper = samsungExpInput.closest('.input-group');
-            if (samsungExpWrapper) {
-                const icon = samsungExpWrapper.querySelector('.input-group-text');
-                if (icon) {
-                    icon.addEventListener('click', () => {
-                        samsungExpInput._flatpickr.open();
-                    });
-                }
-            }
-        }
-
-        // Setup click handler for start time
-        if (startTimeInput) {
-            const startTimeWrapper = startTimeInput.closest('.input-group');
-            if (startTimeWrapper) {
-                const icon = startTimeWrapper.querySelector('.input-group-text');
-                if (icon) {
-                    icon.addEventListener('click', () => {
-                        startTimeInput._flatpickr.open();
-                    });
-                }
-            }
-        }
-
-        // Setup click handler for end time
-        if (endTimeInput) {
-            const endTimeWrapper = endTimeInput.closest('.input-group');
-            if (endTimeWrapper) {
-                const icon = endTimeWrapper.querySelector('.input-group-text');
-                if (icon) {
-                    icon.addEventListener('click', () => {
-                        endTimeInput._flatpickr.open();
-                    });
-                }
-            }
-        }
+        pickerConfigs.forEach(config => {
+            setupCalendarIcon(config.id, config.pickerClass);
+        });
     });
 </script>
 <script>

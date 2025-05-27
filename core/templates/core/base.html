@@ -276,6 +276,34 @@
             });
         }
 
+        /**
+         * Setup click handler for calendar icon of a given input
+         * @param {string} inputId - The ID of the input element
+         * @param {string} [pickerClass='date-picker'] - The class to add to the input (date-picker or datetime-picker)
+         */
+         function setupCalendarIcon(inputId, pickerClass = 'date-picker') {
+            const input = typeof inputId === 'string' ? document.getElementById(inputId) : inputId;
+            if (!input) return;
+            
+            // Add the appropriate picker class
+            if (pickerClass) {
+                input.classList.add(pickerClass);
+            }
+            
+            // Find the calendar icon and add click handler
+            const wrapper = input.closest('.input-group');
+            if (!wrapper) return;
+            
+            const icon = wrapper.querySelector('.input-group-text');
+            if (!icon) return;
+            
+            icon.addEventListener('click', () => {
+                if (input._flatpickr) {
+                    input._flatpickr.open();
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize flatpickr
             initializeDatePickers();
