@@ -250,7 +250,37 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
     <script>
+        // Flatpickr configuration
+        function initializeDatePickers() {
+            // Date picker
+            document.querySelectorAll('.date-picker').forEach(function(el) {
+                flatpickr(el, {
+                    dateFormat: "Y-m-d",
+                    allowInput: true,
+                    locale: 'id'
+                });
+            });
+
+            // Datetime picker
+            document.querySelectorAll('.datetime-picker').forEach(function(el) {
+                flatpickr(el, {
+                    enableTime: true,
+                    dateFormat: "Y-m-d H:i:S",
+                    time_24hr: true,
+                    allowInput: true,
+                    defaultHour: 0,
+                    defaultMinute: 0,
+                    defaultSeconds: 0,
+                    locale: 'id'
+                });
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize flatpickr
+            initializeDatePickers();
+            
+            // Other existing DOMContentLoaded code
             // Get the modal elements
             var deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
             var deleteForm = document.getElementById('deleteForm');
@@ -283,6 +313,7 @@
             });
         });
     </script>
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

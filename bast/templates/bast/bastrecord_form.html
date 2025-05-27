@@ -112,16 +112,16 @@
                     <div class="col-md-4">
                         <label for="datetime_bast_start">Start Date and Time (UTC)</label>
                         <div class="input-group date-picker-wrapper">
-                            <input type="text" id="datetime_bast_start" class="form-control datetime-picker"
-                                placeholder="Select start date & time" data-input>
+                            <input type="datetime" id="datetime_bast_start" class="form-control datetime-picker"
+                                value="2024-12-14 00:00:00">
                             <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <label for="datetime_bast_end">End Date and Time (UTC)</label>
                         <div class="input-group date-picker-wrapper">
-                            <input type="text" id="datetime_bast_end" class="form-control datetime-picker"
-                                placeholder="Select end date & time" data-input>
+                            <input type="datetime" id="datetime_bast_end" class="form-control datetime-picker"
+                                value="2024-12-14 07:00:00">
                             <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                         </div>
                     </div>
@@ -347,17 +347,24 @@
 }
 
 .date-picker-wrapper .input-group-text {
-    background-color: #fff;
+    background-color: #f8f9fa;
     border-left: none;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
 .date-picker-wrapper .input-group-text:hover {
-    background-color: #f8f9fa;
+    background-color: #e9ecef;
+    color: #495057;
+    border-color: #e6e9ec;
+    box-shadow: none;
 }
 
-.date-picker-wrapper .input-group-text i {
+.input-group-text {
+    cursor: pointer;
+}
+
+.input-group-text i {
     color: #6c757d;
 }
 
@@ -457,121 +464,94 @@
 
     // Initialize Flatpickr for datetime inputs
     document.addEventListener('DOMContentLoaded', function () {
-        // Datetime picker for start and end times
-        const datetimeOptions = {
-            enableTime: true,
-            dateFormat: 'Y-m-d H:i',
-            time_24hr: true,
-            defaultHour: 0,
-            defaultMinute: 0,
-            locale: 'id',
-            allowInput: true,
-            clickOpens: true,
-            static: false,
-            monthSelectorType: 'static',
-            // Set default values
-            defaultDate: '2024-12-14 00:00:00',
-            // Time settings
-            time_24hr: true,
-            minuteIncrement: 30
-        };
-
-        // Initialize start datetime picker
-        const startPicker = flatpickr('#datetime_bast_start', {
-            ...datetimeOptions,
-            defaultDate: '2024-12-14 00:00:00',
-            onChange: function(selectedDates, dateStr, instance) {
-                // Update end date to be after start date
-                endPicker.set('minDate', dateStr);
-            }
-        });
-
-        // Initialize end datetime picker
-        const endPicker = flatpickr('#datetime_bast_end', {
-            ...datetimeOptions,
-            defaultDate: '2024-12-14 07:00:00',
-            minDate: '2024-12-14 00:00:00'
-        });
-
-        // Initialize Poco Expiration Date picker
-        const pocoExpInput = document.getElementById('{{ form.poco_exp.id_for_label }}');
-        if (pocoExpInput) {
-            const pocoExpPicker = flatpickr(pocoExpInput, {
-                dateFormat: 'Y-m-d',
-                allowInput: true,
-                locale: 'id',
-                position: 'auto',
-                clickOpens: true,
-                allowOutsideClick: true,
-                allowClear: true,
-                enableTime: false,
-                weekNumbers: false,
-            });
-
-            // Open calendar when clicking the calendar icon
-            const pocoExpWrapper = pocoExpInput.closest('.date-picker-wrapper');
-            if (pocoExpWrapper) {
-                const icon = pocoExpWrapper.querySelector('.input-group-text');
-                if (icon) {
-                    icon.addEventListener('click', () => {
-                        pocoExpPicker.open();
-                    });
+        // Handle start and end datetime changes
+        const startInput = document.getElementById('datetime_bast_start');
+        const endInput = document.getElementById('datetime_bast_end');
+        
+        if (startInput && endInput) {
+            startInput.addEventListener('change', function() {
+                if (this.value) {
+                    endInput.min = this.value;
                 }
-            }
-        }
-
-        // Initialize Samsung Expiration Date picker
-        const samsungExpInput = document.getElementById('{{ form.samsung_exp.id_for_label }}');
-        if (samsungExpInput) {
-            const samsungExpPicker = flatpickr(samsungExpInput, {
-                dateFormat: 'Y-m-d',
-                allowInput: true,
-                locale: 'id',
-                position: 'auto',
-                clickOpens: true,
-                allowOutsideClick: true,
-                allowClear: true,
-                enableTime: false,
-                weekNumbers: false,
             });
-
-            // Open calendar when clicking the calendar icon
-            const samsungExpWrapper = samsungExpInput.closest('.date-picker-wrapper');
-            if (samsungExpWrapper) {
-                const icon = samsungExpWrapper.querySelector('.input-group-text');
-                if (icon) {
-                    icon.addEventListener('click', () => {
-                        samsungExpPicker.open();
-                    });
-                }
-            }
         }
-
-        // date picker initialization with Flatpickr and calendar icon
+        
+        // Add date-picker class to date inputs and set up click handlers for calendar icons
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+        const pocoExpInput = document.getElementById('{{ form.poco_exp.id_for_label }}');
+        const samsungExpInput = document.getElementById('{{ form.samsung_exp.id_for_label }}');
+        const startTimeInput = document.getElementById('datetime_bast_start');
+        const endTimeInput = document.getElementById('datetime_bast_end');
+        
+        // Setup click handler for date input
         if (dateInput) {
-            // Initialize Flatpickr
-            const fp = flatpickr(dateInput, {
-                dateFormat: 'Y-m-d',
-                allowInput: true,
-                locale: 'id',
-                clickOpens: true,
-                allowOutsideClick: true,
-                weekNumbers: false,
-            });
-            
-            // Open calendar when clicking the calendar icon
-            const dateWrapper = dateInput.closest('.date-picker-wrapper');
+            dateInput.classList.add('date-picker');
+            const dateWrapper = dateInput.closest('.input-group');
             if (dateWrapper) {
                 const icon = dateWrapper.querySelector('.input-group-text');
                 if (icon) {
                     icon.addEventListener('click', () => {
-                        fp.open();
+                        dateInput._flatpickr.open();
+                    });
+                }
+            }
+        }
+        
+        // Setup click handler for poco expiration date
+        if (pocoExpInput) {
+            pocoExpInput.classList.add('date-picker');
+            const pocoExpWrapper = pocoExpInput.closest('.input-group');
+            if (pocoExpWrapper) {
+                const icon = pocoExpWrapper.querySelector('.input-group-text');
+                if (icon) {
+                    icon.addEventListener('click', () => {
+                        pocoExpInput._flatpickr.open();
+                    });
+                }
+            }
+        }
+        
+        if (samsungExpInput) {
+            samsungExpInput.classList.add('date-picker');
+            const samsungExpWrapper = samsungExpInput.closest('.input-group');
+            if (samsungExpWrapper) {
+                const icon = samsungExpWrapper.querySelector('.input-group-text');
+                if (icon) {
+                    icon.addEventListener('click', () => {
+                        samsungExpInput._flatpickr.open();
+                    });
+                }
+            }
+        }
+
+        // Setup click handler for start time
+        if (startTimeInput) {
+            const startTimeWrapper = startTimeInput.closest('.input-group');
+            if (startTimeWrapper) {
+                const icon = startTimeWrapper.querySelector('.input-group-text');
+                if (icon) {
+                    icon.addEventListener('click', () => {
+                        startTimeInput._flatpickr.open();
+                    });
+                }
+            }
+        }
+
+        // Setup click handler for end time
+        if (endTimeInput) {
+            const endTimeWrapper = endTimeInput.closest('.input-group');
+            if (endTimeWrapper) {
+                const icon = endTimeWrapper.querySelector('.input-group-text');
+                if (icon) {
+                    icon.addEventListener('click', () => {
+                        endTimeInput._flatpickr.open();
                     });
                 }
             }
         }
     });
+</script>
+<script>
 
     // Example starter JavaScript for disabling form submissions if there are invalid fields
     (function () {
