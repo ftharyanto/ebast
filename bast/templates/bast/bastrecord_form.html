@@ -331,8 +331,7 @@
             </div>
             {% endif %}
             <button type="submit" class="btn btn-primary" id="submit-button">Save</button>
-            <button type="button" class="btn btn-secondary"
-                onclick="window.location.href='{% url 'bast:bastrecord_list' %}'">Cancel</button>
+            <a href="{% url 'bast:bastrecord_list' %}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 </div>
