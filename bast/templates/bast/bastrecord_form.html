@@ -28,7 +28,7 @@
                 </div>
                 <div class="col-md-4">
                     {{ form.shift.label_tag }}
-                    {{ form.shift|add_class:"form-control" }}
+                    {{ form.shift|add_class:"form-select" }}
                 </div>
                 <div class="col-md-4">
                     {{ form.bast_id.label_tag }}
@@ -43,21 +43,21 @@
                 <div class="row">
                     <div class="form-group col-md-4">
                         {{ form.kelompok.label_tag }}
-                        {{ form.kelompok|add_class:"form-control" }}
+                        {{ form.kelompok|add_class:"form-select" }}
                         <div class="invalid-feedback">
                             Please select a valid kelompok.
                         </div>
                     </div>
                     <div class="form-group col-md-4">
                         <label for="{{ form.kel_berikut.id_for_label }}">Kelompok Berikutnya</label>
-                        {{ form.kel_berikut|add_class:"form-control" }}
+                        {{ form.kel_berikut|add_class:"form-select" }}
                         <div class="invalid-feedback">
                             Please fill a valid kelompok berikutnya.
                         </div>
                     </div>
                     <div class="form-group col-md-4">
                         {{ form.waktu_pelaksanaan.label_tag }}
-                        {{ form.waktu_pelaksanaan|add_class:"form-control" }}
+                        {{ form.waktu_pelaksanaan|add_class:"form-select" }}
                         <div class="invalid-feedback">
                             Please select a valid waktu pelaksanaan.
                         </div>
@@ -96,7 +96,7 @@
 
                     <div class="form-group col-md-4" style="display: none;">
                         {{ form.member.label_tag }}
-                        {{ form.member|add_class:"form-control" }}
+                        {{ form.member|add_class:"form-select" }}
                         <div class="invalid-feedback">
                             Please provide a valid member.
                         </div>
@@ -173,35 +173,35 @@
                                     </table>
                                 </div>
                                 {{ form.events.label_tag }}
-                                {{ form.events|add_class:"form-control" }}
+                                {{ form.events|add_class:"form-select" }}
                             </div>
                         </div>
                     </div>
                     <div class="form-group row mt-3">
                         <div class="col-md-3">
                             {{ form.event_indonesia.label_tag }}
-                            {{ form.event_indonesia|add_class:"form-control" }}
+                            {{ form.event_indonesia|add_class:"form-select" }}
                             <div class="invalid-feedback">
                                 Please provide a valid event Indonesia.
                             </div>
                         </div>
                         <div class="col-md-3">
                             {{ form.event_luar.label_tag }}
-                            {{ form.event_luar|add_class:"form-control" }}
+                            {{ form.event_luar|add_class:"form-select" }}
                             <div class="invalid-feedback">
                                 Please provide a valid event luar.
                             </div>
                         </div>
                         <div class="col-md-3">
                             {{ form.event_dirasakan.label_tag }}
-                            {{ form.event_dirasakan|add_class:"form-control" }}
+                            {{ form.event_dirasakan|add_class:"form-select" }}
                             <div class="invalid-feedback">
                                 Please provide a valid event dirasakan.
                             </div>
                         </div>
                         <div class="col-md-3">
                             {{ form.event_dikirim.label_tag }}
-                            {{ form.event_dikirim|add_class:"form-control" }}
+                            {{ form.event_dikirim|add_class:"form-select" }}
                             <div class="invalid-feedback">
                                 Please provide a valid event dikirim.
                             </div>
@@ -210,28 +210,28 @@
                     <div class="form-group row mt-3">
                         <div class="col-md-3">
                             <label for="{{ form.waktu_cs.id_for_label }}">Jam ceklis seiscomp</label>
-                            {{ form.waktu_cs|add_class:"form-control" }}
+                            {{ form.waktu_cs|add_class:"form-select" }}
                             <div class="invalid-feedback">
                                 Please provide a valid count waktu ceklis seiscomp.
                             </div>
                         </div>
                         <div class="col-md-3">
                             {{ form.count_gaps.label_tag }}
-                            {{ form.count_gaps|add_class:"form-control" }}
+                            {{ form.count_gaps|add_class:"form-select" }}
                             <div class="invalid-feedback">
                                 Please provide a valid count gaps.
                             </div>
                         </div>
                         <div class="col-md-3">
                             {{ form.count_spikes.label_tag }}
-                            {{ form.count_spikes|add_class:"form-control" }}
+                            {{ form.count_spikes|add_class:"form-select" }}
                             <div class="invalid-feedback">
                                 Please provide a valid count spikes.
                             </div>
                         </div>
                         <div class="col-md-3">
                             {{ form.count_blanks.label_tag }}
-                            {{ form.count_blanks|add_class:"form-control" }}
+                            {{ form.count_blanks|add_class:"form-select" }}
                             <div class="invalid-feedback">
                                 Please provide a valid count blanks.
                             </div>
@@ -241,7 +241,7 @@
                         <div class="col-md-3">
                             <label for="{{ form.pulsa_poco.id_for_label }}" class="form-label">Pulsa Poco:</label>
                             <div class="input-group" style="width: 100%;">
-                                {{ form.pulsa_poco|add_class:"form-control" }}
+                                {{ form.pulsa_poco|add_class:"form-select" }}
                                 <button class="btn btn-fetch-previous" type="button" id="fetchPreviousPulsaPoco" 
                                     data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Fetch previous Pulsa Poco value">
                                     <i class="fas fa-history"></i>
@@ -254,7 +254,7 @@
                         <div class="col-md-3">
                             <label for="{{ form.poco_exp.id_for_label }}" class="form-label">Poco Expiration Date:</label>
                             <div class="input-group" style="width: 100%;">
-                                {{ form.poco_exp|add_class:"form-control" }}
+                                {{ form.poco_exp|add_class:"form-select" }}
                                 <button class="btn btn-fetch-previous" type="button" id="fetchPreviousPocoExp" 
                                     data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Fetch previous Poco Expiration Date value">
                                     <i class="fas fa-history"></i>
@@ -267,7 +267,7 @@
                         <div class="col-md-3">
                             <label for="{{ form.samsung_exp.id_for_label }}" class="form-label">Samsung Expiration Date:</label>
                             <div class="input-group" style="width: 100%;">
-                                {{ form.samsung_exp|add_class:"form-control" }}
+                                {{ form.samsung_exp|add_class:"form-select" }}
                                 <button class="btn btn-fetch-previous" type="button" id="fetchPreviousSamsungExp" 
                                     data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Fetch previous Samsung Expiration Date value">
                                     <i class="fas fa-history"></i>
@@ -284,7 +284,7 @@
             <div class="form-group row">
                 <div class="col-md-6">
                     <label for="{{ form.spv.id_for_label }}">SPV:</label>
-                    {{ form.spv|add_class:"form-control" }}
+                    {{ form.spv|add_class:"form-select" }}
                     <div class="invalid-feedback">
                         Please select a valid SPV.
                     </div>
@@ -326,6 +326,49 @@
     </div>
 </div>
 <style>
+
+/* Date Picker Styles */
+.date-picker-wrapper {
+    max-width: 300px; /* Adjust width as needed */
+}
+
+.date-picker-wrapper .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.date-picker-wrapper .input-group-text {
+    background-color: #fff;
+    border-left: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.date-picker-wrapper .input-group-text:hover {
+    background-color: #f8f9fa;
+}
+
+.date-picker-wrapper .input-group-text i {
+    color: #6c757d;
+}
+
+/* Flatpickr theme overrides */
+.flatpickr-calendar {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid rgba(0, 0, 0, 0.125) !important;
+    font-family: inherit !important;
+}
+
+.flatpickr-day.selected, 
+.flatpickr-day.selected:hover {
+    background: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+
+.flatpickr-day.today {
+    border-color: #0d6efd !important;
+}
+
 /* Button styles for fetch previous button */
 .btn-fetch-previous {
     background-color: #f8f9fa;
@@ -403,10 +446,38 @@
             }, false);
         };
 
-    // date picker initialization
+    // date picker initialization with Flatpickr and calendar icon
     document.addEventListener('DOMContentLoaded', function () {
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
-        dateInput.type = 'date';
+        if (dateInput) {
+            // Wrap the input in a div with input-group class
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-group date-picker-wrapper';
+            dateInput.parentNode.insertBefore(wrapper, dateInput);
+            wrapper.appendChild(dateInput);
+            
+            // Add calendar icon button
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'input-group-text';
+            iconSpan.innerHTML = '<i class="far fa-calendar-alt"></i>';
+            wrapper.appendChild(iconSpan);
+            
+            // Initialize Flatpickr
+            const fp = flatpickr(dateInput, {
+                dateFormat: 'Y-m-d',
+                allowInput: true,
+                locale: 'id',
+                // Open calendar when clicking the icon
+                clickOpens: false,
+                // Close when clicking outside
+                allowOutsideClick: true,
+            });
+            
+            // Open calendar when clicking the icon
+            iconSpan.addEventListener('click', () => {
+                fp.open();
+            });
+        }
     });
 
     // Example starter JavaScript for disabling form submissions if there are invalid fields
@@ -1025,43 +1096,53 @@
     document.addEventListener('DOMContentLoaded', function() {
         const formErrors = document.getElementById('form-errors');
         if (formErrors && formErrors.dataset.errors === 'true') {
-            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-            const errorContent = document.getElementById('errorModalContent');
-            let errorHtml = '<p>Silakan perbaiki kesalahan berikut:</p><ul class="mb-0">';
-            
-            // Get all error elements
-            const errorElements = formErrors.querySelectorAll('[data-field][data-error]');
-            errorElements.forEach(el => {
-                const fieldId = el.dataset.field;
-                const errorMsg = el.dataset.error;
-                const fieldLabel = document.querySelector(`label[for="${fieldId}"]`);
-                const labelText = fieldLabel ? fieldLabel.textContent.trim().replace(':', '') : fieldId;
-                errorHtml += `<li><strong>${labelText}:</strong> ${errorMsg}</li>`;
-            });
-            
-            errorHtml += '</ul>';
-            errorContent.innerHTML = errorHtml;
-            errorModal.show();
+            // Get the error modal element
+            const errorModalElement = document.getElementById('errorModal');
+            if (errorModalElement) {
+                // Initialize the Bootstrap 5 modal
+                const errorModal = new bootstrap.Modal(errorModalElement, {
+                    backdrop: true, // Enable backdrop click to close
+                    keyboard: true  // Enable ESC key to close
+                });
+                
+                const errorContent = document.getElementById('errorModalContent');
+                
+                if (errorContent) {
+                    let errorHtml = '<p>Silakan perbaiki kesalahan berikut:</p><ul class="mb-0">';
+                    
+                    // Get all error elements
+                    const errorElements = formErrors.querySelectorAll('[data-field][data-error]');
+                    if (errorElements.length > 0) {
+                        errorElements.forEach(el => {
+                            const fieldId = el.dataset.field;
+                            const errorMsg = el.dataset.error;
+                            const fieldLabel = document.querySelector(`label[for="${fieldId}"]`);
+                            const labelText = fieldLabel ? fieldLabel.textContent.trim().replace(':', '') : fieldId;
+                            errorHtml += `<li><strong>${labelText}:</strong> ${errorMsg}</li>`;
+                        });
+                    } else {
+                        // Fallback if no specific field errors found
+                        errorHtml += '<li>Terjadi kesalahan saat memproses formulir.</li>';
+                    }
+                    
+                    errorHtml += '</ul>';
+                    errorContent.innerHTML = errorHtml;
+                    
+                    // Show the modal
+                    errorModal.show();
+                    
+                    // Manually handle close button click
+                    const closeButtons = errorModalElement.querySelectorAll('[data-bs-dismiss="modal"]');
+                    closeButtons.forEach(button => {
+                        button.addEventListener('click', function() {
+                            errorModal.hide();
+                        });
+                    });
+                }
+            }
         }
     });
 </script>
-<!-- Empty NIP Modal -->
-<div class="modal fade" id="emptyNipModal" tabindex="-1" aria-labelledby="emptyNipModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="emptyNipModalLabel">NIP Tidak Ditemukan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-            </div>
-            <div class="modal-body" id="emptyNipModalBody">
-                <!-- Content will be dynamically inserted here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <a href="{% url 'core:operator_list' %}" class="btn btn-primary">Pergi ke Manajemen Operator</a>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 {% endblock %}
