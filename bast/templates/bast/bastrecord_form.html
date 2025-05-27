@@ -21,7 +21,10 @@
             <div class="form-group row">
                 <div class="col-md-4">
                     {{ form.date.label_tag }}
-                    {{ form.date|add_class:"form-control" }}
+                    <div class="input-group date-picker-wrapper">
+                        {{ form.date|add_class:"form-control date-picker" }}
+                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                    </div>
                     <div class="invalid-feedback">
                         Please provide a valid date.
                     </div>
@@ -96,7 +99,7 @@
 
                     <div class="form-group col-md-4" style="display: none;">
                         {{ form.member.label_tag }}
-                        {{ form.member|add_class:"form-select" }}
+                        {{ form.member|add_class:"form-control" }}
                         <div class="invalid-feedback">
                             Please provide a valid member.
                         </div>
@@ -108,13 +111,19 @@
                 <div class="form-group row">
                     <div class="col-md-4">
                         <label for="datetime_bast_start">Start Date and Time (UTC)</label>
-                        <input type="datetime-local" id="datetime_bast_start" class="form-control"
-                            value="2024-12-14 00:00:00">
+                        <div class="input-group date-picker-wrapper">
+                            <input type="text" id="datetime_bast_start" class="form-control datetime-picker"
+                                placeholder="Select start date & time" data-input>
+                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label for="datetime_bast_end">End Date and Time (UTC)</label>
-                        <input type="datetime-local" id="datetime_bast_end" class="form-control"
-                            value="2024-12-14 07:00:00">
+                        <div class="input-group date-picker-wrapper">
+                            <input type="text" id="datetime_bast_end" class="form-control datetime-picker"
+                                placeholder="Select end date & time" data-input>
+                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                        </div>
                     </div>
                     <div class="col-md-4 d-flex align-items-end">
                         <button type="button" id="fetch_bast" class="btn btn-primary align-bottom">Fetch
@@ -173,35 +182,35 @@
                                     </table>
                                 </div>
                                 {{ form.events.label_tag }}
-                                {{ form.events|add_class:"form-select" }}
+                                {{ form.events|add_class:"form-control" }}
                             </div>
                         </div>
                     </div>
                     <div class="form-group row mt-3">
                         <div class="col-md-3">
                             {{ form.event_indonesia.label_tag }}
-                            {{ form.event_indonesia|add_class:"form-select" }}
+                            {{ form.event_indonesia|add_class:"form-control" }}
                             <div class="invalid-feedback">
                                 Please provide a valid event Indonesia.
                             </div>
                         </div>
                         <div class="col-md-3">
                             {{ form.event_luar.label_tag }}
-                            {{ form.event_luar|add_class:"form-select" }}
+                            {{ form.event_luar|add_class:"form-control" }}
                             <div class="invalid-feedback">
                                 Please provide a valid event luar.
                             </div>
                         </div>
                         <div class="col-md-3">
                             {{ form.event_dirasakan.label_tag }}
-                            {{ form.event_dirasakan|add_class:"form-select" }}
+                            {{ form.event_dirasakan|add_class:"form-control" }}
                             <div class="invalid-feedback">
                                 Please provide a valid event dirasakan.
                             </div>
                         </div>
                         <div class="col-md-3">
                             {{ form.event_dikirim.label_tag }}
-                            {{ form.event_dikirim|add_class:"form-select" }}
+                            {{ form.event_dikirim|add_class:"form-control" }}
                             <div class="invalid-feedback">
                                 Please provide a valid event dikirim.
                             </div>
@@ -217,21 +226,21 @@
                         </div>
                         <div class="col-md-3">
                             {{ form.count_gaps.label_tag }}
-                            {{ form.count_gaps|add_class:"form-select" }}
+                            {{ form.count_gaps|add_class:"form-control" }}
                             <div class="invalid-feedback">
                                 Please provide a valid count gaps.
                             </div>
                         </div>
                         <div class="col-md-3">
                             {{ form.count_spikes.label_tag }}
-                            {{ form.count_spikes|add_class:"form-select" }}
+                            {{ form.count_spikes|add_class:"form-control" }}
                             <div class="invalid-feedback">
                                 Please provide a valid count spikes.
                             </div>
                         </div>
                         <div class="col-md-3">
                             {{ form.count_blanks.label_tag }}
-                            {{ form.count_blanks|add_class:"form-select" }}
+                            {{ form.count_blanks|add_class:"form-control" }}
                             <div class="invalid-feedback">
                                 Please provide a valid count blanks.
                             </div>
@@ -241,7 +250,7 @@
                         <div class="col-md-3">
                             <label for="{{ form.pulsa_poco.id_for_label }}" class="form-label">Pulsa Poco:</label>
                             <div class="input-group" style="width: 100%;">
-                                {{ form.pulsa_poco|add_class:"form-select" }}
+                                {{ form.pulsa_poco|add_class:"form-control" }}
                                 <button class="btn btn-fetch-previous" type="button" id="fetchPreviousPulsaPoco" 
                                     data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Fetch previous Pulsa Poco value">
                                     <i class="fas fa-history"></i>
@@ -253,8 +262,9 @@
                         </div>
                         <div class="col-md-3">
                             <label for="{{ form.poco_exp.id_for_label }}" class="form-label">Poco Expiration Date:</label>
-                            <div class="input-group" style="width: 100%;">
-                                {{ form.poco_exp|add_class:"form-select" }}
+                            <div class="input-group date-picker-wrapper" style="width: 100%;">
+                                {{ form.poco_exp|add_class:"form-control date-picker" }}
+                                <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                                 <button class="btn btn-fetch-previous" type="button" id="fetchPreviousPocoExp" 
                                     data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Fetch previous Poco Expiration Date value">
                                     <i class="fas fa-history"></i>
@@ -266,8 +276,9 @@
                         </div>
                         <div class="col-md-3">
                             <label for="{{ form.samsung_exp.id_for_label }}" class="form-label">Samsung Expiration Date:</label>
-                            <div class="input-group" style="width: 100%;">
-                                {{ form.samsung_exp|add_class:"form-select" }}
+                            <div class="input-group date-picker-wrapper" style="width: 100%;">
+                                {{ form.samsung_exp|add_class:"form-control date-picker" }}
+                                <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                                 <button class="btn btn-fetch-previous" type="button" id="fetchPreviousSamsungExp" 
                                     data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Fetch previous Samsung Expiration Date value">
                                     <i class="fas fa-history"></i>
@@ -326,7 +337,6 @@
     </div>
 </div>
 <style>
-
 /* Date Picker Styles */
 .date-picker-wrapper {
     max-width: 300px; /* Adjust width as needed */
@@ -446,37 +456,121 @@
             }, false);
         };
 
-    // date picker initialization with Flatpickr and calendar icon
+    // Initialize Flatpickr for datetime inputs
     document.addEventListener('DOMContentLoaded', function () {
+        // Datetime picker for start and end times
+        const datetimeOptions = {
+            enableTime: true,
+            dateFormat: 'Y-m-d H:i',
+            time_24hr: true,
+            defaultHour: 0,
+            defaultMinute: 0,
+            locale: 'id',
+            allowInput: true,
+            clickOpens: true,
+            static: false,
+            monthSelectorType: 'static',
+            // Set default values
+            defaultDate: '2024-12-14 00:00:00',
+            // Time settings
+            time_24hr: true,
+            minuteIncrement: 30
+        };
+
+        // Initialize start datetime picker
+        const startPicker = flatpickr('#datetime_bast_start', {
+            ...datetimeOptions,
+            defaultDate: '2024-12-14 00:00:00',
+            onChange: function(selectedDates, dateStr, instance) {
+                // Update end date to be after start date
+                endPicker.set('minDate', dateStr);
+            }
+        });
+
+        // Initialize end datetime picker
+        const endPicker = flatpickr('#datetime_bast_end', {
+            ...datetimeOptions,
+            defaultDate: '2024-12-14 07:00:00',
+            minDate: '2024-12-14 00:00:00'
+        });
+
+        // Initialize Poco Expiration Date picker
+        const pocoExpInput = document.getElementById('{{ form.poco_exp.id_for_label }}');
+        if (pocoExpInput) {
+            const pocoExpPicker = flatpickr(pocoExpInput, {
+                dateFormat: 'Y-m-d',
+                allowInput: true,
+                locale: 'id',
+                position: 'auto',
+                clickOpens: true,
+                allowOutsideClick: true,
+                allowClear: true,
+                enableTime: false,
+                weekNumbers: false,
+            });
+
+            // Open calendar when clicking the calendar icon
+            const pocoExpWrapper = pocoExpInput.closest('.date-picker-wrapper');
+            if (pocoExpWrapper) {
+                const icon = pocoExpWrapper.querySelector('.input-group-text');
+                if (icon) {
+                    icon.addEventListener('click', () => {
+                        pocoExpPicker.open();
+                    });
+                }
+            }
+        }
+
+        // Initialize Samsung Expiration Date picker
+        const samsungExpInput = document.getElementById('{{ form.samsung_exp.id_for_label }}');
+        if (samsungExpInput) {
+            const samsungExpPicker = flatpickr(samsungExpInput, {
+                dateFormat: 'Y-m-d',
+                allowInput: true,
+                locale: 'id',
+                position: 'auto',
+                clickOpens: true,
+                allowOutsideClick: true,
+                allowClear: true,
+                enableTime: false,
+                weekNumbers: false,
+            });
+
+            // Open calendar when clicking the calendar icon
+            const samsungExpWrapper = samsungExpInput.closest('.date-picker-wrapper');
+            if (samsungExpWrapper) {
+                const icon = samsungExpWrapper.querySelector('.input-group-text');
+                if (icon) {
+                    icon.addEventListener('click', () => {
+                        samsungExpPicker.open();
+                    });
+                }
+            }
+        }
+
+        // date picker initialization with Flatpickr and calendar icon
         const dateInput = document.getElementById('{{ form.date.id_for_label }}');
         if (dateInput) {
-            // Wrap the input in a div with input-group class
-            const wrapper = document.createElement('div');
-            wrapper.className = 'input-group date-picker-wrapper';
-            dateInput.parentNode.insertBefore(wrapper, dateInput);
-            wrapper.appendChild(dateInput);
-            
-            // Add calendar icon button
-            const iconSpan = document.createElement('span');
-            iconSpan.className = 'input-group-text';
-            iconSpan.innerHTML = '<i class="far fa-calendar-alt"></i>';
-            wrapper.appendChild(iconSpan);
-            
             // Initialize Flatpickr
             const fp = flatpickr(dateInput, {
                 dateFormat: 'Y-m-d',
                 allowInput: true,
                 locale: 'id',
-                // Open calendar when clicking the icon
-                clickOpens: false,
-                // Close when clicking outside
+                clickOpens: true,
                 allowOutsideClick: true,
+                weekNumbers: false,
             });
             
-            // Open calendar when clicking the icon
-            iconSpan.addEventListener('click', () => {
-                fp.open();
-            });
+            // Open calendar when clicking the calendar icon
+            const dateWrapper = dateInput.closest('.date-picker-wrapper');
+            if (dateWrapper) {
+                const icon = dateWrapper.querySelector('.input-group-text');
+                if (icon) {
+                    icon.addEventListener('click', () => {
+                        fp.open();
+                    });
+                }
+            }
         }
     });
 
