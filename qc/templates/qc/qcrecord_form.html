@@ -3,23 +3,21 @@
 <div class="form-container">
     <div class="container">
         <h1 class="page-header">QC-3 Record Form</h1>
-        <p>Sumber data: <a href="http://202.90.198.41/index3.txt" target="_blank">http://202.90.198.41/index3.txt</a></p>
+        <p>Sumber data: <a href="http://202.90.198.41/index3.txt" target="_blank">http://202.90.198.41/index3.txt</a>
+        </p>
         <form method="post" class="needs-validation" novalidate>
             {% csrf_token %}
             {% load form_tags %}
 
             {% if form.errors %}
-            <div class="alert alert-danger">
-                Please correct the errors below.
-                <ul>
-                    {% for field in form %}
-                    {% if field.errors %}
-                    {% for error in field.errors %}
-                    <li>{{ field.label }}: {{ error }}</li>
-                    {% endfor %}
-                    {% endif %}
-                    {% endfor %}
-                </ul>
+            <div id="form-errors" data-errors="true" style="display: none;">
+                {% for field in form %}
+                {% if field.errors %}
+                {% for error in field.errors %}
+                <div data-field="{{ field.id_for_label }}" data-error="{{ error|escapejs }}"></div>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
             </div>
             {% endif %}
             <div class="form-group row">
@@ -112,7 +110,8 @@
                             data-parent="#fetchedDataAccordion">
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-hover table-sm" id="fetched-data-table">
+                                    <table class="table table-bordered table-striped table-hover table-sm"
+                                        id="fetched-data-table">
                                         <thead class="thead-dark">
                                             <tr>
                                                 <th>No</th>
@@ -168,7 +167,8 @@
                     <div class="col-md-4">
                         <label for="datetime_qc_end">End Date and Time (UTC)</label>
                         <div class="input-group">
-                            <input type="datetime" id="datetime_qc_end" class="form-control datetime-picker" value="2024-12-14 07:00:00">
+                            <input type="datetime" id="datetime_qc_end" class="form-control datetime-picker"
+                                value="2024-12-14 07:00:00">
                             <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                         </div>
                     </div>
@@ -192,7 +192,8 @@
                             data-parent="#qcDataAccordion">
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-hover table-sm" id="qc-data-table">
+                                    <table class="table table-bordered table-striped table-hover table-sm"
+                                        id="qc-data-table">
                                         <thead class="thead-dark">
                                             <tr>
                                                 <th>No</th>
@@ -240,16 +241,17 @@
                     </div>
                 </div>
                 <div class="col-md-2 d-flex align-items-end align-items-bottom">
-                    <button id="save-nip-button" type="button" class="btn btn-success ml-2" style="display: none;">Save NIP</button>
+                    <button id="save-nip-button" type="button" class="btn btn-success ml-2" style="display: none;">Save
+                        NIP</button>
                     <div class="invalid-feedback">
                         Please provide a valid NIP.
                     </div>
                 </div>
             </div>
 
-            <!-- Modal for NIP notification -->
-<!-- Empty NIP Modal -->
-            <div class="modal fade" id="emptyNipModal" tabindex="-1" aria-labelledby="emptyNipModalLabel" aria-hidden="true">
+            <!-- Empty NIP Modal -->
+            <div class="modal fade" id="emptyNipModal" tabindex="-1" aria-labelledby="emptyNipModalLabel"
+                aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header bg-warning text-dark">
@@ -261,7 +263,8 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                            <a href="{% url 'core:operator_list' %}" class="btn btn-primary">Pergi ke Manajemen Operator</a>
+                            <a href="{% url 'core:operator_list' %}" class="btn btn-primary">Pergi ke Manajemen
+                                Operator</a>
                         </div>
                     </div>
                 </div>
@@ -272,20 +275,6 @@
                     Please provide a valid date.
                 </div>
             </div>
-            {% if form.errors %}
-            <div class="alert alert-danger">
-                Please correct the errors below.
-                <ul>
-                    {% for field in form %}
-                    {% if field.errors %}
-                    {% for error in field.errors %}
-                    <li>{{ field.label }}: {{ error }}</li>
-                    {% endfor %}
-                    {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
             <button type="submit" class="btn btn-primary">Save</button>
             <button type="button" class="btn btn-secondary"
                 onclick="window.location.href='{% url 'qc:qcrecord_list' %}'">Cancel</button>
@@ -293,7 +282,7 @@
     </div>
 </div>
 
-<!-- Error Modal -->
+<!-- Validation Error Modal -->
 <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -312,69 +301,7 @@
 </div>
 
 <script>
-    // Helper function for showing error messages in modal
-    function showErrorModal(message) {
-        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-        const errorContent = document.getElementById('errorModalContent');
-        errorContent.innerHTML = `<p>${message}</p>`;
-        errorModal.show();
-    }
-
-    // Form validation with Bootstrap 5 and error modal
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.querySelector('.needs-validation');
-        if (form) {
-            form.addEventListener('submit', function(event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                    const errorContent = document.getElementById('errorModalContent');
-                    let errorHtml = '<p>Mohon perbaiki kesalahan berikut:</p><ul class="mb-0">';
-                    // Find all invalid fields
-                    const invalidFields = form.querySelectorAll(':invalid');
-                    invalidFields.forEach(field => {
-                        const fieldLabel = document.querySelector(`label[for="${field.id}"]`);
-                        const labelText = fieldLabel ? fieldLabel.textContent.trim().replace(':', '') : field.name;
-                        errorHtml += `<li><strong>${labelText}:</strong> ${field.validationMessage || 'Wajib diisi'}</li>`;
-                    });
-                    errorHtml += '</ul>';
-                    errorContent.innerHTML = errorHtml;
-                    errorModal.show();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        }
-    });
-</script>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script>
-    // date picker initialization
-    document.addEventListener('DOMContentLoaded', function () {
-                    const dateInput = document.getElementById('{{ form.date.id_for_label }}');
-                    dateInput.type = 'date';
-                });
-
-    // Example starter JavaScript for disabling form submissions if there are invalid fields
-    (function () {
-        'use strict';
-        window.addEventListener('load', function () {
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
-            var forms = document.getElementsByClassName('needs-validation');
-            // Loop over them and prevent submission
-            var validation = Array.prototype.filter.call(forms, function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (form.checkValidity() === false) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        }, false);
-    })();
+    // Other initialization code can go here
 
     // Helper for QC ID suffix
     function getQcSuffix(waktuDinasValue) {
@@ -539,7 +466,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Add click event listeners to all calendar icons
         document.querySelectorAll('.input-group-text .fa-calendar-alt').forEach(icon => {
-            icon.closest('.input-group-text').addEventListener('click', function(e) {
+            icon.closest('.input-group-text').addEventListener('click', function (e) {
                 // Find the closest input group and get the input element
                 const inputGroup = this.closest('.input-group');
                 if (inputGroup) {
@@ -555,12 +482,12 @@
                     }
                 }
             });
-            
+
             // Change cursor to pointer on hover for better UX
             icon.closest('.input-group-text').style.cursor = 'pointer';
         });
 
-        // Set NIP's value based on the selected operator and handle "Save NIP" button
+        // Set NIP's value based on the selected operator
         const operatorSelect = document.getElementById('{{ form.operator.id_for_label }}');
         const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
         const saveButton = document.getElementById('save-nip-button');
@@ -568,7 +495,7 @@
 
         function updateNip() {
             const selectedOperator = operatorSelect.value;
-            
+
             // Don't proceed if no operator is selected
             if (!selectedOperator) {
                 nipInput.value = '';
@@ -602,7 +529,7 @@
                             const emptyNipModal = new bootstrap.Modal(document.getElementById('emptyNipModal'));
                             const modalBody = document.getElementById('emptyNipModalBody');
                             const selectedOperatorText = operatorSelect.options[operatorSelect.selectedIndex].text;
-                            
+
                             modalBody.innerHTML = `
                                 <p>Operator <strong>${selectedOperatorText}</strong> belum memiliki NIP yang terdaftar.</p>
                                 <p>Silakan tambahkan NIP melalui halaman <a href="{% url 'core:operator_list' %}" class="alert-link">Manajemen Operator</a>.</p>
@@ -624,48 +551,63 @@
         updateNip();
     });
 
-    // Handle "Save NIP" button click
-    document.addEventListener('DOMContentLoaded', function () {
-        const saveButton = document.getElementById('save-nip-button');
-        const operatorSelect = document.getElementById('{{ form.operator.id_for_label }}');
-        const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
-
-        saveButton.addEventListener('click', function () {
-            const operatorId = operatorSelect.value;
-            const nip = nipInput.value;
-
-            if (!operatorId || !nip) {
-                alert('Please select an operator and provide a valid NIP.');
-                return;
-            }
-
-            fetch("{% url 'qc:save_nip' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                },
-                body: JSON.stringify({ operator_id: operatorId, nip: nip })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.success);
-                    saveButton.style.display = 'none';
-                } else {
-                    alert(data.error || 'Failed to save NIP.');
-                }
-            })
-            .catch(error => console.error('Error saving NIP:', error));
-        });
-    });
-
     // Show modal when NIP is empty
     document.addEventListener('DOMContentLoaded', function () {
         const operatorSelect = document.getElementById('{{ form.operator.id_for_label }}');
         const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
         const emptyNipModalElement = document.getElementById('emptyNipModal');
         const emptyNipModal = new bootstrap.Modal(emptyNipModalElement);
+    });
+
+    // Handle form validation errors
+    document.addEventListener('DOMContentLoaded', function () {
+        const formErrors = document.getElementById('form-errors');
+        if (formErrors && formErrors.dataset.errors === 'true') {
+            // Get the error modal element
+            const errorModalElement = document.getElementById('errorModal');
+            if (errorModalElement) {
+                // Initialize the Bootstrap 5 modal
+                const errorModal = new bootstrap.Modal(errorModalElement, {
+                    backdrop: true, // Enable backdrop click to close
+                    keyboard: true  // Enable ESC key to close
+                });
+
+                const errorContent = document.getElementById('errorModalContent');
+
+                if (errorContent) {
+                    let errorHtml = '<p>Silakan perbaiki kesalahan berikut:</p><ul class="mb-0">';
+
+                    // Get all error elements
+                    const errorElements = formErrors.querySelectorAll('[data-field][data-error]');
+                    if (errorElements.length > 0) {
+                        errorElements.forEach(el => {
+                            const fieldId = el.dataset.field;
+                            const errorMsg = el.dataset.error;
+                            const fieldLabel = document.querySelector(`label[for="${fieldId}"]`);
+                            const labelText = fieldLabel ? fieldLabel.textContent.trim().replace(':', '') : fieldId;
+                            errorHtml += `<li><strong>${labelText}:</strong> ${errorMsg}</li>`;
+                        });
+                    } else {
+                        // Fallback if no specific field errors found
+                        errorHtml += '<li>Terjadi kesalahan saat memproses formulir.</li>';
+                    }
+
+                    errorHtml += '</ul>';
+                    errorContent.innerHTML = errorHtml;
+
+                    // Show the modal
+                    errorModal.show();
+
+                    // Manually handle close button click
+                    const closeButtons = errorModalElement.querySelectorAll('[data-bs-dismiss="modal"]');
+                    closeButtons.forEach(button => {
+                        button.addEventListener('click', function () {
+                            errorModal.hide();
+                        });
+                    });
+                }
+            }
+        }
     });
 </script>
 {% endblock %}
