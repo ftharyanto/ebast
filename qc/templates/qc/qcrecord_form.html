@@ -95,22 +95,19 @@
                 </div>
                 <!-- Accordion for fetched data and qc_prev form -->
                 <div class="accordion" id="fetchedDataAccordion">
-                    <div class="card">
-                        <div class="card-header" id="headingOne">
-                            <h2 class="mb-0">
-                                <button class="btn btn-link" type="button" data-toggle="collapse"
-                                    data-target="#fetchedDataSection" aria-expanded="true"
-                                    aria-controls="fetchedDataSection">
-                                    Fetched Data
-                                </button>
-                            </h2>
-                        </div>
-
-                        <div id="fetchedDataSection" class="collapse" aria-labelledby="headingOne"
-                            data-parent="#fetchedDataAccordion">
-                            <div class="card-body">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#fetchedDataSection" aria-expanded="false"
+                                aria-controls="fetchedDataSection">
+                                Fetched Data
+                            </button>
+                        </h2>
+                        <div id="fetchedDataSection" class="accordion-collapse collapse" 
+                            aria-labelledby="headingOne" data-bs-parent="#fetchedDataAccordion">
+                            <div class="accordion-body">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-hover table-sm"
+                                    <table class="table table-bordered table-striped table-hover table-sm m-0"
                                         id="fetched-data-table">
                                         <thead class="thead-dark">
                                             <tr>
@@ -135,6 +132,9 @@
                                 </div>
                                 {{ form.qc_prev.label_tag }}
                                 {{ form.qc_prev|add_class:"form-control" }}
+                                <div class="invalid-feedback">
+                                    Please provide a valid Event.
+                                </div>
                                 <div class="form-group row">
                                     <div class="col-md-6">
                                         {{ form.event_indonesia.label_tag }}
@@ -144,9 +144,6 @@
                                         {{ form.event_luar.label_tag }}
                                         {{ form.event_luar|add_class:"form-control" }}
                                     </div>
-                                </div>
-                                <div class="invalid-feedback">
-                                    Please provide a valid previous QC.
                                 </div>
                             </div>
                         </div>
@@ -178,19 +175,17 @@
                 </div>
                 <!-- Accordion for fetched data and qc form -->
                 <div class="accordion" id="qcDataAccordion">
-                    <div class="card">
-                        <div class="card-header" id="headingTwo">
-                            <h2 class="mb-0">
-                                <button class="btn btn-link" type="button" data-toggle="collapse"
-                                    data-target="#qcDataSection" aria-expanded="true" aria-controls="qcDataSection">
-                                    Fetched QC Data
-                                </button>
-                            </h2>
-                        </div>
-
-                        <div id="qcDataSection" class="collapse" aria-labelledby="headingTwo"
-                            data-parent="#qcDataAccordion">
-                            <div class="card-body">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#qcDataSection" aria-expanded="false"
+                                aria-controls="qcDataSection">
+                                Fetched QC Data
+                            </button>
+                        </h2>
+                        <div id="qcDataSection" class="accordion-collapse collapse" 
+                            aria-labelledby="headingTwo" data-bs-parent="#qcDataAccordion">
+                            <div class="accordion-body">
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped table-hover table-sm"
                                         id="qc-data-table">
@@ -359,7 +354,8 @@
                 // Simulate a click on the accordion button if not already expanded
                 const fetchedDataSection = document.getElementById('fetchedDataSection');
                 if (!fetchedDataSection.classList.contains('show')) {
-                    document.querySelector('[data-target="#fetchedDataSection"]').click();
+                    const accordionButton = document.querySelector('[data-bs-target="#fetchedDataSection"]');
+                    accordionButton.click();
                 }
             })
             .catch(error => console.error('Error fetching data:', error));
@@ -395,7 +391,8 @@
                 // Simulate a click on the accordion button if not already expanded
                 const qcDataSection = document.getElementById('qcDataSection');
                 if (!qcDataSection.classList.contains('show')) {
-                    document.querySelector('[data-target="#qcDataSection"]').click();
+                    const accordionButton = document.querySelector('[data-bs-target="#qcDataSection"]');
+                    accordionButton.click();
                 }
             })
             .catch(error => console.error('Error fetching data:', error));

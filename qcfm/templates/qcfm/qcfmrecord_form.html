@@ -92,21 +92,18 @@
                     </div>
                 </div>
                 <!-- Accordion for fetched data and qcfm_prev form -->
-                <div class="accordion" id="fetchedDataAccordion">
-                    <div class="card">
-                        <div class="card-header" id="headingOne">
-                            <h2 class="mb-0">
-                                <button class="btn btn-link" type="button" data-toggle="collapse"
-                                    data-target="#fetchedDataSection" aria-expanded="true"
-                                    aria-controls="fetchedDataSection">
-                                    Fetched Data
-                                </button>
-                            </h2>
-                        </div>
-
-                        <div id="fetchedDataSection" class="collapse" aria-labelledby="headingOne"
-                            data-parent="#fetchedDataAccordion">
-                            <div class="card-body">
+                <div class="accordion mb-3" id="fetchedDataAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button bg-light" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#fetchedDataSection" aria-expanded="true"
+                                aria-controls="fetchedDataSection">
+                                Fetched Data
+                            </button>
+                        </h2>
+                        <div id="fetchedDataSection" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                            data-bs-parent="#fetchedDataAccordion">
+                            <div class="card-body p-4">
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped table-hover table-sm" id="fetched-data-table">
                                         <thead class="thead-dark">
@@ -168,20 +165,17 @@
                     </div>
                 </div>
                 <!-- Accordion for fetched data and qc form -->
-                <div class="accordion" id="qcFmDataAccordion">
-                    <div class="card">
-                        <div class="card-header" id="headingTwo">
-                            <h2 class="mb-0">
-                                <button class="btn btn-link" type="button" data-toggle="collapse"
-                                    data-target="#qcFmDataSection" aria-expanded="true" aria-controls="qcFmDataSection">
-                                    Fetched QC Data
-                                </button>
-                            </h2>
-                        </div>
-
-                        <div id="qcFmDataSection" class="collapse" aria-labelledby="headingTwo"
-                            data-parent="#qcFmDataAccordion">
-                            <div class="card-body">
+                <div class="accordion mb-3" id="qcFmDataAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button bg-light" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#qcFmDataSection" aria-expanded="true" aria-controls="qcFmDataSection">
+                                Fetched QC Data
+                            </button>
+                        </h2>
+                        <div id="qcFmDataSection" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                            data-bs-parent="#qcFmDataAccordion">
+                            <div class="card-body p-4">
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped table-hover table-sm" id="qc-fm-data-table">
                                         <thead class="thead-dark">
@@ -245,9 +239,6 @@
         </form>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <!-- Helper function for showing error messages in modal -->
 <script>
@@ -346,7 +337,7 @@
                 // Simulate a click on the accordion button if not already expanded
                 const fetchedDataSection = document.getElementById('fetchedDataSection');
                 if (!fetchedDataSection.classList.contains('show')) {
-                    document.querySelector('[data-target="#fetchedDataSection"]').click();
+                    document.querySelector('[data-bs-target="#fetchedDataSection"]').click();
                 }
             })
             .catch(error => {
@@ -385,7 +376,7 @@
                 // Simulate a click on the accordion button if not already expanded
                 const qcFmDataSection = document.getElementById('qcFmDataSection');
                 if (!qcFmDataSection.classList.contains('show')) {
-                    document.querySelector('[data-target="#qcFmDataSection"]').click();
+                    document.querySelector('[data-bs-target="#qcFmDataSection"]').click();
                 }
             })
             .catch(error => {
