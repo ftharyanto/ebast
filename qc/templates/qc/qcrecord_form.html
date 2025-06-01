@@ -35,9 +35,9 @@
                     {{ form.shift.label_tag }}
                     {{ form.shift|add_class:"form-select" }}
                 </div>
-                <div class="col-md-4" style="display: none;">
+                <div class="col-md-4">
                     {{ form.qc_id.label_tag }}
-                    {{ form.qc_id|add_class:"form-control" }}
+                    <input type="text" name="{{ form.qc_id.name }}" value="{{ form.qc_id.value|default:'' }}" class="form-control bg-light" id="{{ form.qc_id.id_for_label }}" readonly style="cursor: not-allowed;">
                     <div class="invalid-feedback">
                         Please provide a valid QC ID.
                     </div>
@@ -240,13 +240,7 @@
                         Please provide a valid NIP.
                     </div>
                 </div>
-                <div class="col-md-2 d-flex align-items-end align-items-bottom">
-                    <button id="save-nip-button" type="button" class="btn btn-success ml-2" style="display: none;">Save
-                        NIP</button>
-                    <div class="invalid-feedback">
-                        Please provide a valid NIP.
-                    </div>
-                </div>
+
             </div>
 
             <!-- Empty NIP Modal -->
@@ -461,10 +455,11 @@
         }
     });
 
+    // Main DOMContentLoaded event listener
+    document.addEventListener('DOMContentLoaded', function () {
         // Set NIP's value based on the selected operator
         const operatorSelect = document.getElementById('{{ form.operator.id_for_label }}');
         const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
-        const saveButton = document.getElementById('save-nip-button');
         const nipContainer = document.getElementById('nip-container');
 
         function updateNip() {
@@ -473,7 +468,6 @@
             // Don't proceed if no operator is selected
             if (!selectedOperator) {
                 nipInput.value = '';
-                saveButton.style.display = 'none';
                 nipContainer.classList.remove('col-md-4');
                 nipContainer.classList.add('col-md-6');
                 return;
@@ -489,12 +483,11 @@
                 .then(data => {
                     if (data && data.nip) {
                         nipInput.value = data.nip;
-                        saveButton.style.display = 'none'; // Hide the button
+
                         nipContainer.classList.remove('col-md-4');
                         nipContainer.classList.add('col-md-6');
                     } else {
                         nipInput.value = '';
-                        saveButton.style.display = 'inline-block'; // Show the button
                         nipContainer.classList.remove('col-md-6');
                         nipContainer.classList.add('col-md-4');
 
@@ -527,10 +520,10 @@
 
     // Show modal when NIP is empty
     document.addEventListener('DOMContentLoaded', function () {
-        const operatorSelect = document.getElementById('{{ form.operator.id_for_label }}');
-        const nipInput = document.getElementById('{{ form.NIP.id_for_label }}');
         const emptyNipModalElement = document.getElementById('emptyNipModal');
-        const emptyNipModal = new bootstrap.Modal(emptyNipModalElement);
+        if (emptyNipModalElement) {
+            const emptyNipModal = new bootstrap.Modal(emptyNipModalElement);
+        }
     });
 
     // Handle form validation errors

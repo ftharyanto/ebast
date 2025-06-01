@@ -36,7 +36,7 @@
                 </div>
                 <div class="col-md-4">
                     {{ form.qcfm_id.label_tag }}
-                    {{ form.qcfm_id|add_class:"form-control" }}
+                    <input type="text" name="{{ form.qcfm_id.name }}" value="{{ form.qcfm_id.value|default:'' }}" class="form-control bg-light" id="{{ form.qcfm_id.id_for_label }}" readonly style="cursor: not-allowed;">
                     <div class="invalid-feedback">
                         Please provide a valid QC FM ID.
                     </div>

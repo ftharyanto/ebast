@@ -35,7 +35,7 @@
                 </div>
                 <div class="col-md-4">
                     {{ form.bast_id.label_tag }}
-                    {{ form.bast_id|add_class:"form-control" }}
+                    <input type="text" name="{{ form.bast_id.name }}" value="{{ form.bast_id.value|default:'' }}" class="form-control bg-light" id="{{ form.bast_id.id_for_label }}" readonly style="cursor: not-allowed;">
                     <div class="invalid-feedback">
                         Please provide a valid BAST ID.
                     </div>
