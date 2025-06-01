@@ -544,23 +544,4 @@
         }
     });
 </script>
-<!-- Empty NIP Modal -->
-<div class="modal fade" id="emptyNipModal" tabindex="-1" aria-labelledby="emptyNipModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="emptyNipModalLabel">NIP Tidak Ditemukan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-            </div>
-            <div class="modal-body" id="emptyNipModalBody">
-                <!-- Content will be dynamically inserted here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <a href="{% url 'core:operator_list' %}" class="btn btn-primary">Pergi ke Manajemen Operator</a>
-            </div>
-        </div>
-    </div>
-</div>
-
 {% endblock %}
