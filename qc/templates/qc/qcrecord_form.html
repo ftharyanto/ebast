@@ -276,8 +276,7 @@
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Save</button>
-            <button type="button" class="btn btn-secondary"
-                onclick="window.location.href='{% url 'qc:qcrecord_list' %}'">Cancel</button>
+            <a href="{% url 'qc:qcrecord_list' %}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 </div>
@@ -461,31 +460,6 @@
             qcIdInput.value = dateValue + "-" + waktuDinasValue;
         }
     });
-
-    // Make calendar icons clickable to trigger date/datetime picker
-    document.addEventListener('DOMContentLoaded', function () {
-        // Add click event listeners to all calendar icons
-        document.querySelectorAll('.input-group-text .fa-calendar-alt').forEach(icon => {
-            icon.closest('.input-group-text').addEventListener('click', function (e) {
-                // Find the closest input group and get the input element
-                const inputGroup = this.closest('.input-group');
-                if (inputGroup) {
-                    const input = inputGroup.querySelector('input');
-                    if (input) {
-                        input.focus();
-                        // For datetime picker, we need to trigger the click event
-                        if (input.classList.contains('datetime-picker') && typeof $.fn.datetimepicker === 'function') {
-                            $(input).datetimepicker('show');
-                        } else if (input.classList.contains('date-picker') && typeof $.fn.datepicker === 'function') {
-                            $(input).datepicker('show');
-                        }
-                    }
-                }
-            });
-
-            // Change cursor to pointer on hover for better UX
-            icon.closest('.input-group-text').style.cursor = 'pointer';
-        });
 
         // Set NIP's value based on the selected operator
         const operatorSelect = document.getElementById('{{ form.operator.id_for_label }}');

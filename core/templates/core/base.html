@@ -304,9 +304,36 @@
             });
         }
 
+        // Make calendar icons clickable to trigger date/datetime picker
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize flatpickr
             initializeDatePickers();
+            
+            // Add click event listeners to all calendar icons
+            document.querySelectorAll('.input-group-text .fa-calendar-alt').forEach(icon => {
+                const inputGroupText = icon.closest('.input-group-text');
+                if (inputGroupText) {
+                    // Change cursor to pointer on hover for better UX
+                    inputGroupText.style.cursor = 'pointer';
+                    
+                    inputGroupText.addEventListener('click', function (e) {
+                        // Find the closest input group and get the input element
+                        const inputGroup = this.closest('.input-group');
+                        if (inputGroup) {
+                            const input = inputGroup.querySelector('input');
+                            if (input) {
+                                input.focus();
+                                // For datetime picker, we need to trigger the click event
+                                if (input.classList.contains('datetime-picker') && typeof $.fn.datetimepicker === 'function') {
+                                    $(input).datetimepicker('show');
+                                } else if (input.classList.contains('date-picker') && typeof $.fn.datepicker === 'function') {
+                                    $(input).datepicker('show');
+                                }
+                            }
+                        }
+                    });
+                }
+            });
             
             // Other existing DOMContentLoaded code
             // Get the modal elements
