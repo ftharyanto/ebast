@@ -33,9 +33,12 @@
                     </div>
                     <div class="card-body p-0 d-flex flex-column" style="height: calc(100vh - 200px);">
                         <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column;">
-                            <div id="tabulator-table" class="loading" style="flex: 1; min-height: 0; min-width: 100%; position: relative;">
-                                <div class="loader-container" style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;'>
-                                    <div class="loader" style='display:inline-block; border:4px solid #0d6efd; border-radius:10px; background:#fff; font-weight:bold; font-size:16px; color:#0d6efd; padding:12px 24px; border-width: 2px; box-shadow: 0 2px 4px rgba(0, 109, 237, 0.2);'>
+                            <div id="tabulator-table" class="loading"
+                                style="flex: 1; min-height: 0; min-width: 100%; position: relative;">
+                                <div class="loader-container"
+                                    style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;'>
+                                    <div class="loader"
+                                        style='display:inline-block; border:4px solid #0d6efd; border-radius:10px; background:#fff; font-weight:bold; font-size:16px; color:#0d6efd; padding:12px 24px; border-width: 2px; box-shadow: 0 2px 4px rgba(0, 109, 237, 0.2);'>
                                         Loading Data...
                                     </div>
                                 </div>
@@ -64,37 +67,37 @@
         var searchInput = document.getElementById('globalSearch');
         var clearSearchBtn = document.getElementById('clearSearch');
         var searchTimeout;
-        
+
         // Search on input with debounce
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(function() {
+            searchTimeout = setTimeout(function () {
                 var searchValue = searchInput.value;
                 if (searchValue === '') {
                     table.clearFilter();
                 } else {
-                    table.setFilter(function(data) {
+                    table.setFilter(function (data) {
                         return table.options.globalSearch(data, searchValue);
                     });
                 }
             }, 300);
         });
-        
+
         // Clear search
-        clearSearchBtn.addEventListener('click', function() {
+        clearSearchBtn.addEventListener('click', function () {
             searchInput.value = '';
             table.clearFilter();
         });
-        
+
         // Search on Enter key
-        searchInput.addEventListener('keyup', function(e) {
+        searchInput.addEventListener('keyup', function (e) {
             if (e.key === 'Enter') {
                 clearTimeout(searchTimeout);
                 var searchValue = searchInput.value;
                 if (searchValue === '') {
                     table.clearFilter();
                 } else {
-                    table.setFilter(function(data) {
+                    table.setFilter(function (data) {
                         return table.options.globalSearch(data, searchValue);
                     });
                 }
@@ -138,38 +141,38 @@
             paginationCounter: "rows",
             ajaxURL: `{% url 'bast:bastrecord_list_api' 10 %}`,
             ajaxConfig: "GET",
-            ajaxRequesting: function(url, params) {
+            ajaxRequesting: function (url, params) {
                 // Show loading state
                 document.getElementById('tabulator-table').classList.add('loading');
             },
-            ajaxResponse: function(url, params, response) {
+            ajaxResponse: function (url, params, response) {
                 // Hide loading state
                 document.getElementById('tabulator-table').classList.remove('loading');
                 console.log('AJAX Response received. Record count:', response ? response.length : 0);
                 return response;
             },
-            ajaxError: function(xhr, status, error) {
+            ajaxError: function (xhr, status, error) {
                 // Hide loading state on error
                 document.getElementById('tabulator-table').classList.remove('loading');
                 console.error('AJAX Error:', error);
             },
             ajaxContentType: "json",
-            
+
             // Function to perform global search
-            globalSearch: function(data, searchValue) {
+            globalSearch: function (data, searchValue) {
                 // Check each property of the row
                 for (var key in data) {
                     // Skip internal Tabulator fields and functions
                     if (typeof data[key] === 'function' || !(key === 'bast_id' || key === 'spv_name')) {
                         continue;
                     }
-                    
+
                     // Get the value and convert to string
                     var value = data[key];
                     if (value === null || value === undefined) {
                         continue;
                     }
-                    
+
                     // Convert to string and check if it contains the search term
                     var stringValue = String(value).toLowerCase();
                     if (stringValue.includes(searchValue.toLowerCase())) {
@@ -307,6 +310,11 @@
                                     <i class="fas fa-file-pdf"></i>
                                 </a>
                             </div>
+                            <style>
+                                .tabulator .tabulator-footer {
+                                    background-color: #f5f5f5 !important; /* Light gray background */
+                                }
+                            </style>
                         `;
                     },
                     headerSort: false
@@ -333,7 +341,7 @@
     });
 
     // Handle delete confirmation modal
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Create a single form for all delete actions
         const deleteForm = document.createElement('form');
         deleteForm.method = 'post';
@@ -344,7 +352,7 @@
         let deleteUrl = '';
 
         // When delete button is clicked, store the delete URL
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (e.target.closest('.delete-button')) {
                 e.preventDefault();
                 const button = e.target.closest('.delete-button');
@@ -355,7 +363,7 @@
         // When confirm delete is clicked, submit the form
         const confirmDeleteBtn = document.getElementById('confirmDeleteButton');
         if (confirmDeleteBtn) {
-            confirmDeleteBtn.addEventListener('click', function() {
+            confirmDeleteBtn.addEventListener('click', function () {
                 if (deleteUrl) {
                     deleteForm.action = deleteUrl;
                     deleteForm.submit();
