@@ -80,7 +80,7 @@
                     <div class="table-responsive container" style="padding-right: 5em; padding-left: 5em;">
                         <table class="table table-bordered table-hover table-sm" id="member-data-table"
                             style="width: auto;">
-                            <thead class="thead-dark">
+                            <thead class="table-dark">
                                 <tr>
                                     <th style="width: 1%;">No</th>
                                     <th style="width: 20%;">Nama</th>
@@ -133,24 +133,23 @@
                 </div>
                 <!-- Accordion for fetched data and bast form -->
                 <div class="accordion" id="fetchedDataAccordion">
-                    <div class="card">
-                        <div class="card-header clickable" id="headingOne" data-bs-toggle="collapse"
-                            data-bs-target="#fetchedDataSection" aria-expanded="true" aria-controls="fetchedDataSection"
-                            style="cursor:pointer;">
-                            <h5 class="mb-2 mt-2">
-                                <span class="font-weight-bold">Fetched Data</span>
-                            </h5>
-                        </div>
-
-                        <div id="fetchedDataSection" class="collapse" aria-labelledby="headingOne"
-                            data-bs-parent="#fetchedDataAccordion">
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-hover table-sm"
-                                        id="fetched-data-table">
-                                        <thead class="thead-dark">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#fetchedDataSection" aria-expanded="false"
+                                aria-controls="fetchedDataSection">
+                                <b>Fetched Data</b>
+                            </button>
+                        </h2>
+                        <div id="fetchedDataSection" class="accordion-collapse collapse" 
+                            aria-labelledby="headingOne" data-bs-parent="#fetchedDataAccordion">
+                            <div class="accordion-body p-0">
+                                <div class="table-responsive" style="max-height: 300px; overflow-x: auto; font-size: 0.85rem;">
+                                    <table class="table table-bordered table-striped table-hover table-sm mb-0"
+                                        id="fetched-data-table" style="min-width: 1100px;">
+                                        <thead class="table-dark" style="position: sticky; top: 0; z-index: 1;">
                                             <tr>
-                                                <th>No</th>
+                                                <th style="width: 40px;">No</th>
                                                 <th>Date</th>
                                                 <th>OT (UTC)</th>
                                                 <th>Lat</th>
@@ -169,12 +168,14 @@
                                                     <span data-bs-toggle="tooltip" data-bs-placement="top"
                                                         title="Waktu diseminasi oleh PGN. Contoh: 20:25:03">
                                                         <i class="fas fa-info-circle"></i>
+                                                    </span>
                                                 </th>
                                                 <th>Selisih PGN</th>
                                                 <th>Dis. PGR
                                                     <span data-bs-toggle="tooltip" data-bs-placement="top"
                                                         title="Waktu diseminasi oleh PGR. Contoh: 20:25:03">
                                                         <i class="fas fa-info-circle"></i>
+                                                    </span>
                                                 </th>
                                                 <th>Selisih PGR</th>
                                             </tr>
@@ -184,8 +185,10 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                {{ form.events.label_tag }}
-                                {{ form.events|add_class:"form-control" }}
+                                <div class="mt-3">
+                                    <label for="{{ form.events.id_for_label }}">Events (in CSV format):</label>
+                                    {{ form.events|add_class:"form-control" }}
+                                </div>
                             </div>
                         </div>
                     </div>
