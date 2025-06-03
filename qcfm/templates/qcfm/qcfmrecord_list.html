@@ -33,9 +33,12 @@
                     </div>
                     <div class="card-body p-0 d-flex flex-column" style="height: calc(100vh - 200px);">
                         <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column;">
-                            <div id="tabulator-table" class="loading" style="flex: 1; min-height: 0; min-width: 100%; position: relative;">
-                                <div class="loader-container" style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;'>
-                                    <div class="loader" style='display:inline-block; border:4px solid #0d6efd; border-radius:10px; background:#fff; font-weight:bold; font-size:16px; color:#0d6efd; padding:12px 24px; border-width: 2px; box-shadow: 0 2px 4px rgba(0, 109, 237, 0.2);'>
+                            <div id="tabulator-table" class="loading"
+                                style="flex: 1; min-height: 0; min-width: 100%; position: relative;">
+                                <div class="loader-container"
+                                    style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;'>
+                                    <div class="loader"
+                                        style='display:inline-block; border:4px solid #0d6efd; border-radius:10px; background:#fff; font-weight:bold; font-size:16px; color:#0d6efd; padding:12px 24px; border-width: 2px; box-shadow: 0 2px 4px rgba(0, 109, 237, 0.2);'>
                                         Loading Data...
                                     </div>
                                 </div>
@@ -64,37 +67,37 @@
         var searchInput = document.getElementById('globalSearch');
         var clearSearchBtn = document.getElementById('clearSearch');
         var searchTimeout;
-        
+
         // Search on input with debounce
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(function() {
+            searchTimeout = setTimeout(function () {
                 var searchValue = searchInput.value;
                 if (searchValue === '') {
                     table.clearFilter();
                 } else {
-                    table.setFilter(function(data) {
+                    table.setFilter(function (data) {
                         return table.options.globalSearch(data, searchValue);
                     });
                 }
             }, 300);
         });
-        
+
         // Clear search
-        clearSearchBtn.addEventListener('click', function() {
+        clearSearchBtn.addEventListener('click', function () {
             searchInput.value = '';
             table.clearFilter();
         });
-        
+
         // Search on Enter key
-        searchInput.addEventListener('keyup', function(e) {
+        searchInput.addEventListener('keyup', function (e) {
             if (e.key === 'Enter') {
                 clearTimeout(searchTimeout);
                 var searchValue = searchInput.value;
                 if (searchValue === '') {
                     table.clearFilter();
                 } else {
-                    table.setFilter(function(data) {
+                    table.setFilter(function (data) {
                         return table.options.globalSearch(data, searchValue);
                     });
                 }
@@ -138,38 +141,38 @@
             paginationCounter: "rows",
             ajaxURL: `{% url 'qcfm:qcfmrecord_list_api' 10 %}`,
             ajaxConfig: "GET",
-            ajaxRequesting: function(url, params) {
+            ajaxRequesting: function (url, params) {
                 // Show loading state
                 document.getElementById('tabulator-table').classList.add('loading');
             },
-            ajaxResponse: function(url, params, response) {
+            ajaxResponse: function (url, params, response) {
                 // Hide loading state
                 document.getElementById('tabulator-table').classList.remove('loading');
                 console.log('AJAX Response received. Record count:', response ? response.length : 0);
                 return response;
             },
-            ajaxError: function(xhr, status, error) {
+            ajaxError: function (xhr, status, error) {
                 // Hide loading state on error
                 document.getElementById('tabulator-table').classList.remove('loading');
                 console.error('AJAX Error:', error);
             },
             ajaxContentType: "json",
-            
+
             // Function to perform global search
-            globalSearch: function(data, searchValue) {
+            globalSearch: function (data, searchValue) {
                 // Check each property of the row
                 for (var key in data) {
                     // Skip internal Tabulator fields and functions
                     if (typeof data[key] === 'function' || key === 'id' || key === '_row' || key === 'table') {
                         continue;
                     }
-                    
+
                     // Get the value and convert to string
                     var value = data[key];
                     if (value === null || value === undefined) {
                         continue;
                     }
-                    
+
                     // Convert to string and check if it contains the search term
                     var stringValue = String(value).toLowerCase();
                     if (stringValue.includes(searchValue.toLowerCase())) {
@@ -289,43 +292,37 @@
                     headerHozAlign: "center",
                     formatter: function (cell, formatterParams, onRendered) {
                         const row = cell.getRow();
-                        const id = row.getData().id;
-                        const updateUrl = '{% url "qcfm:qcfmrecord_update" 0 %}'.replace('0', id);
-                        const deleteUrl = '{% url "qcfm:qcfmrecord_delete_direct" 0 %}'.replace('0', id);
-                        const exportExcelUrl = '{% url "qcfm:export_to_excel" 0 %}'.replace('0', id);
-                        const exportPdfUrl = '{% url "qcfm:export_to_pdf" 0 %}'.replace('0', id);
-                        return `
-                            <div class="d-flex gap-2">
-                                <a href="${updateUrl}"
-                                    class="btn btn-sm btn-warning" data-bs-toggle="tooltip"
-                                    title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button type="button" class="btn btn-sm btn-danger delete-button me-1"
-                                    data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal"
-                                    data-delete-url="${deleteUrl}" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                <a href="${exportExcelUrl}"
-                                    class="btn btn-sm btn-light text-success" data-bs-toggle="tooltip"
-                                    title="Export to Excel">
-                                    <i class="fas fa-file-excel"></i>
-                                </a>
-                                <a href="${exportPdfUrl}"
-                                    class="btn btn-sm btn-light text-danger" data-bs-toggle="tooltip"
-                                    title="Export to PDF">
-                                    <i class="fas fa-file-pdf"></i>
-                                </a>
-                            </div>
-                            <style>
-                                .tabulator .tabulator-footer {
-                                    background-color: #f5f5f5 !important; /* Light gray background */
-                                }
-                            </style>
-                        `;
+                        const data = row.getData();
+                        const id = data.id;
+
+                        // Get the template and clone it
+                        const template = document.getElementById('action-buttons-template');
+                        const clone = template.content.cloneNode(true);
+                        const container = clone.querySelector('.d-flex');
+
+                        // Set up the buttons
+                        const editBtn = container.querySelector('.action-edit');
+                        const deleteBtn = container.querySelector('.action-delete');
+                        const excelBtn = container.querySelector('.action-export-excel');
+                        const pdfBtn = container.querySelector('.action-export-pdf');
+
+                        // Set URLs
+                        editBtn.href = '{% url "qcfm:qcfmrecord_update" 0 %}'.replace('0', id);
+                        deleteBtn.dataset.deleteUrl = '{% url "qcfm:qcfmrecord_delete_direct" 0 %}'.replace('0', id);
+                        excelBtn.href = '{% url "qcfm:export_to_excel" 0 %}'.replace('0', id);
+                        pdfBtn.href = '{% url "qcfm:export_to_pdf" 0 %}'.replace('0', id);
+
+                        // Initialize tooltips
+                        const tooltipTriggerList = [].slice.call(container.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                        tooltipTriggerList.map(function (tooltipTriggerEl) {
+                            return new bootstrap.Tooltip(tooltipTriggerEl);
+                        });
+
+                        // Return the cloned node
+                        return container;
                     },
                     headerSort: false
-                },
+                }
             ],
             ajaxRequesting: function (url, params) {
                 console.log('AJAX Request:', url, params);
@@ -348,7 +345,7 @@
     });
 
     // Handle delete confirmation modal
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Create a single form for all delete actions
         const deleteForm = document.createElement('form');
         deleteForm.method = 'post';
@@ -359,18 +356,19 @@
         let deleteUrl = '';
 
         // When delete button is clicked, store the delete URL
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.delete-button')) {
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('.action-delete')) {
                 e.preventDefault();
-                const button = e.target.closest('.delete-button');
-                deleteUrl = button.getAttribute('data-delete-url');
+                const button = e.target.closest('.action-delete');
+                deleteUrl = button.dataset.deleteUrl;
+                document.getElementById('deleteConfirmationModal').dataset.deleteUrl = deleteUrl; // Store URL in modal for confirmation
             }
         });
 
         // When confirm delete is clicked, submit the form
         const confirmDeleteBtn = document.getElementById('confirmDelete');
         if (confirmDeleteBtn) {
-            confirmDeleteBtn.addEventListener('click', function() {
+            confirmDeleteBtn.addEventListener('click', function () {
                 if (deleteUrl) {
                     deleteForm.action = deleteUrl;
                     deleteForm.submit();
@@ -381,12 +379,14 @@
 </script>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 Are you sure you want to delete this record? This action cannot be undone.

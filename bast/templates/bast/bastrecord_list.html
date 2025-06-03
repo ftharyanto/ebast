@@ -282,43 +282,37 @@
                     headerHozAlign: "center",
                     formatter: function (cell, formatterParams, onRendered) {
                         const row = cell.getRow();
-                        const id = row.getData().id;
-                        const updateUrl = '{% url "bast:bastrecord_update" 0 %}'.replace('0', id);
-                        const deleteUrl = '{% url "bast:bastrecord_delete_direct" 0 %}'.replace('0', id);
-                        const exportExcelUrl = '{% url "bast:export_to_excel" 0 %}'.replace('0', id);
-                        const exportPdfUrl = '{% url "bast:export_to_pdf" 0 %}'.replace('0', id);
-                        return `
-                            <div class="d-flex gap-2">
-                                <a href="${updateUrl}"
-                                    class="btn btn-sm btn-warning" data-bs-toggle="tooltip"
-                                    title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button type="button" class="btn btn-sm btn-danger delete-button me-1"
-                                    data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal"
-                                    data-delete-url="${deleteUrl}" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                <a href="${exportExcelUrl}"
-                                    class="btn btn-sm btn-light text-success" data-bs-toggle="tooltip"
-                                    title="Export to Excel">
-                                    <i class="fas fa-file-excel"></i>
-                                </a>
-                                <a href="${exportPdfUrl}"
-                                    class="btn btn-sm btn-light text-danger" data-bs-toggle="tooltip"
-                                    title="Export to PDF">
-                                    <i class="fas fa-file-pdf"></i>
-                                </a>
-                            </div>
-                            <style>
-                                .tabulator .tabulator-footer {
-                                    background-color: #f5f5f5 !important; /* Light gray background */
-                                }
-                            </style>
-                        `;
+                        const data = row.getData();
+                        const id = data.id;
+
+                        // Get the template and clone it
+                        const template = document.getElementById('action-buttons-template');
+                        const clone = template.content.cloneNode(true);
+                        const container = clone.querySelector('.d-flex');
+
+                        // Set up the buttons
+                        const editBtn = container.querySelector('.action-edit');
+                        const deleteBtn = container.querySelector('.action-delete');
+                        const excelBtn = container.querySelector('.action-export-excel');
+                        const pdfBtn = container.querySelector('.action-export-pdf');
+
+                        // Set URLs
+                        editBtn.href = '{% url "bast:bastrecord_update" 0 %}'.replace('0', id);
+                        deleteBtn.dataset.deleteUrl = '{% url "bast:bastrecord_delete_direct" 0 %}'.replace('0', id);
+                        excelBtn.href = '{% url "bast:export_to_excel" 0 %}'.replace('0', id);
+                        pdfBtn.href = '{% url "bast:export_to_pdf" 0 %}'.replace('0', id);
+
+                        // Initialize tooltips
+                        const tooltipTriggerList = [].slice.call(container.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                        tooltipTriggerList.map(function (tooltipTriggerEl) {
+                            return new bootstrap.Tooltip(tooltipTriggerEl);
+                        });
+
+                        // Return the cloned node
+                        return container;
                     },
                     headerSort: false
-                },
+                }
             ],
             ajaxRequesting: function (url, params) {
                 console.log('AJAX Request:', url, params);
@@ -353,9 +347,9 @@
 
         // When delete button is clicked, store the delete URL
         document.addEventListener('click', function (e) {
-            if (e.target.closest('.delete-button')) {
+            if (e.target.closest('.action-delete')) {
                 e.preventDefault();
-                const button = e.target.closest('.delete-button');
+                const button = e.target.closest('.action-delete');
                 deleteUrl = button.getAttribute('data-delete-url');
             }
         });
@@ -372,6 +366,4 @@
         }
     });
 </script>
-
-
 {% endblock %}
