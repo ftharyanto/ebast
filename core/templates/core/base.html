@@ -309,6 +309,12 @@
             // Initialize flatpickr
             initializeDatePickers();
             
+            // Initialize Bootstrap tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
             // Add click event listeners to all calendar icons
             document.querySelectorAll('.input-group-text .fa-calendar-alt').forEach(icon => {
                 const inputGroupText = icon.closest('.input-group-text');

@@ -85,7 +85,7 @@
                                     <th style="width: 1%;">No</th>
                                     <th style="width: 20%;">Nama</th>
                                     <th style="width: 20%;">Keterangan
-                                        <span data-toggle="tooltip" data-placement="top"
+                                        <span data-bs-toggle="tooltip" data-bs-placement="top"
                                             title="Isi keterangan dengan nama pengganti atau keterangan izin/cuti/SPT. Contoh: diganti Fajar">
                                             <i class="fas fa-info-circle"></i>
                                         </span>
@@ -134,8 +134,8 @@
                 <!-- Accordion for fetched data and bast form -->
                 <div class="accordion" id="fetchedDataAccordion">
                     <div class="card">
-                        <div class="card-header clickable" id="headingOne" data-toggle="collapse"
-                            data-target="#fetchedDataSection" aria-expanded="true" aria-controls="fetchedDataSection"
+                        <div class="card-header clickable" id="headingOne" data-bs-toggle="collapse"
+                            data-bs-target="#fetchedDataSection" aria-expanded="true" aria-controls="fetchedDataSection"
                             style="cursor:pointer;">
                             <h5 class="mb-2 mt-2">
                                 <span class="font-weight-bold">Fetched Data</span>
@@ -143,7 +143,7 @@
                         </div>
 
                         <div id="fetchedDataSection" class="collapse" aria-labelledby="headingOne"
-                            data-parent="#fetchedDataAccordion">
+                            data-bs-parent="#fetchedDataAccordion">
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped table-hover table-sm"
@@ -160,19 +160,19 @@
                                                 <th>TypeMag</th>
                                                 <th>Region</th>
                                                 <th>MMI
-                                                    <span data-toggle="tooltip" data-placement="top"
+                                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
                                                         title="Contoh: dirasakan di Kolaka Timur III MMI">
                                                         <i class="fas fa-info-circle"></i>
                                                     </span>
                                                 </th>
                                                 <th>Dis. PGN
-                                                    <span data-toggle="tooltip" data-placement="top"
+                                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
                                                         title="Waktu diseminasi oleh PGN. Contoh: 20:25:03">
                                                         <i class="fas fa-info-circle"></i>
                                                 </th>
                                                 <th>Selisih PGN</th>
                                                 <th>Dis. PGR
-                                                    <span data-toggle="tooltip" data-placement="top"
+                                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
                                                         title="Waktu diseminasi oleh PGR. Contoh: 20:25:03">
                                                         <i class="fas fa-info-circle"></i>
                                                 </th>
@@ -424,9 +424,6 @@
         background-color: #e9ecef;
     }
 </style>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <!-- Helper function for showing error messages in modal -->
 <script>
@@ -599,10 +596,13 @@
                     tableBody.appendChild(tr);
                 });
 
-                // Simulate a click on the accordion button if not already expanded
+                // Expand the accordion if not already expanded
                 const fetchedDataSection = document.getElementById('fetchedDataSection');
-                if (!fetchedDataSection.classList.contains('show')) {
-                    document.querySelector('[data-target="#fetchedDataSection"]').click();
+                const accordionButton = document.querySelector('[data-bs-target="#fetchedDataSection"]');
+                if (fetchedDataSection && accordionButton && !fetchedDataSection.classList.contains('show')) {
+                    const bsCollapse = new bootstrap.Collapse(fetchedDataSection, {
+                        toggle: true
+                    });
                 }
             })
             .catch(error => console.error('Error fetching data:', error));
