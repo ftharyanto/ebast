@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'text_format_converter',
     'bast',
     'qcfm',
+    'papan_klip',
 ]
 
 MIDDLEWARE = [

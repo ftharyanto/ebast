@@ -1,0 +1,133 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Create{% endif %} Papan Klip Entry{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h4 class="mb-0">{% if form.instance.pk %}Edit{% else %}Create New{% endif %} Papan Klip Entry</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+                    <input type="text" 
+                           class="form-control {% if form.title.errors %}is-invalid{% endif %}" 
+                           id="{{ form.title.id_for_label }}" 
+                           name="{{ form.title.name }}" 
+                           value="{{ form.title.value|default:'' }}"
+                           {% if form.title.field.required %}required{% endif %}>
+                    {% if form.title.help_text %}
+                        <div class="form-text">{{ form.title.help_text }}</div>
+                    {% endif %}
+                    {% for error in form.title.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.content.id_for_label }}" class="form-label">{{ form.content.label }}</label>
+                    <textarea class="form-control {% if form.content.errors %}is-invalid{% endif %}" 
+                              id="{{ form.content.id_for_label }}" 
+                              name="{{ form.content.name }}" 
+                              rows="5"
+                              {% if form.content.field.required %}required{% endif %}>{{ form.content.value|default:'' }}</textarea>
+                    {% if form.content.help_text %}
+                        <div class="form-text">{{ form.content.help_text }}</div>
+                    {% endif %}
+                    {% for error in form.content.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'papan_klip:papan_klip_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to List
+                    </a>
+                    <div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Custom styles for the form */
+    .form-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Make the content textarea taller */
+    #id_content {
+        min-height: 300px;
+    }
+    
+    /* Style the form switch */
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    /* Add some spacing around the form */
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    .card-body {
+        padding: 2rem;
+    }
+    
+    /* Style the form buttons */
+    .btn-primary {
+        padding: 0.5rem 1.5rem;
+    }
+    
+    .btn-secondary {
+        padding: 0.5rem 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize any JavaScript components if needed
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize any tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        if (typeof bootstrap !== 'undefined') {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        }
+    });
+    
+    // Initialize any other JavaScript functionality here
+});
+</script>
+{% endblock %}

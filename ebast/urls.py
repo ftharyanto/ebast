@@ -30,6 +30,7 @@ urlpatterns = [
     path('text-format-converter/', include('text_format_converter.urls')),
     path('bast/', include('bast.urls')),
     path('qcfm/', include('qcfm.urls')),
+    path('papan-klip/', include('papan_klip.urls')),
 ]
 
 if settings.DEBUG:  # Only for development
