@@ -54,8 +54,10 @@
                 
                 <div class="mb-3">
                     <label for="{{ form.file.id_for_label }}" class="form-label">{{ form.file.label }}</label>
+                    
+                    <!-- Current files display for editing existing entries -->
                     {% if form.instance.file %}
-                        <div class="mb-2">
+                        <div class="mb-3">
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-paperclip me-2"></i>
                                 <a href="{{ form.instance.file.url }}" target="_blank" class="text-decoration-none">
@@ -63,33 +65,80 @@
                                 </a>
                                 {% if not form.instance.pk %}
                                     <div class="form-check ms-3">
-                                        <input class="form-check-input" type="checkbox" id="clear_file" name="file-clear">
+                                        <input class="form-check-input file-remove-checkbox" type="checkbox" id="clear_file" name="file-clear">
                                         <label class="form-check-label text-muted" for="clear_file">
                                             Remove file
                                         </label>
                                     </div>
                                 {% endif %}
                             </div>
-                        </div>
-                        <div class="form-text">
-                            Current file: {{ form.instance.file.name|slice:"8:" }}
+                            <div class="form-text">
+                                Current file: {{ form.instance.file.name|slice:"8:" }}
+                            </div>
                         </div>
                     {% endif %}
-                    <input type="file" 
-                           class="form-control {% if form.file.errors %}is-invalid{% endif %}" 
-                           id="{{ form.file.id_for_label }}" 
-                           name="{{ form.file.name }}"
-                           {% if not form.instance.pk and not form.instance.file and form.file.field.required %}required{% endif %}>
-                    {% if form.file.help_text %}
-                        <div class="form-text">{{ form.file.help_text }}</div>
-                    {% endif %}
-                    <div class="form-text">
-                        Allowed file types: PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG, TXT. Max size: 5MB
+
+                    <!-- File input for new files -->
+                    <div class="mb-4">
+                        <div class="card border-2 border-dashed" id="fileDropArea">
+                            <div class="card-body text-center p-4 p-md-5">
+                                <div class="d-flex flex-column align-items-center justify-content-center">
+                                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                        <i class="fas fa-cloud-upload-alt fa-2x text-primary"></i>
+                                    </div>
+                                    <h5 class="mb-2">Drop files here or click to browse</h5>
+                                    <p class="text-muted mb-3">Supports: PDF, DOC, XLS, JPG, PNG, TXT</p>
+                                    <span class="badge bg-light text-dark mb-3">Max 5MB per file</span>
+                                    <input type="file" 
+                                           class="d-none" 
+                                           id="{{ form.file.id_for_label }}" 
+                                           name="{{ form.file.name }}" 
+                                           multiple
+                                           accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt"
+                                           {% if not form.instance.pk and not form.instance.file and form.file.field.required %}required{% endif %}>
+                                    <button class="btn btn-outline-primary" type="button" id="browseFilesBtn">
+                                        <i class="fas fa-folder-open me-2"></i>Browse Files
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% if form.file.errors %}
+                            {% for error in form.file.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                                    <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        <div id="alertContainer" class="mt-3"></div>
+                        {# Accessibility: Live region to announce changes for screen readers #}
+                        <div id="file-upload-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
                     </div>
-                    {% for error in form.file.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
-                    {% endfor %}
-                </div>
+
+                    <!-- Preview area for selected files -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="h6 mb-0">
+                                <i class="fas fa-paperclip me-2 text-muted"></i>
+                                Selected Files
+                                <span class="badge bg-primary bg-opacity-10 text-primary ms-2 px-2 py-1" id="fileCount">0</span>
+                            </h5>
+                            <button type="button" class="btn btn-sm btn-outline-danger" id="clearAllFiles">
+                                <i class="fas fa-trash-alt me-1"></i> Clear All
+                            </button>
+                        </div>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush" id="fileList">
+                                    <div class="list-group-item text-center text-muted py-4">
+                                        <i class="far fa-folder-open fa-2x mb-2 opacity-50"></i>
+                                        <p class="mb-0 fw-medium">No files selected</p>
+                                        <small class="text-muted">Drag and drop files or click the browse button above</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 <div class="d-flex justify-content-between mt-4">
                     <a href="{% url 'papan_klip:papan_klip_list' %}" class="btn btn-secondary">
@@ -151,22 +200,428 @@
     .btn-secondary {
         padding: 0.5rem 1.5rem;
     }
+
+    /* File Upload Styles */
+    #fileDropArea {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    #fileDropArea:hover {
+        border-color: #86b7fe !important;
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+    
+    #fileDropArea.highlight {
+        border-color: #86b7fe !important;
+        background-color: rgba(13, 110, 253, 0.05);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    #browseFilesBtn {
+        transition: all 0.2s ease;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    /* File Preview Styles */
+    .file-item {
+        transition: all 0.2s ease;
+    }
+    
+    .file-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .file-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        margin-right: 1rem;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+    
+    .file-icon i {
+        transition: transform 0.2s ease;
+    }
+    
+    .file-item:hover .file-icon i {
+        transform: scale(1.1);
+    }
+    
+    .file-details {
+        flex: 1;
+        min-width: 0;
+        padding-right: 1rem;
+    }
+    
+    .file-name {
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.9rem;
+    }
+    
+    .file-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .file-size {
+        display: flex;
+        align-items: center;
+        font-size: 0.75rem;
+    }
+    
+    .file-type {
+        text-transform: uppercase;
+        font-size: 0.65rem;
+        font-weight: 600;
+        background-color: #f1f3f5;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        letter-spacing: 0.3px;
+    }
+    
+    .drag-handle {
+        cursor: move;
+        color: #adb5bd;
+        padding: 0.5rem;
+        margin: -0.5rem 0.25rem -0.5rem -0.5rem;
+        border-radius: 4px;
+    }
+    
+    .drag-handle:hover {
+        color: #6c757d;
+        background-color: #e9ecef;
+    }
+    
+    .btn-remove {
+        color: #6c757d;
+        padding: 0.5rem;
+        line-height: 1;
+        background: none;
+        border: none;
+        border-radius: 4px;
+    }
+    
+    .btn-remove:hover {
+        color: #dc3545;
+        background-color: #f8d7da;
+    }
+
+    /* SortableJS Styles */
+    .sortable-ghost {
+        background-color: #f8f9fa;
+        opacity: 0.7;
+    }
+    
+    .sortable-drag {
+        background-color: #fff;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .file-item {
+        animation: fadeIn 0.2s ease-out;
+    }
 </style>
 {% endblock %}
 
 {% block extra_js %}
+<!-- Include SortableJS library -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
 <script>
-// Initialize any JavaScript components if needed
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize any tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        if (typeof bootstrap !== 'undefined') {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+    // --- DOM Elements ---
+    console.log('--- Debugging File Uploader Initialization ---');
+    
+    const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+    const fileDropArea = document.getElementById('fileDropArea');
+    const selectedFilesContainer = document.getElementById('fileList'); // Changed from 'selectedFiles' to 'fileList'
+    const browseFilesBtn = document.getElementById('browseFilesBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const alertContainer = document.getElementById('alertContainer');
+    const fileCountBadge = document.getElementById('fileCount'); // Changed from 'fileCountBadge' to 'fileCount'
+
+    console.log('--- File Uploader Debugging ---');
+    console.log('File Input Element:', fileInput);
+    console.log('Attempted ID for File Input:', '{{ form.file.id_for_label }}');
+    console.log('Browse Button Element:', browseFilesBtn);
+
+    // --- State ---
+    let files = []; // Array to hold file objects {id, file, element}
+    let fileIdCounter = 0;
+
+    // --- Initialization ---
+    if (clearAllBtn) {
+        clearAllBtn.style.display = 'none'; // Initially hide clear all button
+    }
+
+    // Initialize tooltips for dynamically added file items using event delegation
+    // NOTE: Temporarily disabled as it was causing a JS crash. To be fixed later.
+    /* new bootstrap.Tooltip(selectedFilesContainer, {
+        selector: '[data-bs-toggle="tooltip"]',
+        trigger: 'hover',
+        container: 'body' // To avoid tooltip being trapped in the scrollable container
+    }); */
+
+    // Initialize SortableJS for drag-and-drop reordering if container exists
+    let sortable;
+    if (selectedFilesContainer) {
+        sortable = new Sortable(selectedFilesContainer, {
+        animation: 150,
+        ghostClass: 'opacity-50',
+        dragClass: 'shadow',
+        handle: '.drag-handle',
+        onStart: () => document.body.style.cursor = 'grabbing',
+        onEnd: (evt) => {
+            document.body.style.cursor = '';
+            // Update the files array to match the new order
+            const movedFile = files.splice(evt.oldIndex, 1)[0];
+            files.splice(evt.newIndex, 0, movedFile);
+            updateFileInput();
         }
     });
-    
-    // Initialize any other JavaScript functionality here
+}
+
+    // --- Event Listeners ---
+    if (browseFilesBtn && fileInput) {
+        browseFilesBtn.addEventListener('click', () => {
+            console.log('Browse button clicked, attempting to trigger file input click.');
+            fileInput.click();
+        });
+    } else {
+        console.error('Could not attach click listener. File Input or Browse Button not found.');
+    }
+
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', () => {
+            files = [];
+            renderFileList();
+            updateFileInput();
+        });
+    }
+
+    // Drag and drop event listeners
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        fileDropArea.addEventListener(eventName, preventDefaults, false);
+    });
+    ['dragenter', 'dragover'].forEach(eventName => {
+        fileDropArea.addEventListener(eventName, () => fileDropArea.classList.add('highlight'), false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        fileDropArea.addEventListener(eventName, () => fileDropArea.classList.remove('highlight'), false);
+    });
+    fileDropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files), false);
+
+    // File input change listener
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+        this.value = ''; // Reset input to allow re-selecting the same file
+    });
+
+    // --- Core Functions ---
+
+    // Process and validate selected files
+    function handleFiles(selectedFiles) {
+        [...selectedFiles].forEach(file => {
+            if (file.size > 5 * 1024 * 1024) {
+                showError(`File "${file.name}" is too large (max 5MB).`);
+                return;
+            }
+            const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'image/jpeg', 'image/png', 'text/plain'];
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx|xls|xlsx|jpg|jpeg|png|txt)$/i)) {
+                showError(`Unsupported file type: "${file.name}".`);
+                return;
+            }
+            if (files.some(f => f.file.name === file.name && f.file.size === file.size)) {
+                showError(`File "${file.name}" is already in the list.`);
+                return;
+            }
+            addFile(file);
+        });
+    }
+
+    // Add a file to the state and re-render
+    function addFile(file) {
+        const fileId = fileIdCounter++;
+        const fileItemElement = createFileItemElement(file, fileId);
+        files.push({ id: fileId, file: file, element: fileItemElement });
+        renderFileList();
+        updateFileInput();
+        announceStatus(`${file.name} has been added.`);
+    }
+
+    // Remove a file from the state and re-render
+    function removeFile(fileId) {
+        const fileToRemove = files.find(f => f.id === fileId);
+        if (!fileToRemove) return;
+
+        // Animate out
+        const elementToRemove = selectedFilesContainer.querySelector(`[data-file-id="${fileId}"]`);
+        if (elementToRemove) {
+            elementToRemove.classList.add('fade-out');
+            // Wait for animation to finish before removing from DOM and state
+            setTimeout(() => {
+                files = files.filter(f => f.id !== fileId);
+                renderFileList();
+                updateFileInput();
+                announceStatus(`${fileToRemove.file.name} has been removed.`);
+            }, 300); // Corresponds to the CSS transition duration
+        } else {
+            // Fallback for safety
+            files = files.filter(f => f.id !== fileId);
+            renderFileList();
+            updateFileInput();
+        }
+    }
+
+    // Re-renders the entire file list based on the current `files` array
+    function renderFileList() {
+        if (!selectedFilesContainer) {
+            console.error('selectedFilesContainer not found');
+            return;
+        }
+        selectedFilesContainer.innerHTML = ''; // Clear the container
+        if (files.length === 0) {
+            selectedFilesContainer.innerHTML = getEmptyStateHTML();
+        } else {
+            files.forEach(fileObj => {
+                const newElement = createFileItemElement(fileObj.file, fileObj.id);
+                selectedFilesContainer.appendChild(newElement);
+                fileObj.element = newElement; // Update reference
+
+                // Animate in new items
+                // Use a short delay to allow the element to be added to the DOM first
+                setTimeout(() => newElement.classList.remove('new-item'), 50);
+            });
+        }
+        updateFileCount();
+    }
+
+    // Synchronize the `files` array with the hidden file input's FileList
+    function updateFileInput() {
+        const dataTransfer = new DataTransfer();
+        files.forEach(fileObj => dataTransfer.items.add(fileObj.file));
+        fileInput.files = dataTransfer.files;
+    }
+
+    // Update the file count badge
+    function updateFileCount() {
+        const count = files.length;
+        if (fileCountBadge) {
+            fileCountBadge.textContent = count;
+            fileCountBadge.style.display = count > 0 ? 'inline-block' : 'none';
+        }
+    }
+
+    // --- UI and Helper Functions ---
+
+    // Creates the HTML element for a single file item
+    function createFileItemElement(file, fileId) {
+        const fileItem = document.createElement('div');
+        // Add 'new-item' class for the fade-in animation
+        fileItem.className = 'file-item list-group-item d-flex align-items-center new-item';
+        fileItem.dataset.fileId = fileId;
+
+        fileItem.innerHTML = `
+            <div class="d-flex align-items-center flex-grow-1">
+                <div class="file-icon d-flex align-items-center justify-content-center me-3" style="background-color: ${getFileIconColor(file)}">
+                    ${getFileIcon(file)}
+                </div>
+                <div class="file-details flex-grow-1">
+                    <div class="file-name text-truncate" title="${file.name}" data-bs-toggle="tooltip" data-bs-placement="top">${file.name}</div>
+                    <div class="file-meta d-flex align-items-center">
+                        <span class="file-size text-muted small"><i class="far fa-hdd me-1"></i>${formatFileSize(file.size)}</span>
+                        <span class="file-type badge bg-light text-muted ms-2">${file.name.split('.').pop().toUpperCase()}</span>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <button type="button" class="btn btn-sm btn-link text-secondary p-0 me-2 drag-handle" aria-label="Drag to reorder">
+                        <i class="fas fa-arrows-alt"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0 btn-remove" aria-label="Remove file">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>`;
+
+        fileItem.querySelector('.btn-remove').addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeFile(fileId);
+        });
+
+        return fileItem;
+    }
+
+    // Display a Bootstrap 5 alert message and announce it to screen readers
+    function showError(message) {
+        if (!alertContainer) return;
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-danger alert-dismissible fade show';
+        alert.role = 'alert';
+        alert.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+        alertContainer.appendChild(alert);
+        announceStatus(`Error: ${message}`);
+        setTimeout(() => bootstrap.Alert.getOrCreateInstance(alert)?.close(), 5000);
+    }
+
+    // Utility and formatting functions
+    function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+    }
+    function getFileIcon(file) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (file.type.startsWith('image/')) return '<i class="fas fa-image"></i>';
+        const iconMap = { pdf: 'fa-file-pdf', doc: 'fa-file-word', docx: 'fa-file-word', xls: 'fa-file-excel', xlsx: 'fa-file-excel', txt: 'fa-file-alt', zip: 'fa-file-archive', rar: 'fa-file-archive', '7z': 'fa-file-archive' };
+        return `<i class="fas ${iconMap[ext] || 'fa-file'}"></i>`;
+    }
+    function getFileIconColor(file) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (file.type.startsWith('image/')) return '#e0f2fe';
+        const colorMap = { pdf: '#fee2e2', doc: '#dbeafe', docx: '#dbeafe', xls: '#dcfce7', xlsx: '#dcfce7', txt: '#f3e8ff', zip: '#fef3c7', rar: '#fef3c7', '7z': '#fef3c7' };
+        return colorMap[ext] || '#f3f4f6';
+    }
+    function getEmptyStateHTML() {
+        return `
+            <div class="list-group-item text-center text-muted py-4">
+                <i class="far fa-folder-open fa-2x mb-2 opacity-50"></i>
+                <p class="mb-0 fw-medium">No files selected</p>
+                <small class="text-muted">Drag & drop or click browse to upload</small>
+            </div>`;
+    }
+
+    // Announce status changes to screen readers
+    function announceStatus(message) {
+        const statusEl = document.getElementById('file-upload-status');
+        if (statusEl) {
+            statusEl.textContent = message;
+            // Clear after a moment so it can be re-announced if needed
+            setTimeout(() => statusEl.textContent = '', 500);
+        }
+    }
 });
 </script>
 {% endblock %}
