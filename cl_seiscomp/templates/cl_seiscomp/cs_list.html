@@ -135,8 +135,24 @@
             addRowPos: "top",
             history: true,
             paginationCounter: "rows",
-            ajaxURL: `{% url 'cl_seiscomp:csrecord_list_api' 10 %}`,
+            ajaxURL: `{% url 'cl_seiscomp:csrecord_list_api' 30 %}`,
             ajaxConfig: "GET",
+            //enable range selection
+            selectableRange:1,
+            selectableRangeColumns:true,
+            selectableRangeRows:true,
+            selectableRangeClearCells:true,
+
+            //configure clipboard to allow copy and paste of range format data
+            clipboard:true,
+            clipboardCopyStyled:false,
+            clipboardCopyConfig:{
+                rowHeaders:false,
+                columnHeaders:false,
+            },
+            clipboardCopyRowRange:"range",
+            clipboardPasteParser:"range",
+            clipboardPasteAction:"range",
             ajaxRequesting: function(url, params) {
                 // Show loading state
                 document.getElementById('tabulator-table').classList.add('loading');
