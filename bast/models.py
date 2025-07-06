@@ -28,6 +28,12 @@ WAKTU_PELAKSANAAN = (
 def get_default_date():
     return timezone.now().astimezone(pytz.timezone('Asia/Jakarta')).date()
 
+def get_default_poco_exp():
+    return timezone.datetime(2026, 1, 17, tzinfo=pytz.timezone('Asia/Jakarta')).date()
+
+def get_default_samsung_exp():
+    return timezone.datetime(2037, 12, 31, tzinfo=pytz.timezone('Asia/Jakarta')).date()
+
 class BastRecordModel(models.Model):
     date = models.DateField(default=get_default_date)
     bast_id = models.CharField(max_length=18, default='0', unique=True)
@@ -48,8 +54,8 @@ class BastRecordModel(models.Model):
     count_blanks = models.IntegerField(default=0)
     waktu_cs = models.CharField(max_length=20, default='00:00 WIB', blank=True, null=True)
     pulsa_poco = models.IntegerField(default=0)
-    poco_exp = models.DateField(default=lambda: timezone.datetime(2026, 1, 17, tzinfo=pytz.timezone('Asia/Jakarta')).date())
-    samsung_exp = models.DateField(default=lambda: timezone.datetime(2037, 12, 31, tzinfo=pytz.timezone('Asia/Jakarta')).date())
+    poco_exp = models.DateField(default=get_default_poco_exp)
+    samsung_exp = models.DateField(default=get_default_samsung_exp)
     notes = models.TextField(max_length=1000, default='', blank=True, null=True)
 
     def __str__(self):
