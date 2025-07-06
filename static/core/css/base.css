@@ -1,0 +1,88 @@
+/* Kelompok Form Styles */
+.form-container {
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.suggestions {
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 150px;
+    overflow-y: auto;
+    position: absolute;
+    z-index: 1000;
+    background: #fff;
+    width: 100%;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-item {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+
+.drag-handle {
+    cursor: grab;
+}
+
+tr.drag-over {
+    border-top: 2px solid rgb(0, 174, 255);
+}
+
+.hidden {
+    display: none;
+}
+
+/* Reusable table styling */
+/* Center text in all table headers by default */
+th {
+    text-align: center;
+}
+/* Specific class to center both th and td if needed */
+.table-center th, .table-center td {
+    text-align: center;
+}
+.table-pointer {
+    cursor: pointer;
+}
+.table-col-10 { width: 10%; }
+.table-col-15 { width: 15%; }
+.table-col-20 { width: 20%; }
+.table-col-25 { width: 25%; }
+.table-col-30 { width: 30%; }
+.table-col-35 { width: 35%; } /* Added for flexibility */
+.table-col-40 { width: 40%; }
+.table-col-50 { width: 50%; }
+
+/* Utility class to truncate long table cell content with ellipsis */
+.ellipsis-cell {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
