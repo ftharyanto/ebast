@@ -1,17 +1,69 @@
+version: '3.8'
+
 services:
   web:
     build: .
-    container_name: ebast-image
-    command: gunicorn ebast.wsgi:application
+    container_name: ebast-web
+    restart: unless-stopped
     ports:
-      - "127.0.0.1:8080:8000"
+      - "8000:8000"
     volumes:
-      - ./ebast:/app
-    restart: always
+      - static_volume:/app/static
+      - media_volume:/app/media
     environment:
+      - DJANGO_SETTINGS_MODULE=ebast.settings
       - DEBUG=False
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: postgres:13
+    container_name: ebast-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=ebast
+      - POSTGRES_USER=ebast
+      - POSTGRES_PASSWORD=ebast_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ebast -d ebast"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    container_name: ebast-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/app/static:ro
+      - media_volume:/app/media:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - web
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
 
 networks:
   default:
-    external: true
-    name: proxy_network
+    name: ebast_network
