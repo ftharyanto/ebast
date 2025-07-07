@@ -13,6 +13,11 @@ import csv, json
 import plotly.graph_objects as go
 import plotly.utils
 from django.forms.models import model_to_dict
+from django.db import transaction
+import logging
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Define time choices
 WAKTU = (
@@ -67,31 +72,128 @@ class StationBulkCreateView(View):
             messages.error(request, 'Please upload a CSV file or provide CSV data')
             return redirect('cl_seiscomp:sl_bulk_create')
 
-        if csv_file:
-            if not csv_file.name.endswith('.csv'):
-                messages.error(request, 'This is not a CSV file')
-                return redirect('cl_seiscomp:sl_bulk_create')
+        try:
+            # Parse CSV data
+            if csv_file:
+                if not csv_file.name.endswith('.csv'):
+                    messages.error(request, 'This is not a CSV file')
+                    return redirect('cl_seiscomp:sl_bulk_create')
 
-            file_data = csv_file.read().decode('utf-8')
-            csv_reader = csv.reader(StringIO(file_data), delimiter=',')
-            header = next(csv_reader)  # Skip the header row
-        else:
-            csv_reader = csv.reader(StringIO(csv_data), delimiter=',')
+                file_data = csv_file.read().decode('utf-8')
+                csv_reader = csv.reader(StringIO(file_data), delimiter=',')
+                # Skip header row for file uploads
+                try:
+                    header = next(csv_reader)
+                    logger.info(f"CSV header detected: {header}")
+                except StopIteration:
+                    messages.error(request, 'CSV file is empty')
+                    return redirect('cl_seiscomp:sl_bulk_create')
+            else:
+                # For pasted data, check if first row looks like a header
+                lines = csv_data.strip().split('\n')
+                if not lines:
+                    messages.error(request, 'CSV data is empty')
+                    return redirect('cl_seiscomp:sl_bulk_create')
+                
+                csv_reader = csv.reader(StringIO(csv_data), delimiter=',')
+                first_row = next(csv_reader)
+                
+                # Check if first row looks like a header (contains expected column names)
+                expected_headers = ['network', 'code', 'province', 'location', 'digitizer_type', 'UPT', 'longitude', 'latitude']
+                if any(header.lower() in [cell.lower() for cell in first_row] for header in expected_headers):
+                    logger.info(f"Header detected in pasted data: {first_row}")
+                    # Skip the header row by creating a new reader
+                    csv_reader = csv.reader(StringIO(csv_data), delimiter=',')
+                    next(csv_reader)  # Skip header
+                else:
+                    # Reset reader to include the first row as data
+                    csv_reader = csv.reader(StringIO(csv_data), delimiter=',')
 
-        for row in csv_reader:
-            StationListModel.objects.create(
-                network=row[0],
-                code=row[1],
-                province=row[2],
-                location=row[3],
-                digitizer_type=row[4],
-                UPT=row[5],
-                longitude=row[6],
-                latitude=row[7],
-            )
+            stations_created = 0
+            errors = []
+            
+            # Use database transaction to ensure data consistency
+            with transaction.atomic():
+                for row_number, row in enumerate(csv_reader, start=2):  # start=2 because we might have skipped header
+                    # Skip empty rows
+                    if not row or all(cell.strip() == '' for cell in row):
+                        continue
+                    
+                    # Validate row length
+                    if len(row) < 8:
+                        error_msg = f"Row {row_number}: Expected 8 columns, got {len(row)}. Row data: {row}"
+                        errors.append(error_msg)
+                        continue
+                    
+                    try:
+                        # Parse and validate longitude and latitude
+                        longitude_str = row[6].strip() if row[6].strip() else None
+                        latitude_str = row[7].strip() if row[7].strip() else None
+                        
+                        longitude = None
+                        latitude = None
+                        
+                        if longitude_str:
+                            try:
+                                longitude = float(longitude_str)
+                            except ValueError:
+                                error_msg = f"Row {row_number}: Invalid longitude value '{longitude_str}'"
+                                errors.append(error_msg)
+                                continue
+                        
+                        if latitude_str:
+                            try:
+                                latitude = float(latitude_str)
+                            except ValueError:
+                                error_msg = f"Row {row_number}: Invalid latitude value '{latitude_str}'"
+                                errors.append(error_msg)
+                                continue
+                        
+                        # Create station record
+                        StationListModel.objects.create(
+                            network=row[0].strip(),
+                            code=row[1].strip(),
+                            province=row[2].strip(),
+                            location=row[3].strip(),
+                            digitizer_type=row[4].strip(),
+                            UPT=row[5].strip(),
+                            longitude=longitude,
+                            latitude=latitude,
+                        )
+                        stations_created += 1
+                        
+                    except Exception as e:
+                        error_msg = f"Row {row_number}: Error creating station - {str(e)}"
+                        errors.append(error_msg)
+                        logger.error(error_msg)
+                        continue
 
-        messages.success(request, 'Stations added successfully')
-        return redirect('cl_seiscomp:station_list')
+            # Report results
+            if stations_created > 0:
+                messages.success(request, f'{stations_created} stations added successfully')
+            
+            if errors:
+                if len(errors) <= 5:
+                    # Show all errors if there are few
+                    for error in errors:
+                        messages.error(request, error)
+                else:
+                    # Show summary if there are many errors
+                    messages.error(request, f'{len(errors)} rows had errors. First few errors:')
+                    for error in errors[:3]:
+                        messages.error(request, error)
+                    messages.warning(request, f'... and {len(errors) - 3} more errors')
+            
+            return redirect('cl_seiscomp:station_list')
+            
+        except UnicodeDecodeError:
+            messages.error(request, 'Error reading CSV file. Please ensure the file is encoded in UTF-8')
+            logger.error(f"Unicode decode error while processing CSV file: {csv_file.name if csv_file else 'pasted data'}")
+            return redirect('cl_seiscomp:sl_bulk_create')
+        except Exception as e:
+            messages.error(request, f'An unexpected error occurred while processing the CSV data: {str(e)}')
+            logger.error(f"Unexpected error in StationBulkCreateView: {str(e)}", exc_info=True)
+            return redirect('cl_seiscomp:sl_bulk_create')
 
 
 ##### Stats View
