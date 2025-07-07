@@ -67,6 +67,7 @@ class StationBulkCreateView(View):
     def post(self, request):
         csv_file = request.FILES.get('csv_file')
         csv_data = request.POST.get('csv_data')
+        remove_existing = request.POST.get('remove_existing')
 
         if not csv_file and not csv_data:
             messages.error(request, 'Please upload a CSV file or provide CSV data')
@@ -110,10 +111,17 @@ class StationBulkCreateView(View):
                     csv_reader = csv.reader(StringIO(csv_data), delimiter=',')
 
             stations_created = 0
+            stations_deleted = 0
             errors = []
             
             # Use database transaction to ensure data consistency
             with transaction.atomic():
+                # Remove existing stations if requested
+                if remove_existing:
+                    stations_deleted = StationListModel.objects.count()
+                    StationListModel.objects.all().delete()
+                    logger.info(f"Deleted {stations_deleted} existing stations as requested")
+                
                 for row_number, row in enumerate(csv_reader, start=2):  # start=2 because we might have skipped header
                     # Skip empty rows
                     if not row or all(cell.strip() == '' for cell in row):
@@ -169,6 +177,9 @@ class StationBulkCreateView(View):
                         continue
 
             # Report results
+            if remove_existing and stations_deleted > 0:
+                messages.warning(request, f'{stations_deleted} existing stations were removed as requested')
+            
             if stations_created > 0:
                 messages.success(request, f'{stations_created} stations added successfully')
             
