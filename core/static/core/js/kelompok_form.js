@@ -32,16 +32,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load operators when the page loads
     window.addEventListener('load', () => {
         fetchOperators().then((operators) => {
-            // Assuming 'memberId' is an array of operator IDs
-            const memberIdField = document.getElementById('id_member'); // Using Django's default id naming
-            if (memberIdField && memberIdField.value) {
-                const memberIds = memberIdField.value.split(',');
-                memberIds.forEach(memberId => {
-                    const operator = operators.find(opr => opr.pk == memberId);
+            // Check for existing members data passed from Django template
+            if (typeof existingMemberIds !== 'undefined' && existingMemberIds.length > 0) {
+                // Use existing members data for update form
+                existingMemberIds.forEach(memberId => {
+                    const operator = operators.find(opr => opr.pk == memberId.trim());
                     if (operator) {
                         addOprToTable(operator.name);
                     }
                 });
+            } else {
+                // Fallback: check form field value for any other cases
+                const memberIdField = document.getElementById('id_member'); // Using Django's default id naming
+                if (memberIdField && memberIdField.value) {
+                    const memberIds = memberIdField.value.split(',');
+                    memberIds.forEach(memberId => {
+                        const operator = operators.find(opr => opr.pk == memberId);
+                        if (operator) {
+                            addOprToTable(operator.name);
+                        }
+                    });
+                }
             }
         });
     });
@@ -113,8 +124,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Initialize tooltip for the new button
-        $(deleteButton).tooltip();
+        // Initialize tooltip for the new button (using native Bootstrap)
+        try {
+            if (window.bootstrap && window.bootstrap.Tooltip) {
+                new window.bootstrap.Tooltip(deleteButton);
+            } else if (typeof $ !== 'undefined' && $.fn.tooltip) {
+                $(deleteButton).tooltip();
+            }
+        } catch (e) {
+            // Silently fail if tooltip initialization fails
+        }
 
         // Append row to table
         oprTableBody.appendChild(row);

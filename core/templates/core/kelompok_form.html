@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{% static 'core/css/kelompok_form.css' %}">
 
 <div class="form-container">
-    <h1 class="page-header">Create Kelompok Form</h1>
+    <h1 class="page-header">{% if form.instance.pk %}Update Kelompok{% else %}Create Kelompok{% endif %} Form</h1>
     <form method="post" class="needs-validation" novalidate>
         {% csrf_token %}
         {% load form_tags %}
@@ -72,5 +72,9 @@
     </form>
 </div>
 
+<script>
+    // Pass existing members data to JavaScript
+    const existingMemberIds = {{ existing_members|default:"[]"|safe }};
+</script>
 <script src="{% static 'core/js/kelompok_form.js' %}"></script>
 {% endblock %}
