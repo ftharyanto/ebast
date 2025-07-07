@@ -28,11 +28,11 @@ class Command(BaseCommand):
                     lat = lon = None
 
                 station = StationListModel(
-                    network=row['Network'],
-                    code=row['Station'],
-                    province=row['Province'],
-                    location=row['Location'],
-                    digitizer_type=row['Digitizer Type'],
+                    network=row['network'],
+                    code=row['code'],
+                    province=row['province'],
+                    location=row['location'],
+                    digitizer_type=row['digitizer_type'],
                     UPT=row['UPT'],
                     longitude=lon,
                     latitude=lat,
