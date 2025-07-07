@@ -34,8 +34,8 @@ class Command(BaseCommand):
                     location=row['Location'],
                     digitizer_type=row['Digitizer Type'],
                     UPT=row['UPT'],
+                    longitude=lon,
                     latitude=lat,
-                    longitude=lon
                 )
                 station.save()
 
