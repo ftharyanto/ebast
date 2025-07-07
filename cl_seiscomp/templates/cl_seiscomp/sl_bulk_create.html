@@ -23,10 +23,10 @@
         <div class="form-group">
             <label>CSV Format Guide:</label>
             <p>CSV file or data should be in the following format:</p>
-            <pre>network,code,province,location,digitizer_type,UPT</pre>
+            <pre>network,code,province,location,digitizer_type,UPT,longitude,latitude</pre>
             <p>Example:</p>
-            <pre>NET1,ST01,Province1,Location1,Type1,UPT1</pre>
-            <pre>NET2,ST02,Province2,Location2,Type2,UPT2</pre>
+            <pre>NET1,ST01,Province1,Location1,Type1,UPT1,Longitude1,Latitude1</pre>
+            <pre>NET2,ST02,Province2,Location2,Type2,UPT2,Longitude2,Latitude2</pre>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
         <a href="{% url 'cl_seiscomp:station_list' %}" class="btn btn-secondary">Cancel</a>

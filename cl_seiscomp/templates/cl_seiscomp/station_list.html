@@ -38,7 +38,7 @@
                         <div class="input-group input-group-sm w-auto">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
                             <input type="text" id="searchFilter"
-                                placeholder="Search Network, Code, Province, Location, UPT..." class="form-control">
+                                placeholder="Search Network, Code, Province, Location, UPT, Lon, Lat, ..." class="form-control">
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -180,6 +180,8 @@ function resetArrows() {
     document.getElementById("provinceSortArrow").innerHTML = "";
     document.getElementById("locationSortArrow").innerHTML = "";
     document.getElementById("uptSortArrow").innerHTML = "";
+    document.getElementById("longitudeSortArrow").innerHTML = "";
+    document.getElementById("latitudeSortArrow").innerHTML = "";
 }
 
 function setArrow(n, dir) {
@@ -195,6 +197,10 @@ function setArrow(n, dir) {
         document.getElementById("locationSortArrow").innerHTML = arrow;
     } else if (n === 4) {
         document.getElementById("uptSortArrow").innerHTML = arrow;
+    } else if (n === 5) {
+        document.getElementById("longitudeSortArrow").innerHTML = arrow;
+    } else if (n === 6) {
+        document.getElementById("latitudeSortArrow").innerHTML = arrow;
     }
 }
 

@@ -85,7 +85,9 @@ class StationBulkCreateView(View):
                 province=row[2],
                 location=row[3],
                 digitizer_type=row[4],
-                UPT=row[5]
+                UPT=row[5],
+                longitude=row[6],
+                latitude=row[7],
             )
 
         messages.success(request, 'Stations added successfully')
@@ -428,15 +430,15 @@ def prepare_workbook(record):
 
     sheet['A3'] = f'KELOMPOK: {record.kelompok}'
     sheet['A2'] = f'SHIFT {record.shift.upper()}'
-    sheet['H266'] = f'{record.operator}'
+    sheet['H286'] = f'{record.operator}'
     jam_pelaksanaan = f'JAM {record.jam_pelaksanaan}'
-    sheet['D5'], sheet['P5'], sheet['H253'] = jam_pelaksanaan, jam_pelaksanaan, jam_pelaksanaan
+    sheet['D5'], sheet['P5'], sheet['H276'] = jam_pelaksanaan, jam_pelaksanaan, jam_pelaksanaan
 
     gaps = record.gaps.splitlines() if record.gaps else []
     spikes = record.spikes.splitlines() if record.spikes else []
     blanks = record.blanks.splitlines() if record.blanks else []
 
-    for row in range(7, 269+1):
+    for row in range(7, 287+1):
         cell_value = sheet.cell(row=row, column=2).value
         if cell_value in gaps:
             sheet.cell(row=row, column=4).value = 1
@@ -445,7 +447,7 @@ def prepare_workbook(record):
         if cell_value in blanks:
             sheet.cell(row=row, column=6).value = 1
 
-    for row in range(7, 249+1):
+    for row in range(7, 274+1):
         cell_value = sheet.cell(row=row, column=9).value
         if cell_value in gaps:
             sheet.cell(row=row, column=16).value = 1
