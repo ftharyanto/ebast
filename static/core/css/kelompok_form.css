@@ -1,0 +1,27 @@
+.btn {
+    margin-right: 0.5rem;
+    padding: 0.5rem 1rem;
+}
+
+.table {
+    margin-top: 1rem;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table th, .table td {
+    padding: 0.5rem;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.table th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+}
+
+.table td.nama-column {
+    text-align: left;
+}

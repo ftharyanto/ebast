@@ -66,6 +66,10 @@ def get_operator_list(request):
     operators = Operator.objects.values('pk', 'name')
     return JsonResponse({'operators': list(operators)})
 
+def health_check(request):
+    """Health check endpoint for Docker container monitoring"""
+    return JsonResponse({'status': 'healthy', 'service': 'ebast'})
+
 class KelompokListView(ListView):
     model = Kelompok
     template_name = 'core/kelompok_list.html'

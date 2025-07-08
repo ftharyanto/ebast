@@ -7,3 +7,5 @@ requests==2.32.3
 gunicorn==22.0.0
 whitenoise==6.7.0
 plotly
+psycopg2-binary==2.9.9
+dj-database-url==2.1.0
