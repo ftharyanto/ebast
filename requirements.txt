@@ -9,3 +9,4 @@ whitenoise==6.7.0
 plotly
 scipy
 matplotlib
+pytz
