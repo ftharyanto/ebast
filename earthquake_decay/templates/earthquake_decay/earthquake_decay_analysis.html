@@ -1,0 +1,115 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Earthquake Decay App{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="container mt-4">
+        <h2 class="mb-4">Earthquake Decay Analysis</h2>
+        <form method="post" enctype="multipart/form-data" class="mb-4">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="data_file" class="form-label">Upload Event Data (.csv/.txt, format: YYYY-MM-DD HH:MM:SS per row)</label>
+            <input type="file" class="form-control" id="data_file" name="data_file" accept=".csv,.txt">
+            <div id="event-count-info" class="mt-2"></div>
+        </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('data_file');
+            const infoDiv = document.getElementById('event-count-info');
+            fileInput.addEventListener('change', function(e) {
+                infoDiv.textContent = '';
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const text = evt.target.result;
+                    // Count non-empty lines (skip header if present)
+                    let lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+                    // If first line looks like a header, skip it
+                    if (lines.length && /[a-zA-Z]/.test(lines[0])) lines = lines.slice(1);
+                    infoDiv.innerHTML = `<strong>${lines.length}</strong> earthquake events detected in file.`;
+                };
+                reader.readAsText(file);
+            });
+        });
+        </script>
+        <div class="mb-3">
+            <label for="interval" class="form-label">Time Interval</label>
+            <input type="number" step="any" min="0.01" class="form-control" id="interval" name="interval" value="1">
+        </div>
+        <div class="mb-3">
+            <label for="unit" class="form-label">Interval Unit</label>
+            <select class="form-select" id="unit" name="unit">
+                <option value="Days">Days</option>
+                <option value="Hours">Hours</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Models</label><br>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="models" value="omori" id="model_omori" checked>
+                <label class="form-check-label" for="model_omori">Omori</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="models" value="mogi1" id="model_mogi1">
+                <label class="form-check-label" for="model_mogi1">Mogi I</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="models" value="mogi2" id="model_mogi2">
+                <label class="form-check-label" for="model_mogi2">Mogi II</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="models" value="utsu" id="model_utsu">
+                <label class="form-check-label" for="model_utsu">Utsu</label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Analyze & Plot</button>
+        </form>
+    </div>
+</div>
+
+    {% if histogram_data or plot_data %}
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    {% endif %}
+    {% if event_count %}
+    <div class="alert alert-info mb-3"><strong>{{ event_count }}</strong> earthquake events loaded.</div>
+    {% endif %}
+    {% if histogram_data %}
+    <div id="plotly-histogram" style="height:350px;"></div>
+    <script>
+        const histogramData = {{ histogram_data|safe }};
+        Plotly.newPlot('plotly-histogram', histogramData.traces, {
+            title: {
+                text: '<b>Event Data Histogram</b>',
+                font: { size: 28, family: 'inherit', weight: 'bold' }
+            },
+            xaxis: { title: histogramData.xaxis_title },
+            yaxis: { title: histogramData.yaxis_title },
+            margin: { t: 60 }
+        }, {responsive: true});
+    </script>
+    {% endif %}
+    {% if plot_data %}
+    <div id="plotly-graph" style="height:600px;"></div>
+    <script>
+        const plotData = {{ plot_data|safe }};
+        const layout = {
+            title: {
+                text: '<b>Earthquake Decay Model Results</b>',
+                font: { size: 28, family: 'inherit', weight: 'bold' }
+            },
+            xaxis: { title: plotData.xaxis_title },
+            yaxis: { title: plotData.yaxis_title },
+            legend: { orientation: 'h', y: -0.2 },
+        };
+
+        Plotly.newPlot('plotly-graph', plotData.traces, layout, {responsive: true});
+    </script>
+    {% endif %}
+    {% if error %}
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+    {% endif %}
+</div>
+{% endblock %}
