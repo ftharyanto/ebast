@@ -3,7 +3,8 @@
 <div class="form-container">
     <div class="container">
         <h1 class="page-header">QC FM Record Form</h1>
-        <p>Sumber data: <a href="http://202.90.198.41/qc_focal.txt" target="_blank">http://202.90.198.41/qc_focal.txt</a></p>
+        <p>Sumber data: <a href="http://202.90.198.41/qc_focal.txt"
+                target="_blank">http://202.90.198.41/qc_focal.txt</a></p>
         <form method="post" class="needs-validation" novalidate>
             {% csrf_token %}
             {% load form_tags %}
@@ -36,7 +37,9 @@
                 </div>
                 <div class="col-md-4">
                     {{ form.qcfm_id.label_tag }}
-                    <input type="text" name="{{ form.qcfm_id.name }}" value="{{ form.qcfm_id.value|default:'' }}" class="form-control bg-light" id="{{ form.qcfm_id.id_for_label }}" readonly style="cursor: not-allowed;">
+                    <input type="text" name="{{ form.qcfm_id.name }}" value="{{ form.qcfm_id.value|default:'' }}"
+                        class="form-control bg-light" id="{{ form.qcfm_id.id_for_label }}" readonly
+                        style="cursor: not-allowed;">
                     <div class="invalid-feedback">
                         Please provide a valid QC FM ID.
                     </div>
@@ -88,7 +91,8 @@
                         </div>
                     </div>
                     <div class="col-md-4 d-flex align-items-end">
-                        <button type="button" id="fetch_qcfm_prev" class="btn btn-primary align-bottom">Fetch Data</button>
+                        <button type="button" id="fetch_qcfm_prev" class="btn btn-primary align-bottom">Fetch
+                            Data</button>
                     </div>
                 </div>
                 <!-- Accordion for fetched data and qcfm_prev form -->
@@ -105,7 +109,8 @@
                             data-bs-parent="#fetchedDataAccordion">
                             <div class="card-body p-4">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-hover table-sm" id="fetched-data-table">
+                                    <table class="table table-bordered table-striped table-hover table-sm"
+                                        id="fetched-data-table">
                                         <thead class="table-dark">
                                             <tr>
                                                 <th>No</th>
@@ -177,7 +182,8 @@
                             data-bs-parent="#qcFmDataAccordion">
                             <div class="card-body p-4">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-hover table-sm" id="qc-fm-data-table">
+                                    <table class="table table-bordered table-striped table-hover table-sm"
+                                        id="qc-fm-data-table">
                                         <thead class="table-dark">
                                             <tr>
                                                 <th>No</th>
@@ -252,9 +258,9 @@
 <script>
     // date picker initialization
     document.addEventListener('DOMContentLoaded', function () {
-                    const dateInput = document.getElementById('{{ form.date.id_for_label }}');
-                    dateInput.type = 'date';
-                });
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+        dateInput.type = 'date';
+    });
 
     // Example starter JavaScript for disabling form submissions if there are invalid fields
     (function () {
@@ -498,7 +504,7 @@
         function updateNip() {
             const selectedOperator = operatorSelect.value;
             const selectedOperatorText = operatorSelect.options[operatorSelect.selectedIndex].text;
-            
+
             // Only proceed if an operator is actually selected (not the default empty option)
             if (!selectedOperator) {
                 nipInput.value = '';
@@ -537,10 +543,44 @@
         }
 
         operatorSelect.addEventListener('change', updateNip);
-        
+
         // Only call updateNip on page load if an operator is already selected
         if (operatorSelect.value) {
             updateNip();
+        }
+    });
+
+    // --- Kelompok Sebelumnya logic ---
+    document.addEventListener('DOMContentLoaded', function () {
+        // Adjust these IDs if needed
+        const shiftSelect = document.getElementById('id_shift');
+        const kelompokSelect = document.getElementById('id_kelompok');
+        const kelSebelumSelect = document.getElementById('id_kel_sebelum');
+
+        function updateKelSebelum() {
+            const shift = shiftSelect.value;
+            const kelompok = kelompokSelect.value;
+            let newValue = kelompok;
+            if (shift === 'Siang' || shift === 'Dini Hari') {
+                newValue = kelompok;
+            } else {
+                // Map kelompok to kel_sebelum based on pattern
+                const map = { '1': '4', '2': '5', '3': '1', '4': '2', '5': '3' };
+                newValue = map[kelompok] || kelompok;
+            }
+            // Set kelSebelumSelect value if option exists
+            for (let i = 0; i < kelSebelumSelect.options.length; i++) {
+                if (kelSebelumSelect.options[i].value === newValue) {
+                    kelSebelumSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        if (shiftSelect && kelompokSelect && kelSebelumSelect) {
+            shiftSelect.addEventListener('change', updateKelSebelum);
+            kelompokSelect.addEventListener('change', updateKelSebelum);
+            // Call once on page load
+            updateKelSebelum();
         }
     });
 </script>

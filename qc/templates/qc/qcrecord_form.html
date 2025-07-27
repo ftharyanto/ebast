@@ -494,6 +494,40 @@
         updateNip();
     });
 
+    // --- Kelompok Sebelumnya logic ---
+    document.addEventListener('DOMContentLoaded', function () {
+        // Adjust these IDs if needed
+        const shiftSelect = document.getElementById('id_shift');
+        const kelompokSelect = document.getElementById('id_kelompok');
+        const kelSebelumSelect = document.getElementById('id_kel_sebelum');
+
+        function updateKelSebelum() {
+            const shift = shiftSelect.value;
+            const kelompok = kelompokSelect.value;
+            let newValue = kelompok;
+            if (shift === 'Siang' || shift === 'Dini Hari') {
+                newValue = kelompok;
+            } else {
+                // Map kelompok to kel_sebelum based on pattern
+                const map = { '1': '4', '2': '5', '3': '1', '4': '2', '5': '3' };
+                newValue = map[kelompok] || kelompok;
+            }
+            // Set kelSebelumSelect value if option exists
+            for (let i = 0; i < kelSebelumSelect.options.length; i++) {
+                if (kelSebelumSelect.options[i].value === newValue) {
+                    kelSebelumSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        if (shiftSelect && kelompokSelect && kelSebelumSelect) {
+            shiftSelect.addEventListener('change', updateKelSebelum);
+            kelompokSelect.addEventListener('change', updateKelSebelum);
+            // Call once on page load
+            updateKelSebelum();
+        }
+    });
+
     // Show modal when NIP is empty
     document.addEventListener('DOMContentLoaded', function () {
         const emptyNipModalElement = document.getElementById('emptyNipModal');
