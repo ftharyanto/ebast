@@ -35,16 +35,18 @@
             });
         });
         </script>
-        <div class="mb-3">
-            <label for="interval" class="form-label">Time Interval</label>
-            <input type="number" step="any" min="0.01" class="form-control" id="interval" name="interval" value="1">
-        </div>
-        <div class="mb-3">
-            <label for="unit" class="form-label">Interval Unit</label>
-            <select class="form-select" id="unit" name="unit">
-                <option value="Days">Days</option>
-                <option value="Hours">Hours</option>
-            </select>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="interval" class="form-label">Time Interval</label>
+                <input type="number" step="any" min="0.01" class="form-control" id="interval" name="interval" value="1">
+            </div>
+            <div class="col-md-6">
+                <label for="unit" class="form-label">Interval Unit</label>
+                <select class="form-select" id="unit" name="unit">
+                    <option value="Days">Days</option>
+                    <option value="Hours">Hours</option>
+                </select>
+            </div>
         </div>
         <div class="mb-3">
             <label class="form-label">Models</label><br>
