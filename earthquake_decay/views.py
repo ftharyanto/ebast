@@ -112,6 +112,28 @@ def index(request):
                 )
                 context['histogram_data'] = build_histogram_data(datetimes)
                 context['event_count'] = len(datetimes)
+
+                # Prepare decay_results for template
+                decay_results = {}
+                from matplotlib import dates as mdates
+                bin_centers = results['bin_centers']
+                start_date_num = bin_centers[0] if len(bin_centers) > 0 else None
+                for model in selected_models:
+                    res = results.get(model)
+                    if res and 't1' in res and 'r' in res:
+                        t_days = float(res['t1']) if res['t1'] is not None else None
+                        r_value = float(res['r']) if res['r'] is not None else None
+                        if start_date_num is not None and t_days is not None:
+                            end_date = mdates.num2date(start_date_num + t_days).strftime('%d %B %Y')
+                        else:
+                            end_date = '-'
+                        decay_results[model.capitalize()] = {
+                            't_days': f"{t_days:.0f}" if t_days is not None else '-',
+                            'end_date': end_date,
+                            'r_squared': f"{r_value:.4f}" if r_value is not None else '-',
+                        }
+                context['decay_results'] = decay_results
+
             except Exception as e:
                 error = f"Calculation error: {e}"
         if error:

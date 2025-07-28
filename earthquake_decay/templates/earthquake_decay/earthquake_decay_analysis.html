@@ -95,6 +95,27 @@
     {% endif %}
     {% if plot_data %}
     <div id="plotly-graph" style="height:600px;"></div>
+    
+    <!-- Add results table -->
+    <div class="mt-4">
+        <h4>Decay Model Results</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Model</th>
+                        <th>Decay Time (Days)</th>
+                        <th>End Date</th>
+                        <th>R² Value</th>
+                    </tr>
+                </thead>
+                <tbody id="decay-results">
+                    <!-- Results will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
     <script>
         const plotData = {{ plot_data|safe }};
         const layout = {
@@ -108,6 +129,25 @@
         };
 
         Plotly.newPlot('plotly-graph', plotData.traces, layout, {responsive: true});
+        
+        // Add decay results to the table if available
+        {% if decay_results %}
+        const results = {{ decay_results|safe }};
+        const tbody = document.getElementById('decay-results');
+        
+        Object.entries(results).forEach(([model, data]) => {
+            if (data) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${model}</td>
+                    <td>${data.t_days}</td>
+                    <td>${data.end_date}</td>
+                    <td>${data.r_squared}</td>
+                `;
+                tbody.appendChild(row);
+            }
+        });
+        {% endif %}
     </script>
     {% endif %}
     {% if error %}
