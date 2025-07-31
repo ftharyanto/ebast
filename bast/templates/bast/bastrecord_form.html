@@ -1006,6 +1006,11 @@
         shiftSelect.addEventListener('change', handleDateOrShiftChange);
         dateInput.addEventListener('change', handleDateOrShiftChange);
         bastIdInput.addEventListener('change', autofillCounts);
+        
+        // Call autofillCounts after setting initial BAST ID
+        if (bastIdInput.value) {
+            autofillCounts();
+        }
     });
     // --- Fetch Previous Members Button Logic ---
     document.getElementById('fetch-prev-members-btn').addEventListener('click', function () {

@@ -25,6 +25,13 @@ WAKTU_PELAKSANAAN = (
     ('02:00 - 08:30 WIB', '02:00 - 08:30 WIB'),
 )
 
+WAKTU_CS = (
+    ('00:00 WIB', '00:00 WIB'),
+    ('06:00 WIB', '06:00 WIB'),
+    ('12:00 WIB', '12:00 WIB'),
+    ('18:00 WIB', '18:00 WIB'),
+)
+
 def get_default_date():
     return timezone.now().astimezone(pytz.timezone('Asia/Jakarta')).date()
 
@@ -52,7 +59,7 @@ class BastRecordModel(models.Model):
     count_gaps = models.IntegerField(default=0)
     count_spikes = models.IntegerField(default=0)
     count_blanks = models.IntegerField(default=0)
-    waktu_cs = models.CharField(max_length=20, default='00:00 WIB', blank=True, null=True)
+    waktu_cs = models.CharField(choices=WAKTU_CS, max_length=20, default='00:00 WIB', blank=True, null=True)
     pulsa_poco = models.IntegerField(default=0)
     poco_exp = models.DateField(default=get_default_poco_exp)
     samsung_exp = models.DateField(default=get_default_samsung_exp)
