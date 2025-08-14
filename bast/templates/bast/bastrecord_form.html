@@ -353,6 +353,12 @@
     </div>
 </div>
 <style>
+    /* Style for editable table cells */
+    #fetched-data-table td[contenteditable="true"] {
+        background-color: #fff3cd; /* Light yellow to indicate editable */
+        cursor: text;
+    }
+
     /* Date Picker Styles */
     .date-picker-wrapper {
         max-width: 300px;
@@ -1240,12 +1246,51 @@
             Array.from(modalTableBody.rows).forEach((modalRow, rowIndex) => {
                 const originalRow = originalTableBody.rows[rowIndex];
                 if (originalRow) {
+                    // First, update all editable cells (MMI, Dis. PGN, Dis. PGR)
                     Array.from(modalRow.cells).forEach((modalCell, cellIndex) => {
                         const originalCell = originalRow.cells[cellIndex];
                         if (originalCell && modalCell.contentEditable === 'true') {
                             originalCell.textContent = modalCell.textContent;
                         }
                     });
+                    
+                    // Update Selisih PGN (column 11) if Dis. PGN (column 10) was edited
+                    const disPgnCell = modalRow.cells[10];
+                    const selisihPgnCell = originalRow.cells[11];
+                    if (disPgnCell && selisihPgnCell && disPgnCell.textContent.trim() !== '') {
+                        const otCell = modalRow.cells[2]; // OT (UTC) column
+                        if (otCell && otCell.textContent.trim() !== '') {
+                            const otTime = new Date('1970-01-01T' + otCell.textContent + 'Z');
+                            const disPgnTime = new Date('1970-01-01T' + disPgnCell.textContent + 'Z');
+                            
+                            if (!isNaN(otTime) && !isNaN(disPgnTime)) {
+                                const diffInSeconds = (disPgnTime - otTime) / 1000;
+                                const minutes = Math.floor(Math.abs(diffInSeconds) / 60);
+                                const seconds = Math.abs(diffInSeconds) % 60;
+                                const sign = diffInSeconds >= 0 ? '' : '-';
+                                selisihPgnCell.textContent = `${sign}${minutes}:${seconds.toString().padStart(2, '0')}`;
+                            }
+                        }
+                    }
+                    
+                    // Update Selisih PGR (column 13) if Dis. PGR (column 12) was edited
+                    const disPgrCell = modalRow.cells[12];
+                    const selisihPgrCell = originalRow.cells[13];
+                    if (disPgrCell && selisihPgrCell && disPgrCell.textContent.trim() !== '') {
+                        const otCell = modalRow.cells[2]; // OT (UTC) column
+                        if (otCell && otCell.textContent.trim() !== '') {
+                            const otTime = new Date('1970-01-01T' + otCell.textContent + 'Z');
+                            const disPgrTime = new Date('1970-01-01T' + disPgrCell.textContent + 'Z');
+                            
+                            if (!isNaN(otTime) && !isNaN(disPgrTime)) {
+                                const diffInSeconds = (disPgrTime - otTime) / 1000;
+                                const minutes = Math.floor(Math.abs(diffInSeconds) / 60);
+                                const seconds = Math.abs(diffInSeconds) % 60;
+                                const sign = diffInSeconds >= 0 ? '' : '-';
+                                selisihPgrCell.textContent = `${sign}${minutes}:${seconds.toString().padStart(2, '0')}`;
+                            }
+                        }
+                    }
                 }
             });
             
