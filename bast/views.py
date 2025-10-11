@@ -405,7 +405,7 @@ def populate_bast_sheet(sheet, record):
     sheet['L22'] = f': {record.event_dirasakan} event'
     sheet['L23'] = f': {record.event_dikirim} event'
     sheet['E33'] = f'Pukul: {record.waktu_cs}'
-    sheet['E34'] = f'IA (505) : Gaps = {record.count_gaps} ; Spike = {record.count_spikes} ; Blank = {record.count_blanks}'
+    sheet['E34'] = f'IA (549) : Gaps = {record.count_gaps} ; Spike = {record.count_spikes} ; Blank = {record.count_blanks}'
     sheet['E38'] = f'Rp {record.pulsa_poco:,.0f}'.replace(',', '.')
     sheet['E40'] = f'{record.poco_exp.strftime("%d %b %Y")}'
     sheet['G40'] = f'{record.samsung_exp.strftime("%d %b %Y")}'
