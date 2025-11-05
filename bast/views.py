@@ -394,7 +394,7 @@ def populate_bast_sheet(sheet, record):
         member_number += 1
         sheet[f'K{9 + idx}'] = member_data['nama']
         sheet[f'L{9 + idx}'] = member_data['keterangan']
-        if re.match(r'^\s*hadir\s*$', member_data['keterangan'], re.IGNORECASE):
+        if re.match(r'^\s*hadir\s*$', member_data['keterangan'], re.IGNORECASE) or re.match(r'^\s*diganti\b.*$', member_data['keterangan'], re.IGNORECASE):
             count_member += 1
 
     sheet['L19'] = f'{count_member}'
