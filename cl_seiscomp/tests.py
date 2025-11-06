@@ -6,6 +6,86 @@ from .models import StationListModel
 from core.models import Operator
 from django.contrib.auth.models import User
 import io
+import json
+
+
+class StationListViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('cl_seiscomp:station_list')
+        
+    def test_station_list_with_coordinates_shows_map(self):
+        """Test that map is displayed when stations have coordinates"""
+        # Create stations with coordinates
+        StationListModel.objects.create(
+            network='IA', code='JAGI', province='East Java', 
+            location='Jajag', digitizer_type='Q330', UPT='BMKG Tretes',
+            longitude=114.2266, latitude=-8.3264
+        )
+        StationListModel.objects.create(
+            network='IA', code='VSI', province='East Java',
+            location='Vesuvius', digitizer_type='Q330', UPT='BMKG Tretes',
+            longitude=112.5675, latitude=-7.9175
+        )
+        
+        response = self.client.get(self.url)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['has_map_data'])
+        self.assertIn('map_data', response.context)
+        
+        # Verify map data is valid JSON
+        map_data = json.loads(response.context['map_data'])
+        self.assertIn('data', map_data)
+        self.assertIn('layout', map_data)
+        
+        # Verify station data in map
+        scatter_data = map_data['data'][0]
+        self.assertEqual(len(scatter_data['lat']), 2)
+        self.assertEqual(len(scatter_data['lon']), 2)
+        self.assertIn('JAGI', scatter_data['text'])
+        self.assertIn('VSI', scatter_data['text'])
+        
+    def test_station_list_without_coordinates_no_map(self):
+        """Test that map is not displayed when stations don't have coordinates"""
+        # Create station without coordinates
+        StationListModel.objects.create(
+            network='IA', code='TEST', province='Test Province',
+            location='Test Location', digitizer_type='Q330', UPT='Test UPT'
+        )
+        
+        response = self.client.get(self.url)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['has_map_data'])
+        self.assertNotIn('map_data', response.context)
+        
+    def test_station_list_map_excludes_zero_coordinates(self):
+        """Test that stations with 0,0 coordinates are excluded from map"""
+        # Create station with valid coordinates
+        StationListModel.objects.create(
+            network='IA', code='VALID', province='East Java',
+            location='Jajag', digitizer_type='Q330', UPT='BMKG Tretes',
+            longitude=114.2266, latitude=-8.3264
+        )
+        # Create station with 0,0 coordinates (should be excluded)
+        StationListModel.objects.create(
+            network='IA', code='ZERO', province='Test',
+            location='Test', digitizer_type='Q330', UPT='Test',
+            longitude=0.0, latitude=0.0
+        )
+        
+        response = self.client.get(self.url)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['has_map_data'])
+        
+        # Verify only valid station is in map
+        map_data = json.loads(response.context['map_data'])
+        scatter_data = map_data['data'][0]
+        self.assertEqual(len(scatter_data['lat']), 1)
+        self.assertIn('VALID', scatter_data['text'])
+        self.assertNotIn('ZERO', scatter_data['text'])
 
 
 class StationBulkCreateViewTest(TestCase):

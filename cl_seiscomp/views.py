@@ -40,6 +40,74 @@ class StationListView(ListView):
     model = StationListModel
     template_name = 'cl_seiscomp/station_list.html'
     context_object_name = 'station_list'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get stations with valid coordinates
+        stations_with_coords = self.model.objects.filter(
+            latitude__isnull=False,
+            longitude__isnull=False
+        ).exclude(latitude=0, longitude=0)
+        
+        if stations_with_coords.exists():
+            # Prepare data for map
+            lats = []
+            lons = []
+            codes = []
+            hover_texts = []
+            
+            for station in stations_with_coords:
+                lats.append(station.latitude)
+                lons.append(station.longitude)
+                codes.append(station.code)
+                hover_texts.append(
+                    f"<b>{station.code}</b><br>" +
+                    f"Network: {station.network}<br>" +
+                    f"Location: {station.location}<br>" +
+                    f"Province: {station.province}<br>" +
+                    f"Lat: {station.latitude:.4f}<br>" +
+                    f"Lon: {station.longitude:.4f}"
+                )
+            
+            # Create Plotly map
+            fig = go.Figure(go.Scattermapbox(
+                lat=lats,
+                lon=lons,
+                mode='markers',
+                marker=dict(
+                    size=10,
+                    color='red',
+                    opacity=0.7
+                ),
+                text=codes,
+                hovertext=hover_texts,
+                hoverinfo='text'
+            ))
+            
+            # Calculate center of map
+            center_lat = sum(lats) / len(lats) if lats else 0
+            center_lon = sum(lons) / len(lons) if lons else 0
+            
+            # Update map layout
+            fig.update_layout(
+                mapbox_style="open-street-map",
+                mapbox=dict(
+                    center=dict(lat=center_lat, lon=center_lon),
+                    zoom=5
+                ),
+                margin={"r": 0, "t": 0, "l": 0, "b": 0},
+                height=500
+            )
+            
+            # Convert to JSON for template
+            map_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+            context['map_data'] = map_json
+            context['has_map_data'] = True
+        else:
+            context['has_map_data'] = False
+        
+        return context
 
 class StationCreateView(CreateView):
     model = StationListModel
